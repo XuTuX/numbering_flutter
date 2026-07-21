@@ -607,22 +607,11 @@ class _DragDropEditor extends StatelessWidget {
       ),
     );
 
-    if (isLandscape) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(child: digitsWrap),
-          const SizedBox(width: AppSpacing.lg),
-          _OperatorPalette(accent: accent, isLandscape: true),
-        ],
-      );
-    }
-
     return Column(
       children: [
         digitsWrap,
-        const SizedBox(height: AppSpacing.xl),
-        _OperatorPalette(accent: accent, isLandscape: false),
+        SizedBox(height: isLandscape ? AppSpacing.lg : AppSpacing.xl),
+        const _OperatorPalette(),
       ],
     );
   }
@@ -697,13 +686,7 @@ class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
 }
 
 class _OperatorPalette extends StatelessWidget {
-  const _OperatorPalette({
-    required this.accent,
-    this.isLandscape = false,
-  });
-
-  final Color accent;
-  final bool isLandscape;
+  const _OperatorPalette();
 
   @override
   Widget build(BuildContext context) {
@@ -747,11 +730,8 @@ class _OperatorPalette extends StatelessWidget {
     }).toList();
 
     return Container(
-      width: isLandscape ? null : double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: isLandscape ? 14 : 8,
-        vertical: isLandscape ? 8 : 14,
-      ),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(100),
@@ -763,17 +743,11 @@ class _OperatorPalette extends StatelessWidget {
           ),
         ],
       ),
-      child: isLandscape
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: children,
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: children,
-            ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: children,
+      ),
     );
   }
 }

@@ -88,14 +88,16 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
           SafeArea(
             child: Column(
               children: [
-                // 가로 모드: 상단에 탭 배치
-                _HomePageTabs(
-                  activeIndex: _pageIndex,
-                  onTap: (index) {
-                    _openTab(index);
-                  },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: _HomeHeader(
+                    authService: widget.authService,
+                    activeIndex: _pageIndex,
+                    onSettingsTap: widget.onSettingsTap,
+                    onTabTap: _openTab,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 12),
                 Expanded(
                   child: PageView(
                     controller: _pageController,
@@ -106,7 +108,6 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                       _HomeDashboardPage(
                         scoreController: widget.scoreController,
                         authService: widget.authService,
-                        onSettingsTap: widget.onSettingsTap,
                         onStartGame: widget.onStartGame,
                         onRankingTap: widget.onRankingTap,
                       ),
@@ -135,14 +136,12 @@ class _HomeDashboardPage extends StatelessWidget {
   const _HomeDashboardPage({
     required this.scoreController,
     required this.authService,
-    required this.onSettingsTap,
     required this.onStartGame,
     required this.onRankingTap,
   });
 
   final ScoreController scoreController;
   final AuthService authService;
-  final VoidCallback onSettingsTap;
   final VoidCallback onStartGame;
   final VoidCallback onRankingTap;
 
@@ -153,7 +152,6 @@ class _HomeDashboardPage extends StatelessWidget {
     final sw = mediaSize.width;
     final sh = mediaSize.height;
     final horizontalPadding = (sw * 0.04).clamp(16.0, 40.0);
-    final topSpacing = (sh * 0.02).clamp(6.0, 16.0);
     final bottomPad = (sh * 0.02).clamp(8.0, 20.0);
 
     return LayoutBuilder(
@@ -171,83 +169,66 @@ class _HomeDashboardPage extends StatelessWidget {
                 maxWidth: isLandscape ? sw * 0.95 : 480.0,
                 minHeight: constraints.maxHeight,
               ),
-              child: Column(
-                children: [
-                  // Top bar: nickname + settings
-                  _TopBar(
-                    authService: authService,
-                    onSettingsTap: onSettingsTap,
-                  ),
-                  SizedBox(height: topSpacing),
-                  // 가로 모드: Row로 좌우 배치
-                  // 세로 모드: Column으로 위아래 배치
-                  Expanded(
-                    child: isLandscape
-                        ? Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // 왼쪽: 점수 카드 + 랭킹 미리보기
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      child: ScoreDisplay(
-                                        scoreController: scoreController,
-                                        authService: authService,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Expanded(
-                                      child: WeeklyRankingPreview(
-                                        isAllTime: false,
-                                        limit: 5,
-                                        onViewAll: onRankingTap,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+              child: isLandscape
+                  ? Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 820),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: WeeklyRankingPreview(
+                                isAllTime: false,
+                                limit: 5,
+                                onViewAll: onRankingTap,
                               ),
-                              const SizedBox(width: 12),
-                              // 오른쪽: 게임 시작 버튼
-                              Expanded(
-                                flex: 2,
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8),
-                                    child: _AnimatedPlayButton(
-                                      onPressed: onStartGame,
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 64,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(
+                                    flex: 4,
+                                    child: ScoreDisplay(
+                                      scoreController: scoreController,
+                                      authService: authService,
                                     ),
                                   ),
-                                ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    flex: 6,
+                                    child: Center(
+                                      child: _AnimatedPlayButton(
+                                        onPressed: onStartGame,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          )
-                        : SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                SizedBox(height: topSpacing + 8),
-                                ScoreDisplay(
-                                  scoreController: scoreController,
-                                  authService: authService,
-                                ),
-                                const SizedBox(height: 12),
-                                WeeklyRankingPreview(
-                                  isAllTime: false,
-                                  limit: 5,
-                                  onViewAll: onRankingTap,
-                                ),
-                                const SizedBox(height: 16),
-                                _AnimatedPlayButton(
-                                  onPressed: onStartGame,
-                                ),
-                              ],
                             ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          ScoreDisplay(
+                            scoreController: scoreController,
+                            authService: authService,
                           ),
-                  ),
-                ],
-              ),
+                          const SizedBox(height: 12),
+                          WeeklyRankingPreview(
+                            isAllTime: false,
+                            limit: 5,
+                            onViewAll: onRankingTap,
+                          ),
+                          const SizedBox(height: 16),
+                          _AnimatedPlayButton(onPressed: onStartGame),
+                        ],
+                      ),
+                    ),
             ),
           ),
         );
@@ -256,85 +237,98 @@ class _HomeDashboardPage extends StatelessWidget {
   }
 }
 
-class _TopBar extends StatelessWidget {
-  const _TopBar({
+class _HomeHeader extends StatelessWidget {
+  const _HomeHeader({
     required this.authService,
+    required this.activeIndex,
     required this.onSettingsTap,
+    required this.onTabTap,
   });
 
   final AuthService authService;
+  final int activeIndex;
   final VoidCallback onSettingsTap;
+  final ValueChanged<int> onTabTap;
 
   @override
   Widget build(BuildContext context) {
     final sw = MediaQuery.sizeOf(context).width;
-    final isLandscape =
-        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
-    final titleFs = isLandscape
-        ? (sw * 0.035).clamp(16.0, 24.0)
-        : (sw * 0.052).clamp(16.0, 24.0);
+    final titleFs = (sw * 0.035).clamp(18.0, 24.0);
 
     return Obx(() {
       final nickname = authService.userNickname.value?.trim();
       final hasNickname = nickname != null && nickname.isNotEmpty;
 
-      return Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: hasNickname
-                  ? () {
-                      Get.dialog(
-                        EditNicknameDialog(
-                          currentNickname: nickname,
-                          onSave: (newNickname) async {
-                            return authService.updateNickname(newNickname);
-                          },
+      return SizedBox(
+        height: 48,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: sw * 0.26),
+                child: GestureDetector(
+                  onTap: hasNickname
+                      ? () {
+                          Get.dialog(
+                            EditNicknameDialog(
+                              currentNickname: nickname,
+                              onSave: (newNickname) async {
+                                return authService.updateNickname(newNickname);
+                              },
+                            ),
+                            barrierDismissible: false,
+                          );
+                        }
+                      : null,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF0095FF),
+                          shape: BoxShape.circle,
                         ),
-                        barrierDismissible: false,
-                      );
-                    }
-                  : null,
-              child: Row(
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF0095FF),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 9),
-                  Flexible(
-                    child: Text(
-                      hasNickname ? nickname : 'NUMBERING',
-                      style: GoogleFonts.blackHanSans(
-                        fontSize: titleFs,
-                        color: charcoalBlack,
-                        height: 1.0,
-                        letterSpacing: 0,
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      const SizedBox(width: 9),
+                      Flexible(
+                        child: Text(
+                          hasNickname ? nickname : 'NUMBERING',
+                          style: GoogleFonts.blackHanSans(
+                            fontSize: titleFs,
+                            color: charcoalBlack,
+                            height: 1.0,
+                            letterSpacing: 0,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (hasNickname) ...[
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.edit_rounded,
+                          size: 14,
+                          color: charcoalBlack.withValues(alpha: 0.2),
+                        ),
+                      ],
+                    ],
                   ),
-                  if (hasNickname) ...[
-                    const SizedBox(width: 6),
-                    Icon(
-                      Icons.edit_rounded,
-                      size: 14,
-                      color: charcoalBlack.withValues(alpha: 0.2),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
-          ),
-          TopIconButton(
-            icon: Icons.settings_rounded,
-            onTap: onSettingsTap,
-          ),
-        ],
+            _HomePageTabs(activeIndex: activeIndex, onTap: onTabTap),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TopIconButton(
+                icon: Icons.settings_rounded,
+                onTap: onSettingsTap,
+              ),
+            ),
+          ],
+        ),
       );
     });
   }
@@ -413,13 +407,20 @@ class _AnimatedPlayButtonState extends State<_AnimatedPlayButton>
             ),
             padding: EdgeInsets.zero,
           ),
-          child: Text(
-            '게임 시작'.tr,
-            style: GoogleFonts.blackHanSans(
-              fontSize: btnFs,
-              letterSpacing: 0,
-              color: Colors.white,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.play_arrow_rounded, size: 26),
+              const SizedBox(width: 6),
+              Text(
+                '게임 시작'.tr,
+                style: GoogleFonts.blackHanSans(
+                  fontSize: btnFs,
+                  letterSpacing: 0,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -439,17 +440,13 @@ class _HomePageTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ms = MediaQuery.sizeOf(context);
-    final isLandscape = ms.width > ms.height;
-    final maxWidth =
-        isLandscape ? (ms.width * 0.35).clamp(240.0, 400.0) : double.infinity;
-    final hMargin = (ms.width * 0.04).clamp(16.0, 40.0);
-    final tabHeight = isLandscape ? 38.0 : 44.0;
+    final maxWidth = (ms.width * 0.37).clamp(300.0, 390.0);
+    const tabHeight = 38.0;
 
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: hMargin),
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: AppColors.surface,

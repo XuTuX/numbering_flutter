@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:numbering/constant.dart';
@@ -53,12 +54,92 @@ class NicknameStickerCard extends StatelessWidget {
         final tierFs = isLandscape
             ? (sh * 0.015).clamp(9.0, 12.0)
             : (sw * 0.03).clamp(10.0, 13.0);
+        final hexRow = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _TinyHex(
+              color:
+                  GamePalette.colorFor(GameColor.coral).withValues(alpha: 0.4),
+            ),
+            const SizedBox(width: 4),
+            _TinyHex(
+              color:
+                  GamePalette.colorFor(GameColor.azure).withValues(alpha: 0.4),
+            ),
+            const SizedBox(width: 4),
+            _TinyHex(
+              color:
+                  GamePalette.colorFor(GameColor.mint).withValues(alpha: 0.4),
+            ),
+            const SizedBox(width: 4),
+            _TinyHex(
+              color:
+                  GamePalette.colorFor(GameColor.amber).withValues(alpha: 0.4),
+            ),
+          ],
+        );
+        final scoreValue = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          child: isLoading
+              ? SizedBox(
+                  key: const ValueKey('loading'),
+                  height: scoreFontSize,
+                  child: const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: charcoalBlack,
+                        strokeWidth: 2.5,
+                      ),
+                    ),
+                  ),
+                )
+              : Text(
+                  _formatScore(score),
+                  key: const ValueKey('score'),
+                  style: GoogleFonts.blackHanSans(
+                    fontSize: scoreFontSize,
+                    color: charcoalBlack,
+                    height: 1.0,
+                  ),
+                ),
+        );
+        final tierRow = _hasTier
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: tierColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    tierRank != null
+                        ? '$tierLabel · ${AppTranslations.rank(tierRank!)}'
+                        : tierLabel!,
+                    style: GoogleFonts.notoSans(
+                      fontSize: tierFs,
+                      fontWeight: FontWeight.w800,
+                      color: charcoalBlack.withValues(alpha: 0.4),
+                    ),
+                  ),
+                ],
+              )
+            : null;
 
         return Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: maxCardWidth),
             child: Container(
               width: double.infinity,
+              height: isLandscape && constraints.hasBoundedHeight
+                  ? constraints.maxHeight
+                  : null,
               padding: EdgeInsets.symmetric(
                 horizontal: cardPadH,
                 vertical: cardPadV,
@@ -69,89 +150,56 @@ class NicknameStickerCard extends StatelessWidget {
                 border: Border.all(color: AppColors.borderLight),
                 boxShadow: AppShadows.cardShadow,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Mini hex decorations
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _TinyHex(
-                          color: GamePalette.colorFor(GameColor.coral)
-                              .withValues(alpha: 0.4)),
-                      const SizedBox(width: 4),
-                      _TinyHex(
-                          color: GamePalette.colorFor(GameColor.azure)
-                              .withValues(alpha: 0.4)),
-                      const SizedBox(width: 4),
-                      _TinyHex(
-                          color: GamePalette.colorFor(GameColor.mint)
-                              .withValues(alpha: 0.4)),
-                      const SizedBox(width: 4),
-                      _TinyHex(
-                          color: GamePalette.colorFor(GameColor.amber)
-                              .withValues(alpha: 0.4)),
-                    ],
-                  ),
-                  SizedBox(height: cardPadV * 0.5),
-                  // Score — big, centered, hero element
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    child: isLoading
-                        ? SizedBox(
-                            key: const ValueKey('loading'),
-                            height: scoreFontSize,
-                            child: const Center(
-                              child: SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  color: charcoalBlack,
-                                  strokeWidth: 2.5,
-                                ),
+              child: isLandscape
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '최고 기록'.tr,
+                              style: GoogleFonts.notoSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: charcoalBlack.withValues(alpha: 0.34),
                               ),
                             ),
-                          )
-                        : Text(
-                            _formatScore(score),
-                            key: const ValueKey('score'),
-                            style: GoogleFonts.blackHanSans(
-                              fontSize: scoreFontSize,
-                              color: charcoalBlack,
-                              height: 1.0,
-                            ),
-                          ),
-                  ),
-                  SizedBox(height: cardPadV * 0.4),
-                  // Tier + Rank — subtle text row
-                  if (_hasTier)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                            const SizedBox(height: 5),
+                            hexRow,
+                          ],
+                        ),
+                        const SizedBox(width: 22),
+                        scoreValue,
+                        if (tierRow != null) ...[
+                          const SizedBox(width: 16),
+                          tierRow,
+                        ],
+                      ],
+                    )
+                  : Column(
                       mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: tierColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
                         Text(
-                          tierRank != null
-                              ? '$tierLabel · ${AppTranslations.rank(tierRank!)}'
-                              : tierLabel!,
+                          '최고 기록'.tr,
                           style: GoogleFonts.notoSans(
-                            fontSize: tierFs,
+                            fontSize: 13,
                             fontWeight: FontWeight.w800,
-                            color: charcoalBlack.withValues(alpha: 0.4),
+                            color: charcoalBlack.withValues(alpha: 0.34),
                           ),
                         ),
+                        SizedBox(height: cardPadV * 0.65),
+                        hexRow,
+                        SizedBox(height: cardPadV * 0.5),
+                        scoreValue,
+                        if (tierRow != null) ...[
+                          SizedBox(height: cardPadV * 0.4),
+                          tierRow,
+                        ],
                       ],
                     ),
-                ],
-              ),
             ),
           ),
         );

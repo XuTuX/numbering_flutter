@@ -4,9 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:numbering/constant.dart';
 import 'package:numbering/services/database_models.dart';
-import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/theme/app_radius.dart';
-import 'package:numbering/theme/app_shadows.dart';
 
 class WeeklyRankingPreview extends StatefulWidget {
   const WeeklyRankingPreview({
@@ -46,94 +43,114 @@ class _WeeklyRankingPreviewState extends State<WeeklyRankingPreview> {
   Widget build(BuildContext context) {
     final ms = MediaQuery.sizeOf(context);
     final isTablet = ms.shortestSide >= 600;
+    final isLandscape = ms.width > ms.height;
     final sw = ms.width;
-    final containerPad = isTablet
-        ? (sw * 0.03).clamp(16.0, 24.0)
-        : (sw * 0.045).clamp(14.0, 22.0);
+    final containerPad = isLandscape
+        ? 20.0
+        : isTablet
+            ? (sw * 0.03).clamp(16.0, 24.0)
+            : (sw * 0.045).clamp(14.0, 22.0);
     final headerFs = isTablet
         ? (sw * 0.02).clamp(14.0, 18.0)
         : (sw * 0.042).clamp(13.0, 17.0);
     final viewAllFs = isTablet
         ? (sw * 0.014).clamp(10.0, 13.0)
         : (sw * 0.028).clamp(9.0, 12.0);
-    final headerGap = isTablet ? 16.0 : (ms.height * 0.016).clamp(10.0, 16.0);
+    final headerGap = isLandscape
+        ? 12.0
+        : isTablet
+            ? 16.0
+            : (ms.height * 0.016).clamp(10.0, 16.0);
 
-    return Container(
-      padding: EdgeInsets.all(containerPad),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.borderLight),
-        boxShadow: AppShadows.cardShadow,
-      ),
-      child: Column(
-        children: [
-          // Header
-          GestureDetector(
-            onTap: widget.onViewAll,
-            behavior: HitTestBehavior.opaque,
-            child: Row(
-              children: [
-                Text(
-                  widget.isAllTime ? '전체 랭킹'.tr : '주간 랭킹'.tr,
-                  style: GoogleFonts.blackHanSans(
-                    fontSize: headerFs,
-                    color: charcoalBlack,
-                    letterSpacing: 0,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '전체 보기'.tr,
-                  style: GoogleFonts.notoSans(
-                    fontSize: viewAllFs,
-                    fontWeight: FontWeight.w700,
-                    color: charcoalBlack.withValues(alpha: 0.32),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: viewAllFs + 3,
-                  color: charcoalBlack.withValues(alpha: 0.28),
-                ),
-              ],
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+        final content = _buildRankingContent();
+
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: containerPad,
+            vertical: isLandscape ? 8 : containerPad,
           ),
-          SizedBox(height: headerGap),
-          // Content
-          if (_isLoading)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  color: charcoalBlack.withValues(alpha: 0.2),
-                  strokeWidth: 2.5,
+          child: Column(
+            mainAxisSize:
+                hasBoundedHeight ? MainAxisSize.max : MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: widget.onViewAll,
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  children: [
+                    Text(
+                      widget.isAllTime ? '전체 랭킹'.tr : '주간 랭킹'.tr,
+                      style: GoogleFonts.blackHanSans(
+                        fontSize: headerFs,
+                        color: charcoalBlack,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '전체 보기'.tr,
+                      style: GoogleFonts.notoSans(
+                        fontSize: viewAllFs,
+                        fontWeight: FontWeight.w700,
+                        color: charcoalBlack.withValues(alpha: 0.32),
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: viewAllFs + 3,
+                      color: charcoalBlack.withValues(alpha: 0.28),
+                    ),
+                  ],
                 ),
               ),
-            )
-          else if (_topScores.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                '아직 기록이 없습니다'.tr,
-                style: GoogleFonts.notoSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: charcoalBlack.withValues(alpha: 0.18),
-                ),
-              ),
-            )
-          else
-            ...List.generate(_topScores.length, (index) {
-              return CleanRankRow(
-                rank: index + 1,
-                data: _topScores[index],
-                isLast: index == _topScores.length - 1,
-              );
-            }),
-        ],
+              SizedBox(height: headerGap),
+              if (hasBoundedHeight) Expanded(child: content) else content,
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRankingContent() {
+    if (_isLoading) {
+      return Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            color: charcoalBlack.withValues(alpha: 0.2),
+            strokeWidth: 2.5,
+          ),
+        ),
+      );
+    }
+
+    if (_topScores.isEmpty) {
+      return Center(
+        child: Text(
+          '아직 기록이 없습니다'.tr,
+          style: GoogleFonts.notoSans(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: charcoalBlack.withValues(alpha: 0.2),
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        children: List.generate(_topScores.length, (index) {
+          return CleanRankRow(
+            rank: index + 1,
+            data: _topScores[index],
+            isLast: index == _topScores.length - 1,
+          );
+        }),
       ),
     );
   }
