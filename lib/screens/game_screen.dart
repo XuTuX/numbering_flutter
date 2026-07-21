@@ -8,7 +8,7 @@ import '../game/game_registry.dart';
 import '../services/audio_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/home_screen/background_painter.dart';
-import 'home_screen.dart';
+import 'home/home_screen.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({

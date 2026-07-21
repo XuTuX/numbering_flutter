@@ -100,15 +100,28 @@ class LevelEvaluation {
   final bool perfect;
 }
 
-LevelEvaluation evaluateLevelScore(LevelData level, int score) {
+LevelEvaluation evaluateLevelScore(LevelData level, int score, {int usedHints = 0}) {
+  bool cleared = true;
+  int stars = 1;
+  bool perfect = false;
+
   if (score < level.minimumScore) {
-    return const LevelEvaluation(cleared: false, stars: 0, perfect: false);
+    stars = 1;
+  } else if (score < level.targetScore) {
+    stars = 2;
+  } else if (score == level.targetScore) {
+    stars = 3;
+  } else {
+    stars = 3;
+    perfect = true;
   }
-  if (score < level.targetScore) {
-    return const LevelEvaluation(cleared: true, stars: 1, perfect: false);
+
+  if (usedHints > 0) {
+    if (stars > 2) {
+      stars = 2;
+    }
+    perfect = false;
   }
-  if (score == level.targetScore) {
-    return const LevelEvaluation(cleared: true, stars: 3, perfect: false);
-  }
-  return const LevelEvaluation(cleared: true, stars: 3, perfect: true);
+
+  return LevelEvaluation(cleared: cleared, stars: stars, perfect: perfect);
 }

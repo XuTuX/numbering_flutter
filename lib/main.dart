@@ -6,7 +6,7 @@ import 'package:numbering/config/app_config.dart';
 import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/l10n/app_translations.dart';
-import 'package:numbering/screens/home_screen.dart';
+import 'package:numbering/screens/home/home_screen.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/services/ad_service.dart';

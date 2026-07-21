@@ -106,6 +106,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           startLevelId: Get.find<LevelProgressService>().highestUnlockedLevel,
         ),
       ),
+      onOpenLevelList: () => openGameScreen(
+        const GameSessionConfig(
+          mode: GameMode.normal,
+          startLevelId: null,
+        ),
+      ),
       onStartDaily: () => openDailyChallenge(authService),
       onStartDailyTest: openDailyChallengeTest,
       onShowDailyRanking: (dateKey) {
