@@ -5,6 +5,7 @@ import 'package:numbering/constant.dart';
 import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/database_models.dart';
+import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
 
 import 'ranking_period.dart';
@@ -73,10 +74,19 @@ class _RankingScreenState extends State<RankingScreen> {
 
     if (!mounted) return;
     final isLoggedIn = authService.user.value != null;
-    final localScore = scoreController.highscore.value;
+    int? localScore;
+    if (_period == RankingPeriod.daily) {
+      final dailyController = Get.find<DailyPuzzleController>();
+      final dateKey = widget.dailyDateKey ?? ''; 
+      localScore = dailyController.getDailyTotalScore(dateKey);
+      if (localScore == 0) localScore = null;
+    } else {
+      localScore = scoreController.highscore.value;
+    }
+    
     setState(() {
       _myRank = null;
-      _myScore = isLoggedIn ? localScore : null;
+      _myScore = isLoggedIn ? localScore : localScore;
       _scores = [];
       _weeklySeasonSummary = null;
       _isLoading = false;

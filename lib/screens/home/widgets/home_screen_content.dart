@@ -12,6 +12,7 @@ import 'package:numbering/widgets/home_screen/background_painter.dart';
 import 'package:numbering/widgets/home_screen/home_components.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/screens/home/level_list_screen.dart';
+import 'package:numbering/utils/kst_clock.dart';
 
 // ─── 레벨 팩 ────────────────────────────────────────────────────
 
@@ -64,6 +65,15 @@ class HomeScreenContent extends StatefulWidget {
 }
 
 class _HomeScreenContentState extends State<HomeScreenContent> {
+  final PageController _mainPageController = PageController();
+  int _currentPageIndex = 0;
+
+  @override
+  void dispose() {
+    _mainPageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
@@ -97,9 +107,48 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
                   Expanded(
-                    child: _LevelPackPage(onStartGame: widget.onStartGame),
+                    child: PageView(
+                      controller: _mainPageController,
+                      onPageChanged: (index) {
+                        setState(() => _currentPageIndex = index);
+                      },
+                      children: [
+                        _DailyPuzzleHero(
+                          onStartDaily: widget.onStartDaily,
+                          onShowRanking: () => widget.onShowDailyRanking(KstClock.currentDateKey()),
+                        ),
+                        _LevelPackPage(onStartGame: widget.onStartGame),
+                      ],
+                    ),
+                  ),
+                  // Segmented control / indicators (Moved to bottom)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _PageIndicator(
+                          title: '오늘의 퍼즐',
+                          isActive: _currentPageIndex == 0,
+                          onTap: () => _mainPageController.animateToPage(
+                            0,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        _PageIndicator(
+                          title: '혼자 하기',
+                          isActive: _currentPageIndex == 1,
+                          onTap: () => _mainPageController.animateToPage(
+                            1,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

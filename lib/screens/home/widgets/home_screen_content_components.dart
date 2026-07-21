@@ -1,5 +1,136 @@
 part of 'home_screen_content.dart';
 
+// ─── 탭 / 인디케이터 ──────────────────────────────────────────
+
+class _PageIndicator extends StatelessWidget {
+  const _PageIndicator({
+    required this.title,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final String title;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.textPrimary : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isActive ? Colors.white : AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── 오늘의 퍼즐 히어로 영역 ────────────────────────────────────
+
+class _DailyPuzzleHero extends StatelessWidget {
+  const _DailyPuzzleHero({
+    required this.onStartDaily,
+    required this.onShowRanking,
+  });
+
+  final VoidCallback onStartDaily;
+  final VoidCallback onShowRanking;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton.icon(
+                onPressed: onShowRanking,
+                icon: const Icon(Icons.leaderboard_rounded, color: AppColors.textPrimary, size: 20),
+                label: const Text(
+                  '오늘의 랭킹 보기',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(maxWidth: 320),
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: AppColors.borderLight, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      '오늘의 퍼즐',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: FilledButton(
+                        onPressed: onStartDaily,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.textPrimary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          '플레이 하기',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _LevelPackPage extends StatefulWidget {
   const _LevelPackPage({required this.onStartGame});
   final VoidCallback onStartGame;
@@ -52,8 +183,7 @@ class _LevelPackPageState extends State<_LevelPackPage> {
             child: Column(
               children: [
                 // ── 가운데 팩 카드 (Carousel) ──
-                SizedBox(
-                  height: 360,
+                Expanded(
                   child: PageView.builder(
                     controller: _pageController,
                     onPageChanged: (index) {
@@ -119,7 +249,7 @@ class _LevelPackPageState extends State<_LevelPackPage> {
                     },
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 // ── 이어서 하기 ──
                 _ContinueBar(currentLevel: current, onPressed: widget.onStartGame),
                 const SizedBox(height: 32),

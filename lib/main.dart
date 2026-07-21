@@ -11,6 +11,7 @@ import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/services/ad_service.dart';
 import 'package:numbering/services/audio_service.dart';
+import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/utils/app_snackbar.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_radius.dart';
@@ -126,6 +127,7 @@ class AppBinding extends Bindings {
   void dependencies() {
     Get.put(AuthService(supabase: authClient), permanent: true);
     Get.put(ScoreController(), permanent: true);
+    Get.put(DailyPuzzleController(), permanent: true);
     if (AppConfig.supportsAds) {
       Get.put(AdService(), permanent: true);
     }

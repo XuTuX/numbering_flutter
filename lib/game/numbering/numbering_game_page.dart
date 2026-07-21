@@ -14,12 +14,16 @@ import 'package:numbering/game/numbering/expression_engine.dart';
 import 'package:numbering/game/numbering/level_catalog.dart';
 import 'package:numbering/game/numbering/level_models.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
+import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/numbering_visuals.dart';
+import 'package:numbering/game/numbering/problem_generators.dart';
 
 part 'views/level_play_view.dart';
+part 'views/daily_play_view.dart';
 part 'widgets/formula_editor.dart';
 part 'widgets/formula_editor_components.dart';
+part 'widgets/daily_formula_editor.dart';
 
 class NumberingGamePage extends StatefulWidget {
   const NumberingGamePage({
@@ -56,6 +60,18 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.session.isDailyMode) {
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 240),
+        child: _DailyPlayView(
+          key: const ValueKey('daily-puzzle'),
+          session: widget.session,
+          accent: widget.game.visuals.accent,
+          onShowLevels: widget.callbacks.onExit,
+        ),
+      );
+    }
+
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 240),
       child: _LevelPlayView(
