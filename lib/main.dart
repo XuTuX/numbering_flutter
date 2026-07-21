@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/services.dart';
 import 'package:numbering/constant.dart';
 import 'package:numbering/config/app_config.dart';
 import 'package:numbering/controllers/score_controller.dart';
@@ -22,6 +23,12 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _installGlobalErrorHandlers();
+
+  // 모든 화면을 가로(landscape) 모드로 고정
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
   final settingsService = await SettingsService().init();
   await AudioService().initialize(
     isBgmEnabled: settingsService.isBgmOn.value,

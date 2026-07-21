@@ -25,8 +25,13 @@ class _LoginSheetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+
     return Container(
-      constraints: BoxConstraints(maxHeight: Get.height * 0.85),
+      constraints: BoxConstraints(
+        maxHeight: isLandscape ? Get.height * 0.9 : Get.height * 0.85,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -41,31 +46,83 @@ class _LoginSheetView extends StatelessWidget {
             children: [
               Flexible(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 450),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const _SheetHandle(),
-                      const SizedBox(height: 32),
-                      _LoginSheetHeader(
-                        title: title,
-                        description: description,
-                      ),
-                      _LoginErrorBanner(errorMessage: errorMessage),
-                      const SizedBox(height: 28),
-                      _SocialSignInRow(
-                        isLoading: isLoading,
-                        showAppleButton: showAppleButton,
-                        onGoogleTap: onGoogleTap,
-                        onAppleTap: onAppleTap,
-                      ),
-                      _LoginLegalLinks(
-                        onOpenTerms: onOpenTerms,
-                        onOpenPrivacy: onOpenPrivacy,
-                      ),
-                    ],
+                  constraints: BoxConstraints(
+                    maxWidth: isLandscape ? 600 : 450,
                   ),
+                  child: isLandscape
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // 왼쪽: 헤더
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    _LoginSheetHeader(
+                                      title: title,
+                                      description: description,
+                                    ),
+                                    _LoginErrorBanner(
+                                        errorMessage: errorMessage),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+                              // 오른쪽: 버튼
+                              Expanded(
+                                flex: 2,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    _SocialSignInRow(
+                                      isLoading: isLoading,
+                                      showAppleButton: showAppleButton,
+                                      onGoogleTap: onGoogleTap,
+                                      onAppleTap: onAppleTap,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _LoginLegalLinks(
+                                      onOpenTerms: onOpenTerms,
+                                      onOpenPrivacy: onOpenPrivacy,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const _SheetHandle(),
+                            const SizedBox(height: 32),
+                            _LoginSheetHeader(
+                              title: title,
+                              description: description,
+                            ),
+                            _LoginErrorBanner(errorMessage: errorMessage),
+                            const SizedBox(height: 28),
+                            _SocialSignInRow(
+                              isLoading: isLoading,
+                              showAppleButton: showAppleButton,
+                              onGoogleTap: onGoogleTap,
+                              onAppleTap: onAppleTap,
+                            ),
+                            _LoginLegalLinks(
+                              onOpenTerms: onOpenTerms,
+                              onOpenPrivacy: onOpenPrivacy,
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ],

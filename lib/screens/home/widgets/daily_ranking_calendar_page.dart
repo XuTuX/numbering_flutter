@@ -127,23 +127,15 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
   Widget build(BuildContext context) {
     super.build(context);
     final mediaSize = MediaQuery.sizeOf(context);
-    final isTablet = mediaSize.shortestSide >= 600;
+    final isLandscape = mediaSize.width > mediaSize.height;
     final sw = mediaSize.width;
     final sh = mediaSize.height;
-    final horizontalPadding = isTablet
-        ? (sw * 0.06).clamp(32.0, 60.0)
-        : (sw * 0.06).clamp(16.0, 28.0);
-    final maxWidth = isTablet ? 680.0 : 480.0;
+    final horizontalPadding = (sw * 0.04).clamp(12.0, 32.0);
+    final maxWidth = isLandscape ? sw * 0.95 : 480.0;
     final myId = widget.authService.user.value?.id;
-    final topPad = isTablet
-        ? (sh * 0.03).clamp(24.0, 44.0)
-        : (sh * 0.02).clamp(12.0, 22.0);
-    final bottomPad = isTablet
-        ? (sh * 0.03).clamp(24.0, 44.0)
-        : (sh * 0.025).clamp(14.0, 26.0);
-    final sectionGap = isTablet
-        ? (sh * 0.02).clamp(14.0, 24.0)
-        : (sh * 0.02).clamp(10.0, 20.0);
+    final topPad = (sh * 0.02).clamp(8.0, 20.0);
+    final bottomPad = (sh * 0.02).clamp(8.0, 20.0);
+    final sectionGap = (sh * 0.02).clamp(8.0, 16.0);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -154,48 +146,118 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // 가로 모드: 캘린더와 랭킹+버튼을 좌우로 배치
+              // 세로 모드: 위에서 아래로 배치
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(left: 4, right: 4, bottom: 40),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const _CalendarHeader(),
-                      SizedBox(height: sectionGap * 0.7),
-                      _MonthlyCalendar(
-                        cells: _calendarCells,
-                        selectableDateKeys: _selectableDateKeys,
-                        selectedDateKey: _selectedDateKey,
-                        myDailyRanks: _myDailyRanks,
-                        isRankLoading: _isRankLoading,
-                        onDateSelected: _selectDate,
+                child: isLandscape
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // 왼쪽: 캘린더
+                          Expanded(
+                            flex: 3,
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  const _CalendarHeader(),
+                                  SizedBox(height: sectionGap * 0.5),
+                                  _MonthlyCalendar(
+                                    cells: _calendarCells,
+                                    selectableDateKeys: _selectableDateKeys,
+                                    selectedDateKey: _selectedDateKey,
+                                    myDailyRanks: _myDailyRanks,
+                                    isRankLoading: _isRankLoading,
+                                    onDateSelected: _selectDate,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          // 오른쪽: 랭킹 + 버튼
+                          Expanded(
+                            flex: 2,
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(left: 6),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _InlineDailyRankingPanel(
+                                    dateKey: _selectedDateKey,
+                                    scores: _selectedScores,
+                                    myId: myId,
+                                    isLoading: _isSelectedRankingLoading,
+                                    error: _selectedRankingError,
+                                    onRetry: () =>
+                                        _loadSelectedRanking(_selectedDateKey),
+                                    onViewAll: () => widget
+                                        .onShowDailyRanking(_selectedDateKey),
+                                  ),
+                                  SizedBox(height: sectionGap),
+                                  _DailyPlayButton(
+                                    isLoading: _isLaunching,
+                                    onPressed: _handleStartDaily,
+                                  ),
+                                  if (kDebugMode) ...[
+                                    const SizedBox(height: 8),
+                                    _DailyTestButton(
+                                      isLoading: _isLaunchingTest,
+                                      onPressed: _handleStartDailyTest,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.only(
+                            left: 4, right: 4, bottom: 40),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const _CalendarHeader(),
+                            SizedBox(height: sectionGap * 0.5),
+                            _MonthlyCalendar(
+                              cells: _calendarCells,
+                              selectableDateKeys: _selectableDateKeys,
+                              selectedDateKey: _selectedDateKey,
+                              myDailyRanks: _myDailyRanks,
+                              isRankLoading: _isRankLoading,
+                              onDateSelected: _selectDate,
+                            ),
+                            SizedBox(height: sectionGap),
+                            _InlineDailyRankingPanel(
+                              dateKey: _selectedDateKey,
+                              scores: _selectedScores,
+                              myId: myId,
+                              isLoading: _isSelectedRankingLoading,
+                              error: _selectedRankingError,
+                              onRetry: () =>
+                                  _loadSelectedRanking(_selectedDateKey),
+                              onViewAll: () =>
+                                  widget.onShowDailyRanking(_selectedDateKey),
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: sectionGap),
-                      _InlineDailyRankingPanel(
-                        dateKey: _selectedDateKey,
-                        scores: _selectedScores,
-                        myId: myId,
-                        isLoading: _isSelectedRankingLoading,
-                        error: _selectedRankingError,
-                        onRetry: () => _loadSelectedRanking(_selectedDateKey),
-                        onViewAll: () =>
-                            widget.onShowDailyRanking(_selectedDateKey),
-                      ),
-                    ],
+              ),
+              // 가로 모드에서는 버튼이 우측 패널 안에 이미 포함됨
+              if (!isLandscape) ...[
+                SizedBox(height: sectionGap * 0.6),
+                _DailyPlayButton(
+                  isLoading: _isLaunching,
+                  onPressed: _handleStartDaily,
+                ),
+                if (kDebugMode) ...[
+                  const SizedBox(height: 8),
+                  _DailyTestButton(
+                    isLoading: _isLaunchingTest,
+                    onPressed: _handleStartDailyTest,
                   ),
-                ),
-              ),
-              SizedBox(height: sectionGap * 0.8),
-              _DailyPlayButton(
-                isLoading: _isLaunching,
-                onPressed: _handleStartDaily,
-              ),
-              if (kDebugMode) ...[
-                const SizedBox(height: 10),
-                _DailyTestButton(
-                  isLoading: _isLaunchingTest,
-                  onPressed: _handleStartDailyTest,
-                ),
+                ],
               ],
             ],
           ),
@@ -297,14 +359,14 @@ class _DailyPlayButtonState extends State<_DailyPlayButton>
   @override
   Widget build(BuildContext context) {
     final ms = MediaQuery.sizeOf(context);
-    final isTablet = ms.shortestSide >= 600;
-    final btnH = isTablet
-        ? (ms.height * 0.07).clamp(64.0, 88.0)
+    final isLandscape = ms.width > ms.height;
+    final btnH = isLandscape
+        ? (ms.height * 0.1).clamp(44.0, 64.0)
         : (ms.height * 0.078).clamp(52.0, 72.0);
-    final btnFs = isTablet
-        ? (ms.width * 0.032).clamp(22.0, 30.0)
+    final btnFs = isLandscape
+        ? (ms.width * 0.025).clamp(16.0, 24.0)
         : (ms.width * 0.06).clamp(18.0, 26.0);
-    final br = isTablet ? 28.0 : (ms.width * 0.06).clamp(18.0, 26.0);
+    final br = (ms.width * 0.04).clamp(16.0, 26.0);
 
     return Container(
       width: double.infinity,

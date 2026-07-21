@@ -88,6 +88,14 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
           SafeArea(
             child: Column(
               children: [
+                // 가로 모드: 상단에 탭 배치
+                _HomePageTabs(
+                  activeIndex: _pageIndex,
+                  onTap: (index) {
+                    _openTab(index);
+                  },
+                ),
+                const SizedBox(height: 4),
                 Expanded(
                   child: PageView(
                     controller: _pageController,
@@ -113,13 +121,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                     ],
                   ),
                 ),
-                _HomePageTabs(
-                  activeIndex: _pageIndex,
-                  onTap: (index) {
-                    _openTab(index);
-                  },
-                ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 4),
               ],
             ),
           ),
@@ -147,22 +149,12 @@ class _HomeDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
-    final isTablet = mediaSize.shortestSide >= 600;
+    final isLandscape = mediaSize.width > mediaSize.height;
     final sw = mediaSize.width;
     final sh = mediaSize.height;
-    final horizontalPadding = isTablet
-        ? (sw * 0.06).clamp(32.0, 60.0)
-        : (sw * 0.06).clamp(16.0, 28.0);
-    final contentMaxWidth = isTablet ? 680.0 : 480.0;
-    final topSpacing = isTablet
-        ? (sh * 0.025).clamp(20.0, 40.0)
-        : (sh * 0.018).clamp(8.0, 20.0);
-    final sectionGap = isTablet
-        ? (sh * 0.022).clamp(16.0, 28.0)
-        : (sh * 0.02).clamp(12.0, 22.0);
-    final bottomPad = isTablet
-        ? (sh * 0.03).clamp(24.0, 44.0)
-        : (sh * 0.025).clamp(14.0, 26.0);
+    final horizontalPadding = (sw * 0.04).clamp(16.0, 40.0);
+    final topSpacing = (sh * 0.02).clamp(6.0, 16.0);
+    final bottomPad = (sh * 0.02).clamp(8.0, 20.0);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -176,42 +168,83 @@ class _HomeDashboardPage extends StatelessWidget {
           child: Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: contentMaxWidth,
+                maxWidth: isLandscape ? sw * 0.95 : 480.0,
                 minHeight: constraints.maxHeight,
               ),
               child: Column(
                 children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          SizedBox(height: topSpacing),
-                          // Top bar: nickname + settings
-                          _TopBar(
-                            authService: authService,
-                            onSettingsTap: onSettingsTap,
-                          ),
-                          SizedBox(height: sectionGap + 12),
-                          // Score hero card
-                          ScoreDisplay(
-                            scoreController: scoreController,
-                            authService: authService,
-                          ),
-                          SizedBox(height: sectionGap + 10),
-                          // Weekly Ranking Preview
-                          WeeklyRankingPreview(
-                            isAllTime: false,
-                            limit: isTablet ? 7 : 5,
-                            onViewAll: onRankingTap,
-                          ),
-                          SizedBox(height: sectionGap * 0.8),
-                        ],
-                      ),
-                    ),
+                  // Top bar: nickname + settings
+                  _TopBar(
+                    authService: authService,
+                    onSettingsTap: onSettingsTap,
                   ),
-                  SizedBox(height: sectionGap * 0.8),
-                  _AnimatedPlayButton(
-                    onPressed: onStartGame,
+                  SizedBox(height: topSpacing),
+                  // 가로 모드: Row로 좌우 배치
+                  // 세로 모드: Column으로 위아래 배치
+                  Expanded(
+                    child: isLandscape
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // 왼쪽: 점수 카드 + 랭킹 미리보기
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: ScoreDisplay(
+                                        scoreController: scoreController,
+                                        authService: authService,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Expanded(
+                                      child: WeeklyRankingPreview(
+                                        isAllTime: false,
+                                        limit: 5,
+                                        onViewAll: onRankingTap,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // 오른쪽: 게임 시작 버튼
+                              Expanded(
+                                flex: 2,
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    child: _AnimatedPlayButton(
+                                      onPressed: onStartGame,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                SizedBox(height: topSpacing + 8),
+                                ScoreDisplay(
+                                  scoreController: scoreController,
+                                  authService: authService,
+                                ),
+                                const SizedBox(height: 12),
+                                WeeklyRankingPreview(
+                                  isAllTime: false,
+                                  limit: 5,
+                                  onViewAll: onRankingTap,
+                                ),
+                                const SizedBox(height: 16),
+                                _AnimatedPlayButton(
+                                  onPressed: onStartGame,
+                                ),
+                              ],
+                            ),
+                          ),
                   ),
                 ],
               ),
@@ -235,7 +268,11 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sw = MediaQuery.sizeOf(context).width;
-    final titleFs = (sw * 0.052).clamp(16.0, 24.0);
+    final isLandscape =
+        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+    final titleFs = isLandscape
+        ? (sw * 0.035).clamp(16.0, 24.0)
+        : (sw * 0.052).clamp(16.0, 24.0);
 
     return Obx(() {
       final nickname = authService.userNickname.value?.trim();
@@ -340,14 +377,14 @@ class _AnimatedPlayButtonState extends State<_AnimatedPlayButton>
   @override
   Widget build(BuildContext context) {
     final ms = MediaQuery.sizeOf(context);
-    final isTablet = ms.shortestSide >= 600;
-    final btnH = isTablet
-        ? (ms.height * 0.07).clamp(64.0, 88.0)
+    final isLandscape = ms.width > ms.height;
+    final btnH = isLandscape
+        ? (ms.height * 0.12).clamp(48.0, 80.0)
         : (ms.height * 0.078).clamp(52.0, 72.0);
-    final btnFs = isTablet
-        ? (ms.width * 0.032).clamp(22.0, 30.0)
+    final btnFs = isLandscape
+        ? (ms.width * 0.025).clamp(16.0, 26.0)
         : (ms.width * 0.06).clamp(18.0, 26.0);
-    final br = isTablet ? 28.0 : (ms.width * 0.06).clamp(18.0, 26.0);
+    final br = (ms.width * 0.04).clamp(18.0, 28.0);
 
     return AnimatedBuilder(
       animation: _scaleAnim,
@@ -402,11 +439,11 @@ class _HomePageTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ms = MediaQuery.sizeOf(context);
-    final isTablet = ms.shortestSide >= 600;
-    final maxWidth = isTablet ? 360.0 : double.infinity;
-    final hMargin = isTablet
-        ? (ms.width * 0.04).clamp(20.0, 40.0)
-        : (ms.width * 0.06).clamp(16.0, 28.0);
+    final isLandscape = ms.width > ms.height;
+    final maxWidth =
+        isLandscape ? (ms.width * 0.35).clamp(240.0, 400.0) : double.infinity;
+    final hMargin = (ms.width * 0.04).clamp(16.0, 40.0);
+    final tabHeight = isLandscape ? 38.0 : 44.0;
 
     return Center(
       child: ConstrainedBox(
@@ -439,7 +476,7 @@ class _HomePageTabs extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 220),
                     curve: Curves.easeOutCubic,
-                    height: 44,
+                    height: tabHeight,
                     decoration: BoxDecoration(
                       color:
                           isActive ? activeColors[index] : Colors.transparent,

@@ -45,6 +45,9 @@ class RankingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+
     return Column(
       children: [
         Row(
@@ -70,10 +73,10 @@ class RankingHeader extends StatelessWidget {
           ],
         ),
         if (!isDailyOnly) ...[
-          const SizedBox(height: 20),
+          SizedBox(height: isLandscape ? 12 : 20),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            height: 44,
+            margin: EdgeInsets.symmetric(horizontal: isLandscape ? 16 : 24),
+            height: isLandscape ? 38 : 44,
             decoration: BoxDecoration(
               color: const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(14),

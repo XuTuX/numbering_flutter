@@ -38,8 +38,9 @@ class SettingsScreen extends StatelessWidget {
             child: Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: MediaQuery.sizeOf(context).shortestSide >= 600
-                      ? 680
+                  maxWidth: MediaQuery.sizeOf(context).width >
+                          MediaQuery.sizeOf(context).height
+                      ? MediaQuery.sizeOf(context).width * 0.85
                       : 600,
                 ),
                 child: Column(

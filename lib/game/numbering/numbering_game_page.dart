@@ -36,7 +36,6 @@ class NumberingGamePage extends StatefulWidget {
 class _NumberingGamePageState extends State<NumberingGamePage> {
   late final Random _random;
   late final DateTime _startedAt;
-  late final Timer _clock;
   int _round = 1;
   int _score = 0;
   int _roundVersion = 0;
@@ -50,14 +49,10 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     _random = Random(widget.session.seed);
     _startedAt = DateTime.now();
     _problem = _generateProblem();
-    _clock = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() {});
-    });
   }
 
   @override
   void dispose() {
-    _clock.cancel();
     super.dispose();
   }
 
@@ -65,21 +60,21 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
   Widget build(BuildContext context) {
     final difficulty = difficultyForRound(_round);
     final visuals = widget.game.visuals;
+    final isLandscape =
+        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+
     return Column(
       children: [
         _GameHeader(
-          title: widget.game.title,
-          icon: visuals.icon,
           accent: visuals.accent,
-          accentSoft: visuals.accentSoft,
           round: _round,
           score: _score,
           difficulty: difficulty,
-          elapsed: DateTime.now().difference(_startedAt),
           onReset: _resetCurrentRound,
           onExit: widget.callbacks.onExit,
+          isLandscape: isLandscape,
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.md),
         if (widget.session.isTutorialMode)
           _InfoBanner(
             text: widget.game.description,
@@ -87,16 +82,16 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
             accentSoft: visuals.accentSoft,
           ),
         if (widget.session.isTutorialMode)
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.only(bottom: 16),
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
               child: IgnorePointer(
                 key: ValueKey('${widget.game.id}-$_round-$_roundVersion'),
                 ignoring: _roundLocked,
-                child: _buildRound(),
+                child: _buildRound(isLandscape),
               ),
             ),
           ),
@@ -119,12 +114,13 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     );
   }
 
-  Widget _buildRound() {
+  Widget _buildRound(bool isLandscape) {
     final visuals = widget.game.visuals;
     return FormulaWorkshopRound(
       problem: _problem as FormulaProblem,
       accent: visuals.accent,
       onSolved: _handleSolved,
+      isLandscape: isLandscape,
     );
   }
 
@@ -140,10 +136,10 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     });
   }
 
-  void _handleSolved() {
+  void _handleSolved(int scoreGained) {
     if (_roundLocked) return;
     setState(() {
-      _score++;
+      _score += scoreGained;
       _roundLocked = true;
       _feedback = '정답입니다!'.tr;
     });
@@ -188,11 +184,13 @@ class FormulaWorkshopRound extends StatefulWidget {
     required this.problem,
     required this.accent,
     required this.onSolved,
+    this.isLandscape = false,
   });
 
   final FormulaProblem problem;
   final Color accent;
-  final VoidCallback onSolved;
+  final ValueChanged<int> onSolved;
+  final bool isLandscape;
 
   @override
   State<FormulaWorkshopRound> createState() => _FormulaWorkshopRoundState();
@@ -220,9 +218,9 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
-        vertical: AppSpacing.lg,
+        vertical: widget.isLandscape ? AppSpacing.sm : AppSpacing.lg,
       ),
       child: Column(
         children: [
@@ -232,6 +230,7 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
             parentheses: _parentheses,
             accent: widget.accent,
             selectedDigitIndex: _selectedDigitIndex,
+            isLandscape: widget.isLandscape,
             onDigitTapped: _handleDigitTap,
             onOperatorChanged: (index, value) {
               setState(() => _operators[index] = value);
@@ -318,7 +317,7 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
     );
     if (result.valid) {
       _solved = true;
-      widget.onSolved();
+      widget.onSolved(result.value!);
     } else {
       setState(() => _message = result.message);
     }
@@ -327,31 +326,108 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
 
 class _GameHeader extends StatelessWidget {
   const _GameHeader({
-    required this.title,
-    required this.icon,
     required this.accent,
-    required this.accentSoft,
     required this.round,
     required this.score,
     required this.difficulty,
-    required this.elapsed,
     required this.onReset,
     required this.onExit,
+    this.isLandscape = false,
   });
 
-  final String title;
-  final IconData icon;
   final Color accent;
-  final Color accentSoft;
   final int round;
   final int score;
   final NumberingDifficulty difficulty;
-  final Duration elapsed;
   final VoidCallback onReset;
   final VoidCallback onExit;
+  final bool isLandscape;
 
   @override
   Widget build(BuildContext context) {
+    // 가로 모드: 헤더를 컴팩트하게 한 줄로 표시
+    if (isLandscape) {
+      return Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            SoftIconButton(
+              icon: Icons.arrow_back_rounded,
+              label: '뒤로 가기'.tr,
+              onPressed: onExit,
+              size: 34,
+              iconSize: 18,
+            ),
+            const Spacer(),
+            // Difficulty badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withValues(alpha: 0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                difficulty.label,
+                style: AppTypography.label.copyWith(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              '${'라운드'.tr} $round',
+              style: AppTypography.label.copyWith(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Text(
+              '${'점수'.tr} $score',
+              style: GoogleFonts.blackHanSans(
+                fontSize: 14,
+                color: accent,
+              ),
+            ),
+
+            const SizedBox(width: AppSpacing.sm),
+            SoftIconButton(
+              icon: Icons.refresh_rounded,
+              label: '초기화'.tr,
+              onPressed: onReset,
+              size: 34,
+              iconSize: 18,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 세로 모드: 기존 스타일 유지
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -380,34 +456,7 @@ class _GameHeader extends StatelessWidget {
                 size: 40,
                 iconSize: 20,
               ),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: accentSoft,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(icon, color: accent, size: 18),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Flexible(
-                      child: Text(
-                        title.tr,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.blackHanSans(
-                          fontSize: 22,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const Spacer(),
               SoftIconButton(
                 icon: Icons.refresh_rounded,
                 label: '초기화'.tr,
@@ -478,32 +527,6 @@ class _GameHeader extends StatelessWidget {
                         color: accent,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.textSecondary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.small),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.timer_outlined,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatElapsed(elapsed),
-                            style: AppTypography.caption.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ],
@@ -524,6 +547,7 @@ class _DragDropEditor extends StatelessWidget {
     required this.selectedDigitIndex,
     required this.onDigitTapped,
     required this.onOperatorChanged,
+    this.isLandscape = false,
   });
 
   final List<String> digits;
@@ -533,60 +557,72 @@ class _DragDropEditor extends StatelessWidget {
   final int? selectedDigitIndex;
   final ValueChanged<int> onDigitTapped;
   final void Function(int index, InlineOperator? value) onOperatorChanged;
+  final bool isLandscape;
 
   @override
   Widget build(BuildContext context) {
+    final digitsWrap = SizedBox(
+      width: double.infinity,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 4,
+        runSpacing: 12,
+        children: List.generate(digits.length, (digitIndex) {
+          final openingCount = parentheses
+              .where(
+                  (range) => range.normalized().startDigitIndex == digitIndex)
+              .length;
+          final closingCount = parentheses
+              .where((range) => range.normalized().endDigitIndex == digitIndex)
+              .length;
+
+          final isSelected = selectedDigitIndex == digitIndex;
+          final digit = GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => onDigitTapped(digitIndex),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              child: Text(
+                '${'(' * openingCount}${digits[digitIndex]}${')' * closingCount}',
+                style: TextStyle(
+                  fontSize: 56,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected ? accent : AppColors.textPrimary,
+                ),
+              ),
+            ),
+          );
+
+          if (digitIndex == 0) return digit;
+          final slotIndex = digitIndex - 1;
+          return _InlineOperatorTarget(
+            current: operators[slotIndex],
+            digit: digit,
+            accent: accent,
+            onAccept: (op) => onOperatorChanged(slotIndex, op),
+            onRemove: () => onOperatorChanged(slotIndex, null),
+          );
+        }),
+      ),
+    );
+
+    if (isLandscape) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(child: digitsWrap),
+          const SizedBox(width: AppSpacing.lg),
+          _OperatorPalette(accent: accent, isLandscape: true),
+        ],
+      );
+    }
+
     return Column(
       children: [
-        SizedBox(
-          width: double.infinity,
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 4,
-            runSpacing: 12,
-            children: List.generate(digits.length, (digitIndex) {
-              final openingCount = parentheses
-                  .where((range) =>
-                      range.normalized().startDigitIndex == digitIndex)
-                  .length;
-              final closingCount = parentheses
-                  .where(
-                      (range) => range.normalized().endDigitIndex == digitIndex)
-                  .length;
-
-              final isSelected = selectedDigitIndex == digitIndex;
-              final digit = GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => onDigitTapped(digitIndex),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                  child: Text(
-                    '${'(' * openingCount}${digits[digitIndex]}${')' * closingCount}',
-                    style: TextStyle(
-                      fontSize: 56,
-                      fontWeight: FontWeight.w500,
-                      color: isSelected ? accent : AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              );
-
-              if (digitIndex == 0) return digit;
-              final slotIndex = digitIndex - 1;
-              return _InlineOperatorTarget(
-                current: operators[slotIndex],
-                digit: digit,
-                accent: accent,
-                onAccept: (op) => onOperatorChanged(slotIndex, op),
-                onRemove: () => onOperatorChanged(slotIndex, null),
-              );
-            }),
-          ),
-        ),
+        digitsWrap,
         const SizedBox(height: AppSpacing.xl),
-        _OperatorPalette(accent: accent),
+        _OperatorPalette(accent: accent, isLandscape: false),
       ],
     );
   }
@@ -663,9 +699,11 @@ class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
 class _OperatorPalette extends StatelessWidget {
   const _OperatorPalette({
     required this.accent,
+    this.isLandscape = false,
   });
 
   final Color accent;
+  final bool isLandscape;
 
   @override
   Widget build(BuildContext context) {
@@ -677,55 +715,65 @@ class _OperatorPalette extends StatelessWidget {
       InlineOperator.equals,
     ];
 
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+    final children = operators.map((op) {
+      final child = Container(
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(100),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
+          color: AppColors.textSecondary.withValues(alpha: 0.05),
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            op.symbol,
+            style: const TextStyle(
+              fontSize: 24,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
             ),
-          ],
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: operators.map((op) {
-            final child = Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.textSecondary.withValues(alpha: 0.05),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  op.symbol,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            );
+      );
 
-            return Draggable<InlineOperator>(
-              data: op,
-              feedback: Material(
-                color: Colors.transparent,
-                child: Opacity(opacity: 0.8, child: child),
-              ),
-              childWhenDragging: Opacity(opacity: 0.3, child: child),
-              child: child,
-            );
-          }).toList(),
+      return Draggable<InlineOperator>(
+        data: op,
+        feedback: Material(
+          color: Colors.transparent,
+          child: Opacity(opacity: 0.8, child: child),
         ),
+        childWhenDragging: Opacity(opacity: 0.3, child: child),
+        child: child,
+      );
+    }).toList();
+
+    return Container(
+      width: isLandscape ? null : double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: isLandscape ? 14 : 8,
+        vertical: isLandscape ? 8 : 14,
       ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: isLandscape
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: children,
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: children,
+            ),
     );
   }
 }

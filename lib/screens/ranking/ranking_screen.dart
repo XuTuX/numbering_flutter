@@ -111,11 +111,16 @@ class _RankingScreenState extends State<RankingScreen> {
     final authService = Get.find<AuthService>();
     final myId = authService.user.value?.id;
 
+    final mediaSize = MediaQuery.sizeOf(context);
+    final isLandscape = mediaSize.width > mediaSize.height;
+
     return Material(
       color: Colors.transparent,
       child: Container(
-        constraints:
-            BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.9),
+        constraints: BoxConstraints(
+          maxHeight:
+              isLandscape ? mediaSize.height * 0.95 : mediaSize.height * 0.9,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFFF8F9FA),
           borderRadius: const BorderRadius.only(
@@ -130,22 +135,22 @@ class _RankingScreenState extends State<RankingScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              const RankingSheetHandle(),
-              const SizedBox(height: 12),
+              if (!isLandscape) ...[
+                const RankingSheetHandle(),
+                const SizedBox(height: 12),
+              ],
               RankingHeader(
                 period: _period,
                 onPeriodChanged: _handlePeriodChanged,
                 isDailyOnly: widget.isDailyOnly,
                 dailyDateKey: widget.dailyDateKey,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: isLandscape ? 8 : 16),
               Expanded(
                 child: Center(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth: MediaQuery.sizeOf(context).shortestSide >= 600
-                          ? 680
-                          : 480,
+                      maxWidth: isLandscape ? mediaSize.width * 0.85 : 480,
                     ),
                     child: _buildContent(myId),
                   ),
