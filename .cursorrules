@@ -1,0 +1,10 @@
+# Game Template Rules
+
+1. **Preserve Everything Outside Gameplay**: Do not redesign or restructure home, login, ranking, daily challenge, settings, Supabase, ads, audio, localization, or shared UI unless the user explicitly requests it.
+2. **Game Module Only**: Implement new gameplay behind `GameModule` in `lib/game/game_module.dart` and register it in `lib/game/game_registry.dart`.
+3. **Home Is Locked**: Starting a game must continue through the existing `openGameScreen` flow. Do not change the home layout or its callbacks to add a game.
+4. **Design Alignment**: New game UI must follow the existing application's visual character and style.
+5. **Device Specific Design**: Treat iPhone and iPad designs separately.
+6. **Language Consistency**: Use English for buttons, headers, and short labels. Use Korean for descriptive text, dialog messages, and warnings.
+7. **Result Contract**: Report score through `GameCallbacks.onScoreChanged` and finish through `GameCallbacks.onFinished` so the shared result and high-score flow works.
+8. **Verification**: Run `flutter analyze`, `flutter test`, and a target-platform build after adding a game.
