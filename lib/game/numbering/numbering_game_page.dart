@@ -42,6 +42,7 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
   int _score = 0;
   int _roundVersion = 0;
   bool _roundLocked = false;
+  String? _feedback;
   late Object _problem;
 
   @override
@@ -101,6 +102,20 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
             ),
           ),
         ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 180),
+          child: _feedback == null
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.sm),
+                  child: _InfoBanner(
+                    text: _feedback!,
+                    accent: visuals.accent,
+                    accentSoft: visuals.accentSoft,
+                    success: true,
+                  ),
+                ),
+        ),
       ],
     );
   }
@@ -110,7 +125,6 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     return FormulaWorkshopRound(
       problem: _problem as FormulaProblem,
       accent: visuals.accent,
-      accentSoft: visuals.accentSoft,
       onSolved: _handleSolved,
     );
   }
@@ -124,41 +138,48 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     if (_roundLocked) return;
     setState(() {
       _roundVersion++;
+      _feedback = null;
     });
   }
 
   void _handleSolved() {
     if (_roundLocked) return;
-    final isSingleRound =
-        widget.session.isDailyMode || widget.session.isTutorialMode;
     setState(() {
       _score++;
-      _roundLocked = isSingleRound;
-      if (!isSingleRound) {
-        _round++;
-        _problem = _generateProblem();
-        _roundLocked = false;
-      }
+      _roundLocked = true;
+      _feedback = '정답입니다!'.tr;
     });
     widget.callbacks.onScoreChanged(_score);
-
-    if (isSingleRound) {
-      unawaited(_finishSingleRound());
-    }
+    unawaited(_advanceAfterSuccess());
   }
 
-  Future<void> _finishSingleRound() async {
+  Future<void> _advanceAfterSuccess() async {
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    if (!mounted) return;
+
+    final isSingleRound =
+        widget.session.isDailyMode || widget.session.isTutorialMode;
     if (widget.session.isTutorialMode) {
       await Get.find<SettingsService>().completeTutorial();
       if (!mounted) return;
     }
-    widget.callbacks.onFinished(
-      GameResult(
-        score: _score,
-        detailLabel: '경과 시간'.tr,
-        detailValue: _formatElapsed(DateTime.now().difference(_startedAt)),
-      ),
-    );
+    if (isSingleRound) {
+      widget.callbacks.onFinished(
+        GameResult(
+          score: _score,
+          detailLabel: '경과 시간'.tr,
+          detailValue: _formatElapsed(DateTime.now().difference(_startedAt)),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _round++;
+      _problem = _generateProblem();
+      _roundLocked = false;
+      _feedback = null;
+    });
   }
 }
 
@@ -167,13 +188,11 @@ class FormulaWorkshopRound extends StatefulWidget {
     super.key,
     required this.problem,
     required this.accent,
-    required this.accentSoft,
     required this.onSolved,
   });
 
   final FormulaProblem problem;
   final Color accent;
-  final Color accentSoft;
   final VoidCallback onSolved;
 
   @override
@@ -219,7 +238,6 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
             operators: _operators,
             parentheses: _parentheses,
             accent: widget.accent,
-            accentSoft: widget.accentSoft,
             selectedDigitIndex: _selectedDigitIndex,
             onDigitTapped: _handleDigitTap,
             onOperatorChanged: (index, value) {
@@ -448,7 +466,6 @@ class _DragDropEditor extends StatelessWidget {
     required this.operators,
     required this.parentheses,
     required this.accent,
-    required this.accentSoft,
     required this.selectedDigitIndex,
     required this.onDigitTapped,
     required this.onOperatorChanged,
@@ -458,7 +475,6 @@ class _DragDropEditor extends StatelessWidget {
   final List<InlineOperator?> operators;
   final List<ParenthesisRange> parentheses;
   final Color accent;
-  final Color accentSoft;
   final int? selectedDigitIndex;
   final ValueChanged<int> onDigitTapped;
   final void Function(int index, InlineOperator? value) onOperatorChanged;
@@ -492,7 +508,7 @@ class _DragDropEditor extends StatelessWidget {
                       child: Text(
                         '${'(' * openingCount}${digits[digitIndex]}${')' * closingCount}',
                         style: GoogleFonts.blackHanSans(
-                          fontSize: 32,
+                          fontSize: 42,
                           color: selectedDigitIndex == digitIndex
                               ? accent
                               : AppColors.textPrimary,
@@ -527,7 +543,7 @@ class _DragDropEditor extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        _OperatorPalette(accent: accent, accentSoft: accentSoft),
+        _OperatorPalette(accent: accent),
       ],
     );
   }
@@ -568,32 +584,31 @@ class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
         widget.onAccept(details.data);
       },
       builder: (context, candidateData, rejectedData) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          color: _isHovering
-              ? widget.accent.withValues(alpha: 0.08)
-              : Colors.transparent,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (widget.current case final current?)
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: widget.onRemove,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      current.symbol,
-                      style: GoogleFonts.blackHanSans(
-                        fontSize: 28,
-                        color: widget.accent,
-                      ),
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              width: _isHovering && widget.current == null ? 36 : 0,
+            ),
+            if (widget.current case final current?)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: widget.onRemove,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    current.symbol,
+                    style: GoogleFonts.blackHanSans(
+                      fontSize: 32,
+                      color: widget.accent,
                     ),
                   ),
                 ),
-              widget.digit,
-            ],
-          ),
+              ),
+            widget.digit,
+          ],
         );
       },
     );
@@ -603,11 +618,9 @@ class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
 class _OperatorPalette extends StatelessWidget {
   const _OperatorPalette({
     required this.accent,
-    required this.accentSoft,
   });
 
   final Color accent;
-  final Color accentSoft;
 
   @override
   Widget build(BuildContext context) {
@@ -624,27 +637,16 @@ class _OperatorPalette extends StatelessWidget {
       spacing: 12,
       runSpacing: 12,
       children: operators.map((op) {
-        final child = Container(
+        final child = SizedBox(
           width: 52,
           height: 52,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: accentSoft,
-            borderRadius: BorderRadius.circular(AppRadius.large),
-            border: Border.all(color: accent.withValues(alpha: 0.3)),
-            boxShadow: [
-              BoxShadow(
-                color: accent.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+          child: Center(
+            child: Text(
+              op.symbol,
+              style: GoogleFonts.blackHanSans(
+                fontSize: 34,
+                color: accent,
               ),
-            ],
-          ),
-          child: Text(
-            op.symbol,
-            style: GoogleFonts.blackHanSans(
-              fontSize: 26,
-              color: accent,
             ),
           ),
         );
@@ -668,11 +670,13 @@ class _InfoBanner extends StatelessWidget {
     required this.text,
     required this.accent,
     required this.accentSoft,
+    this.success = false,
   });
 
   final String text;
   final Color accent;
   final Color accentSoft;
+  final bool success;
 
   @override
   Widget build(BuildContext context) {
@@ -683,14 +687,14 @@ class _InfoBanner extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: accentSoft,
+        color: success ? AppColors.green.withValues(alpha: 0.16) : accentSoft,
         borderRadius: BorderRadius.circular(AppRadius.medium),
       ),
       child: Text(
         text.tr,
         textAlign: TextAlign.center,
         style: AppTypography.bodySmall.copyWith(
-          color: accent,
+          color: success ? AppColors.green : accent,
           fontWeight: FontWeight.w800,
         ),
       ),
