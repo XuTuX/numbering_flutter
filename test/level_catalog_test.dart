@@ -4,15 +4,15 @@ import 'package:numbering/game/numbering/level_catalog.dart';
 import 'package:numbering/game/numbering/level_models.dart';
 
 void main() {
-  test('catalog contains 200 ordered, playable levels', () {
-    expect(LevelCatalog.all, hasLength(200));
+  test('catalog contains 160 ordered, playable levels', () {
+    expect(LevelCatalog.all, hasLength(160));
     expect(
       LevelCatalog.all.map((level) => level.id),
-      orderedEquals(List.generate(200, (index) => index + 1)),
+      orderedEquals(List.generate(160, (index) => index + 1)),
     );
     expect(
       LevelCatalog.all.map((level) => level.officialAnswer).toSet(),
-      hasLength(200),
+      hasLength(160),
       reason: 'Each fixed level must have a distinct official construction.',
     );
 
@@ -80,11 +80,11 @@ void main() {
 }
 
 int _minimumDigits(int id) {
-  if (id <= 40) return id <= 20 ? 4 : 5;
-  if (id <= 80) return id <= 60 ? 5 : 6;
-  if (id <= 120) return id <= 100 ? 6 : 7;
-  if (id <= 160) return id <= 140 ? 7 : 8;
-  return id <= 180 ? 8 : 9;
+  if (id <= 20) return id <= 10 ? 4 : 5;
+  if (id <= 40) return id <= 30 ? 5 : 6;
+  if (id <= 80) return id <= 60 ? 6 : 7;
+  if (id <= 120) return id <= 100 ? 7 : 8;
+  return id <= 140 ? 8 : 9;
 }
 
 int _maximumDigits(int id) {

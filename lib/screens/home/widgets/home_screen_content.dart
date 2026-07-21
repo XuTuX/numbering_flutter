@@ -26,11 +26,11 @@ class LevelPack {
 }
 
 const levelPacks = [
-  LevelPack('Seoul', 1, 40),
-  LevelPack('Tokyo', 41, 80),
-  LevelPack('New York', 81, 120),
-  LevelPack('London', 121, 160),
-  LevelPack('Paris', 161, 200),
+  LevelPack('Seoul', 1, 20),
+  LevelPack('Tokyo', 21, 40),
+  LevelPack('New York', 41, 80),
+  LevelPack('London', 81, 120),
+  LevelPack('Paris', 121, 160),
 ];
 
 // ─── 홈 화면 ────────────────────────────────────────────────────

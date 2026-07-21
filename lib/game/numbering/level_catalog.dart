@@ -4,7 +4,7 @@ import 'level_models.dart';
 
 abstract final class LevelCatalog {
   static final List<LevelData> all = List<LevelData>.unmodifiable(
-    List.generate(200, (index) => _buildLevel(index + 1)),
+    List.generate(160, (index) => _buildLevel(index + 1)),
   );
 
   static LevelData byId(int id) {
@@ -22,14 +22,14 @@ LevelData _buildLevel(int id) {
   final digitCount = _digitCountFor(id);
   final difficulty = _difficultyFor(id);
   final allowed = <String>{'+', '-', '='};
-  if (id >= 41) allowed.add('×');
-  if (id >= 81) allowed.add('÷');
+  if (id >= 21) allowed.add('×');
+  if (id >= 41) allowed.add('÷');
 
   final random = Random(id * 7919 + 20260721);
   for (var attempt = 0; attempt < 1200; attempt++) {
     final leftLeaves = digitCount ~/ 2;
     final rightLeaves = digitCount - leftLeaves;
-    final maxTarget = min(leftLeaves, rightLeaves) * (id < 41 ? 7 : 9);
+    final maxTarget = min(leftLeaves, rightLeaves) * (id < 21 ? 7 : 9);
     final target = 3 + random.nextInt(max(2, maxTarget - 2));
     final left = _compose(
       target: target,
@@ -50,14 +50,14 @@ LevelData _buildLevel(int id) {
     final answer = '${left.text}=${right.text}';
     final digits = answer.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.length != digitCount) continue;
-    if (id < 120 && RegExp(r'\d{2,}×\d{2,}').hasMatch(answer)) continue;
+    if (id < 80 && RegExp(r'\d{2,}×\d{2,}').hasMatch(answer)) continue;
 
     final usedOperators = <String>{
       for (final match in RegExp(r'[+\-×÷]').allMatches(answer))
         match.group(0)!,
     };
     final operatorHint = _operatorHint(usedOperators);
-    final delta = max(2, target ~/ (id < 81 ? 4 : 3));
+    final delta = max(2, target ~/ (id < 41 ? 4 : 3));
     return LevelData(
       id: id,
       digitString: digits,
@@ -157,18 +157,18 @@ _Expression? _compose({
 }
 
 int _digitCountFor(int id) {
-  if (id <= 40) return id <= 20 ? 4 : 5;
-  if (id <= 80) return id <= 60 ? 5 : 6;
-  if (id <= 120) return id <= 100 ? 6 : 7;
-  if (id <= 160) return id <= 140 ? 7 : 8;
-  return id <= 180 ? 8 : 9;
+  if (id <= 20) return id <= 10 ? 4 : 5;
+  if (id <= 40) return id <= 30 ? 5 : 6;
+  if (id <= 80) return id <= 60 ? 6 : 7;
+  if (id <= 120) return id <= 100 ? 7 : 8;
+  return id <= 140 ? 8 : 9;
 }
 
 int _difficultyFor(int id) {
-  if (id <= 40) return 1;
-  if (id <= 80) return 2;
-  if (id <= 120) return 3;
-  if (id <= 160) return 4;
+  if (id <= 20) return 1;
+  if (id <= 40) return 2;
+  if (id <= 80) return 3;
+  if (id <= 120) return 4;
   return 5;
 }
 
@@ -220,29 +220,29 @@ final Map<int, LevelData> _handcraftedLevels = {
     target: 2,
     perfectScore: 7,
   ),
-  42: _special(
-    id: 42,
+  22: _special(
+    id: 22,
     answer: '2×2×3-4=8',
     perfectAnswer: '2×2×3=4+8',
     target: 8,
     perfectScore: 12,
   ),
-  51: _special(
-    id: 51,
+  31: _special(
+    id: 31,
     answer: '10-1-2×3+4=7',
     perfectAnswer: '10-1=2×3-4+7',
     target: 7,
     perfectScore: 9,
   ),
-  81: _special(
-    id: 81,
+  41: _special(
+    id: 41,
     answer: '10+0-1×2=3-4+9',
     perfectAnswer: '100+1-23×4=9',
     target: 8,
     perfectScore: 9,
   ),
-  161: _special(
-    id: 161,
+  121: _special(
+    id: 121,
     answer: '10+0+0-1×2=3-4+9',
     perfectAnswer: '100+0+1-23×4=9',
     target: 8,

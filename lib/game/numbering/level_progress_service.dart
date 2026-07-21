@@ -31,7 +31,7 @@ class LevelProgressService extends GetxService {
 
   int get highestUnlockedLevel {
     var highest = 1;
-    for (var id = 1; id < 200; id++) {
+    for (var id = 1; id < 160; id++) {
       if (!(progress[id]?.cleared ?? false)) break;
       highest = id + 1;
     }

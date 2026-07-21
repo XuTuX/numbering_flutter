@@ -64,7 +64,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
               accent: widget.accent,
               onReplay: _replay,
               onShowLevels: widget.onShowLevels,
-              onNext: widget.level.id < 200
+              onNext: widget.level.id < 160
                   ? () => widget.onNext(widget.level.id + 1)
                   : null,
             ),
