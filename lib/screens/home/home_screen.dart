@@ -6,9 +6,6 @@ import 'package:get/get.dart';
 import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/audio_service.dart';
-import 'package:numbering/services/settings_service.dart';
-import 'package:numbering/game/game_module.dart';
-import 'package:numbering/screens/game_selection_sheet.dart';
 
 import 'home_screen_flows.dart';
 import 'widgets/home_screen_content.dart';
@@ -101,22 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       scoreController: scoreController,
       authService: authService,
       onSettingsTap: () => showSettingsScreen(authService),
-      onStartGame: () async {
-        final game = await showGameSelectionSheet();
-        if (game == null) return;
-        final settings = Get.find<SettingsService>();
-        if (!settings.hasCompletedTutorial.value) {
-          openGameScreen(GameSessionConfig(
-            mode: GameMode.tutorial,
-            gameId: game.id,
-          ));
-        } else {
-          openGameScreen(GameSessionConfig(
-            mode: GameMode.normal,
-            gameId: game.id,
-          ));
-        }
-      },
+      onStartGame: () => openGameScreen(),
       onStartDaily: () => openDailyChallenge(authService),
       onStartDailyTest: openDailyChallengeTest,
       onShowDailyRanking: (dateKey) {

@@ -42,7 +42,6 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
   int _score = 0;
   int _roundVersion = 0;
   bool _roundLocked = false;
-  String? _feedback;
   late Object _problem;
 
   @override
@@ -102,20 +101,6 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
             ),
           ),
         ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 180),
-          child: _feedback == null
-              ? const SizedBox.shrink()
-              : Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: _InfoBanner(
-                    text: _feedback!,
-                    success: _roundLocked,
-                    accent: visuals.accent,
-                    accentSoft: visuals.accentSoft,
-                  ),
-                ),
-        ),
       ],
     );
   }
@@ -139,42 +124,41 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     if (_roundLocked) return;
     setState(() {
       _roundVersion++;
-      _feedback = null;
     });
   }
 
   void _handleSolved() {
     if (_roundLocked) return;
-    _roundLocked = true;
-    _score++;
-    widget.callbacks.onScoreChanged(_score);
-    setState(() => _feedback = '정답입니다!'.tr);
-
-    Future<void>.delayed(const Duration(milliseconds: 700), () async {
-      if (!mounted) return;
-      final isSingleRound =
-          widget.session.isDailyMode || widget.session.isTutorialMode;
-      if (widget.session.isTutorialMode) {
-        await Get.find<SettingsService>().completeTutorial();
-        if (!mounted) return;
-      }
-      if (isSingleRound) {
-        widget.callbacks.onFinished(
-          GameResult(
-            score: _score,
-            detailLabel: '경과 시간'.tr,
-            detailValue: _formatElapsed(DateTime.now().difference(_startedAt)),
-          ),
-        );
-        return;
-      }
-      setState(() {
+    final isSingleRound =
+        widget.session.isDailyMode || widget.session.isTutorialMode;
+    setState(() {
+      _score++;
+      _roundLocked = isSingleRound;
+      if (!isSingleRound) {
         _round++;
         _problem = _generateProblem();
         _roundLocked = false;
-        _feedback = null;
-      });
+      }
     });
+    widget.callbacks.onScoreChanged(_score);
+
+    if (isSingleRound) {
+      unawaited(_finishSingleRound());
+    }
+  }
+
+  Future<void> _finishSingleRound() async {
+    if (widget.session.isTutorialMode) {
+      await Get.find<SettingsService>().completeTutorial();
+      if (!mounted) return;
+    }
+    widget.callbacks.onFinished(
+      GameResult(
+        score: _score,
+        detailLabel: '경과 시간'.tr,
+        detailValue: _formatElapsed(DateTime.now().difference(_startedAt)),
+      ),
+    );
   }
 }
 
@@ -217,69 +201,34 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
 
   @override
   Widget build(BuildContext context) {
-    return _PuzzleCard(
-      title: '숫자 순서를 바꾸지 않고 등식을 만드세요.'.tr,
-      accent: widget.accent,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.lg,
+      ),
       child: Column(
         children: [
-          _ExpressionPreview(
-            expression: _expression,
-            accent: widget.accent,
+          Text(
+            '숫자 순서를 바꾸지 않고 등식을 만드세요.'.tr,
+            textAlign: TextAlign.center,
+            style: AppTypography.body.copyWith(fontWeight: FontWeight.w800),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.xxl),
           _DragDropEditor(
             digits: widget.problem.digits,
             operators: _operators,
+            parentheses: _parentheses,
             accent: widget.accent,
             accentSoft: widget.accentSoft,
             selectedDigitIndex: _selectedDigitIndex,
-            onDigitTapped: (index) {
-              if (_selectedDigitIndex == null) {
-                setState(() => _selectedDigitIndex = index);
-              } else if (_selectedDigitIndex == index) {
-                setState(() => _selectedDigitIndex = null);
-              } else {
-                final candidate = ParenthesisRange(
-                  id: '${DateTime.now().microsecondsSinceEpoch}',
-                  startDigitIndex: _selectedDigitIndex!,
-                  endDigitIndex: index,
-                );
-                final validation = validateParenthesisRange(
-                  digitCount: widget.problem.digits.length,
-                  candidate: candidate,
-                  existing: _parentheses,
-                );
-                if (validation.valid) {
-                  setState(() {
-                    _parentheses.add(candidate.normalized());
-                    _message = null;
-                  });
-                  _checkAnswer();
-                } else {
-                  setState(() => _message = validation.message);
-                }
-                setState(() => _selectedDigitIndex = null);
-              }
-            },
+            onDigitTapped: _handleDigitTap,
             onOperatorChanged: (index, value) {
               setState(() => _operators[index] = value);
               _checkAnswer();
             },
           ),
-          const SizedBox(height: 16),
-          _ParenthesisChips(
-            ranges: _parentheses,
-            onChanged: (ranges) {
-              setState(() {
-                _parentheses
-                  ..clear()
-                  ..addAll(ranges);
-              });
-              _checkAnswer();
-            },
-          ),
           if (_message != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               _message!,
               textAlign: TextAlign.center,
@@ -292,6 +241,57 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
         ],
       ),
     );
+  }
+
+  void _handleDigitTap(int index) {
+    if (_selectedDigitIndex == null) {
+      setState(() => _selectedDigitIndex = index);
+      return;
+    }
+    if (_selectedDigitIndex == index) {
+      setState(() => _selectedDigitIndex = null);
+      return;
+    }
+
+    final candidate = ParenthesisRange(
+      id: '${DateTime.now().microsecondsSinceEpoch}',
+      startDigitIndex: _selectedDigitIndex!,
+      endDigitIndex: index,
+    ).normalized();
+    final existingIndex = _parentheses.indexWhere((range) {
+      final normalized = range.normalized();
+      return normalized.startDigitIndex == candidate.startDigitIndex &&
+          normalized.endDigitIndex == candidate.endDigitIndex;
+    });
+
+    if (existingIndex >= 0) {
+      setState(() {
+        _parentheses.removeAt(existingIndex);
+        _selectedDigitIndex = null;
+        _message = null;
+      });
+      _checkAnswer();
+      return;
+    }
+
+    final validation = validateParenthesisRange(
+      digitCount: widget.problem.digits.length,
+      candidate: candidate,
+      existing: _parentheses,
+    );
+    if (validation.valid) {
+      setState(() {
+        _parentheses.add(candidate);
+        _message = null;
+        _selectedDigitIndex = null;
+      });
+      _checkAnswer();
+    } else {
+      setState(() {
+        _message = validation.message;
+        _selectedDigitIndex = null;
+      });
+    }
   }
 
   void _checkAnswer() {
@@ -442,49 +442,11 @@ class _GameHeader extends StatelessWidget {
   }
 }
 
-class _PuzzleCard extends StatelessWidget {
-  const _PuzzleCard({
-    required this.title,
-    required this.accent,
-    required this.child,
-  });
-
-  final String title;
-  final Color accent;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return SoftCard(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        children: [
-          Container(
-            width: 28,
-            height: 4,
-            decoration: BoxDecoration(
-              color: accent,
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: AppTypography.body.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
 class _DragDropEditor extends StatelessWidget {
   const _DragDropEditor({
     required this.digits,
     required this.operators,
+    required this.parentheses,
     required this.accent,
     required this.accentSoft,
     required this.selectedDigitIndex,
@@ -494,6 +456,7 @@ class _DragDropEditor extends StatelessWidget {
 
   final List<String> digits;
   final List<InlineOperator?> operators;
+  final List<ParenthesisRange> parentheses;
   final Color accent;
   final Color accentSoft;
   final int? selectedDigitIndex;
@@ -504,59 +467,57 @@ class _DragDropEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(digits.length * 2 - 1, (visualIndex) {
-              if (visualIndex.isEven) {
-                final digitIndex = visualIndex ~/ 2;
-                final isSelected = selectedDigitIndex == digitIndex;
-                return GestureDetector(
-                  onTap: () => onDigitTapped(digitIndex),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    width: 46,
-                    height: 54,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: isSelected ? accent : accentSoft,
-                      borderRadius: BorderRadius.circular(AppRadius.medium),
-                      border: Border.all(
-                        color: isSelected
-                            ? accent
-                            : accent.withValues(alpha: 0.55),
-                        width: isSelected ? 2 : 1,
+        LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(digits.length, (digitIndex) {
+                  final openingCount = parentheses
+                      .where((range) =>
+                          range.normalized().startDigitIndex == digitIndex)
+                      .length;
+                  final closingCount = parentheses
+                      .where((range) =>
+                          range.normalized().endDigitIndex == digitIndex)
+                      .length;
+                  final digit = GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => onDigitTapped(digitIndex),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        '${'(' * openingCount}${digits[digitIndex]}${')' * closingCount}',
+                        style: GoogleFonts.blackHanSans(
+                          fontSize: 32,
+                          color: selectedDigitIndex == digitIndex
+                              ? accent
+                              : AppColors.textPrimary,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      digits[digitIndex],
-                      style: GoogleFonts.blackHanSans(
-                        fontSize: 25,
-                        color: isSelected
-                            ? AppColors.surface
-                            : AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                );
-              }
-              final slotIndex = visualIndex ~/ 2;
-              final current = operators[slotIndex];
-              return _OperatorSlotView(
-                current: current,
-                accent: accent,
-                accentSoft: accentSoft,
-                onAccept: (op) => onOperatorChanged(slotIndex, op),
-                onRemove: () => onOperatorChanged(slotIndex, null),
-              );
-            }),
+                  );
+
+                  if (digitIndex == 0) return digit;
+                  final slotIndex = digitIndex - 1;
+                  return _InlineOperatorTarget(
+                    current: operators[slotIndex],
+                    digit: digit,
+                    accent: accent,
+                    onAccept: (op) => onOperatorChanged(slotIndex, op),
+                    onRemove: () => onOperatorChanged(slotIndex, null),
+                  );
+                }),
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.lg),
         Text(
-          '숫자를 2개 연속으로 터치하면 괄호가 씌워집니다.\n아래 연산자를 빈칸으로 끌어다 놓으세요.\n잘못 놓은 연산자는 터치하면 지워집니다.'
-              .tr,
+          '숫자 두 개를 눌러 괄호를 추가하거나 해제하세요.\n연산자는 넣을 위치의 오른쪽 숫자로 끌어 놓으세요.'.tr,
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: AppColors.textSecondary,
@@ -572,31 +533,30 @@ class _DragDropEditor extends StatelessWidget {
   }
 }
 
-class _OperatorSlotView extends StatefulWidget {
-  const _OperatorSlotView({
+class _InlineOperatorTarget extends StatefulWidget {
+  const _InlineOperatorTarget({
     required this.current,
+    required this.digit,
     required this.accent,
-    required this.accentSoft,
     required this.onAccept,
     required this.onRemove,
   });
 
   final InlineOperator? current;
+  final Widget digit;
   final Color accent;
-  final Color accentSoft;
   final ValueChanged<InlineOperator> onAccept;
   final VoidCallback onRemove;
 
   @override
-  State<_OperatorSlotView> createState() => _OperatorSlotViewState();
+  State<_InlineOperatorTarget> createState() => _InlineOperatorTargetState();
 }
 
-class _OperatorSlotViewState extends State<_OperatorSlotView> {
+class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
   bool _isHovering = false;
 
   @override
   Widget build(BuildContext context) {
-    final hasValue = widget.current != null;
     return DragTarget<InlineOperator>(
       onWillAcceptWithDetails: (_) {
         setState(() => _isHovering = true);
@@ -608,34 +568,31 @@ class _OperatorSlotViewState extends State<_OperatorSlotView> {
         widget.onAccept(details.data);
       },
       builder: (context, candidateData, rejectedData) {
-        return GestureDetector(
-          onTap: hasValue ? widget.onRemove : null,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOutCubic,
-            width: _isHovering || hasValue ? 44 : 20,
-            height: 44,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: hasValue || _isHovering
-                  ? widget.accentSoft
-                  : AppColors.background,
-              borderRadius: BorderRadius.circular(AppRadius.medium),
-              border: Border.all(
-                color: _isHovering ? widget.accent : AppColors.borderLight,
-                width: _isHovering ? 2 : 1,
-              ),
-            ),
-            child: hasValue
-                ? Text(
-                    widget.current!.symbol,
-                    style: GoogleFonts.blackHanSans(
-                      fontSize: 21,
-                      color: widget.accent,
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          color: _isHovering
+              ? widget.accent.withValues(alpha: 0.08)
+              : Colors.transparent,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.current case final current?)
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.onRemove,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      current.symbol,
+                      style: GoogleFonts.blackHanSans(
+                        fontSize: 28,
+                        color: widget.accent,
+                      ),
                     ),
-                  )
-                : null,
+                  ),
+                ),
+              widget.digit,
+            ],
           ),
         );
       },
@@ -706,80 +663,16 @@ class _OperatorPalette extends StatelessWidget {
   }
 }
 
-class _ParenthesisChips extends StatelessWidget {
-  const _ParenthesisChips({
-    required this.ranges,
-    required this.onChanged,
-  });
-
-  final List<ParenthesisRange> ranges;
-  final ValueChanged<List<ParenthesisRange>> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    if (ranges.isEmpty) return const SizedBox.shrink();
-    return Wrap(
-      spacing: 6,
-      children: ranges.map((range) {
-        final normalized = range.normalized();
-        return InputChip(
-          label: Text(
-            '(${normalized.startDigitIndex + 1}~${normalized.endDigitIndex + 1})',
-          ),
-          onDeleted: () {
-            final next = [...ranges]..remove(range);
-            onChanged(next);
-          },
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _ExpressionPreview extends StatelessWidget {
-  const _ExpressionPreview({
-    required this.expression,
-    required this.accent,
-  });
-
-  final String expression;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 70),
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(AppRadius.medium),
-        border: Border.all(color: accent.withValues(alpha: 0.22)),
-      ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          expression,
-          style: GoogleFonts.blackHanSans(fontSize: 30),
-        ),
-      ),
-    );
-  }
-}
-
 class _InfoBanner extends StatelessWidget {
   const _InfoBanner({
     required this.text,
     required this.accent,
     required this.accentSoft,
-    this.success = false,
   });
 
   final String text;
   final Color accent;
   final Color accentSoft;
-  final bool success;
 
   @override
   Widget build(BuildContext context) {
@@ -790,14 +683,14 @@ class _InfoBanner extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: success ? AppColors.green.withValues(alpha: 0.16) : accentSoft,
+        color: accentSoft,
         borderRadius: BorderRadius.circular(AppRadius.medium),
       ),
       child: Text(
         text.tr,
         textAlign: TextAlign.center,
         style: AppTypography.bodySmall.copyWith(
-          color: success ? AppColors.green : accent,
+          color: accent,
           fontWeight: FontWeight.w800,
         ),
       ),
