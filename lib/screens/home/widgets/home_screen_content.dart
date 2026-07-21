@@ -4,14 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:numbering/constant.dart';
 import 'package:numbering/controllers/score_controller.dart';
+import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
 import 'package:numbering/widgets/home_screen/background_painter.dart';
 import 'package:numbering/widgets/home_screen/home_components.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_shadows.dart';
-
-import 'daily_ranking_calendar_page.dart';
+import 'package:numbering/theme/app_typography.dart';
 
 class HomeScreenContent extends StatefulWidget {
   const HomeScreenContent({
@@ -40,38 +40,6 @@ class HomeScreenContent extends StatefulWidget {
 }
 
 class _HomeScreenContentState extends State<HomeScreenContent> {
-  late final PageController _pageController;
-  int _pageIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  void _openTab(int index) {
-    if (!_pageController.hasClients) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _openTab(index);
-        }
-      });
-      return;
-    }
-
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 260),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
@@ -106,36 +74,15 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                         ),
                         child: _HomeHeader(
                           authService: widget.authService,
-                          activeIndex: _pageIndex,
                           onSettingsTap: widget.onSettingsTap,
-                          onTabTap: _openTab,
                         ),
                       ),
                     ),
                   ),
                   SizedBox(height: contentTopGap),
                   Expanded(
-                    child: PageView(
-                      controller: _pageController,
-                      onPageChanged: (index) {
-                        setState(() => _pageIndex = index);
-                      },
-                      children: [
-                        _HomeDashboardPage(
-                          scoreController: widget.scoreController,
-                          authService: widget.authService,
-                          onStartGame: widget.onStartGame,
-                          onRankingTap: widget.onRankingTap,
-                        ),
-                        DailyRankingCalendarPage(
-                          authService: widget.authService,
-                          isVisible: _pageIndex == 1,
-                          onStartDaily: widget.onStartDaily,
-                          onStartDailyTest: widget.onStartDailyTest,
-                          onShowDailyRanking: widget.onShowDailyRanking,
-                          onRankingTap: widget.onRankingTap,
-                        ),
-                      ],
+                    child: _HomeDashboardPage(
+                      onStartGame: widget.onStartGame,
                     ),
                   ),
                   SizedBox(height: isLandscape ? 8 : 12),
@@ -151,16 +98,10 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
 
 class _HomeDashboardPage extends StatelessWidget {
   const _HomeDashboardPage({
-    required this.scoreController,
-    required this.authService,
     required this.onStartGame,
-    required this.onRankingTap,
   });
 
-  final ScoreController scoreController;
-  final AuthService authService;
   final VoidCallback onStartGame;
-  final VoidCallback onRankingTap;
 
   @override
   Widget build(BuildContext context) {
@@ -190,39 +131,20 @@ class _HomeDashboardPage extends StatelessWidget {
                   ? Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 820),
-                        child: Column(
+                        child: Row(
                           children: [
                             Expanded(
-                              child: WeeklyRankingPreview(
-                                isAllTime: false,
-                                limit: 5,
-                                onViewAll: onRankingTap,
+                              flex: 6,
+                              child: _LevelJourneyCard(
+                                progress: Get.find<LevelProgressService>(),
+                                onPressed: onStartGame,
                               ),
                             ),
-                            const SizedBox(height: 20),
-                            SizedBox(
-                              height: 64,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Expanded(
-                                    flex: 4,
-                                    child: ScoreDisplay(
-                                      scoreController: scoreController,
-                                      authService: authService,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    flex: 6,
-                                    child: Center(
-                                      child: _AnimatedPlayButton(
-                                        onPressed: onStartGame,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              flex: 4,
+                              child:
+                                  _AnimatedPlayButton(onPressed: onStartGame),
                             ),
                           ],
                         ),
@@ -230,16 +152,10 @@ class _HomeDashboardPage extends StatelessWidget {
                     )
                   : Column(
                       children: [
-                        ScoreDisplay(
-                          scoreController: scoreController,
-                          authService: authService,
-                        ),
-                        const SizedBox(height: 28),
                         Expanded(
-                          child: WeeklyRankingPreview(
-                            isAllTime: false,
-                            limit: 5,
-                            onViewAll: onRankingTap,
+                          child: _LevelJourneyCard(
+                            progress: Get.find<LevelProgressService>(),
+                            onPressed: onStartGame,
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -257,21 +173,16 @@ class _HomeDashboardPage extends StatelessWidget {
 class _HomeHeader extends StatelessWidget {
   const _HomeHeader({
     required this.authService,
-    required this.activeIndex,
     required this.onSettingsTap,
-    required this.onTabTap,
   });
 
   final AuthService authService;
-  final int activeIndex;
   final VoidCallback onSettingsTap;
-  final ValueChanged<int> onTabTap;
 
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
     final sw = mediaSize.width;
-    final isLandscape = mediaSize.width > mediaSize.height;
     final titleFs = (sw * 0.035).clamp(18.0, 24.0);
 
     return Obx(() {
@@ -349,8 +260,6 @@ class _HomeHeader extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: isLandscape ? 16 : 20),
-          _HomePageTabs(activeIndex: activeIndex, onTap: onTabTap),
         ],
       );
     });
@@ -451,88 +360,103 @@ class _AnimatedPlayButtonState extends State<_AnimatedPlayButton>
   }
 }
 
-class _HomePageTabs extends StatelessWidget {
-  const _HomePageTabs({
-    required this.activeIndex,
-    required this.onTap,
-  });
+class _LevelJourneyCard extends StatelessWidget {
+  const _LevelJourneyCard({required this.progress, required this.onPressed});
 
-  final int activeIndex;
-  final ValueChanged<int> onTap;
+  final LevelProgressService progress;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final ms = MediaQuery.sizeOf(context);
-    final maxWidth = (ms.width * 0.37).clamp(300.0, 390.0);
-    const tabHeight = 38.0;
-
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        child: Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.borderLight),
-            boxShadow: AppShadows.smallShadow,
-          ),
-          child: Row(
-            children: List.generate(2, (index) {
-              final labels = ['플레이'.tr, '오늘의 퍼즐'.tr];
-              final icons = [
-                Icons.sports_esports_rounded,
-                Icons.auto_awesome_rounded,
-              ];
-              final activeColors = [
-                const Color(0xFF0095FF),
-                const Color(0xFFF59E0B),
-              ];
-              final isActive = activeIndex == index;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(index),
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
-                    height: tabHeight,
-                    decoration: BoxDecoration(
-                      color:
-                          isActive ? activeColors[index] : Colors.transparent,
-                      borderRadius: BorderRadius.circular(16),
+    return Obx(() {
+      final highest = progress.highestUnlockedLevel;
+      final records = progress.progress.values;
+      final cleared = records.where((record) => record.cleared).length;
+      final perfect = records.where((record) => record.perfect).length;
+      final ratio = cleared / 200;
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.borderLight),
+              boxShadow: AppShadows.cardShadow,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEAF4FF),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.route_rounded,
+                        color: Color(0xFF0095FF),
+                      ),
                     ),
-                    alignment: Alignment.center,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          icons[index],
-                          size: 17,
-                          color: isActive
-                              ? Colors.white
-                              : charcoalBlack.withValues(alpha: 0.32),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          labels[index],
-                          style: GoogleFonts.blackHanSans(
-                            fontSize: 14,
-                            color: isActive
-                                ? Colors.white
-                                : charcoalBlack.withValues(alpha: 0.32),
-                            letterSpacing: 0,
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '나의 레벨 여정',
+                            style: GoogleFonts.blackHanSans(fontSize: 22),
                           ),
-                        ),
-                      ],
+                          Text(
+                            '다음 도전 · LEVEL $highest',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: const Color(0xFF0095FF),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    value: ratio,
+                    minHeight: 10,
+                    backgroundColor: AppColors.surfaceSecondary,
+                    color: const Color(0xFF0095FF),
                   ),
                 ),
-              );
-            }),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Text(
+                      '$cleared / 200 클리어',
+                      style: AppTypography.label,
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.auto_awesome_rounded,
+                        size: 17, color: AppColors.scoreOrange),
+                    const SizedBox(width: 5),
+                    Text('PERFECT $perfect', style: AppTypography.label),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

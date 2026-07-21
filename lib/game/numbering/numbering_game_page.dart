@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../services/settings_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
@@ -13,9 +11,11 @@ import '../../theme/app_typography.dart';
 import '../../widgets/common/soft_icon_button.dart';
 import '../game_module.dart';
 import 'expression_engine.dart';
+import 'level_catalog.dart';
+import 'level_models.dart';
+import 'level_progress_service.dart';
 import 'numbering_models.dart';
 import 'numbering_visuals.dart';
-import 'problem_generators.dart';
 
 class NumberingGamePage extends StatefulWidget {
   const NumberingGamePage({
@@ -34,243 +34,638 @@ class NumberingGamePage extends StatefulWidget {
 }
 
 class _NumberingGamePageState extends State<NumberingGamePage> {
-  late final Random _random;
-  late final DateTime _startedAt;
-  int _round = 1;
-  int _score = 0;
-  int _roundVersion = 0;
-  bool _roundLocked = false;
-  String? _feedback;
-  late Object _problem;
+  late final LevelProgressService _progress;
+  int? _selectedLevelId;
 
   @override
   void initState() {
     super.initState();
-    _random = Random(widget.session.seed);
-    _startedAt = DateTime.now();
-    _problem = _generateProblem();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+    _progress = Get.find<LevelProgressService>();
+    if (widget.session.isTutorialMode) _selectedLevelId = 1;
   }
 
   @override
   Widget build(BuildContext context) {
-    final visuals = widget.game.visuals;
-    final isLandscape =
-        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
-
-    return Column(
-      children: [
-        _GameHeader(
-          accent: visuals.accent,
-          round: _round,
-          score: _score,
-          onExit: widget.callbacks.onExit,
-          isLandscape: isLandscape,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        if (widget.session.isTutorialMode)
-          _InfoBanner(
-            text: widget.game.description,
-            accent: visuals.accent,
-            accentSoft: visuals.accentSoft,
-          ),
-        if (widget.session.isTutorialMode)
-          const SizedBox(height: AppSpacing.sm),
-        Expanded(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            child: IgnorePointer(
-              key: ValueKey('${widget.game.id}-$_round-$_roundVersion'),
-              ignoring: _roundLocked,
-              child: _buildRound(isLandscape),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 240),
+      child: _selectedLevelId == null
+          ? _LevelSelectionView(
+              key: const ValueKey('level-selection'),
+              progress: _progress,
+              accent: widget.game.visuals.accent,
+              onExit: widget.callbacks.onExit,
+              onSelect: _openLevel,
+            )
+          : _LevelPlayView(
+              key: ValueKey('level-$_selectedLevelId'),
+              level: LevelCatalog.byId(_selectedLevelId!),
+              progress: _progress,
+              accent: widget.game.visuals.accent,
+              onShowLevels: () => setState(() => _selectedLevelId = null),
+              onNext: (id) => setState(() => _selectedLevelId = id),
             ),
-          ),
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 180),
-          child: _feedback == null
-              ? const SizedBox.shrink()
-              : Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.sm),
-                  child: _InfoBanner(
-                    text: _feedback!,
-                    accent: visuals.accent,
-                    accentSoft: visuals.accentSoft,
-                    success: true,
-                  ),
-                ),
-        ),
-      ],
     );
   }
 
-  Widget _buildRound(bool isLandscape) {
-    final visuals = widget.game.visuals;
-    return FormulaWorkshopRound(
-      problem: _problem as FormulaProblem,
-      accent: visuals.accent,
-      onSolved: _handleSolved,
-      onReset: _resetCurrentRound,
-      isLandscape: isLandscape,
-    );
-  }
-
-  Object _generateProblem() {
-    return generateFormulaProblem(_random, _round);
-  }
-
-  void _resetCurrentRound() {
-    if (_roundLocked) return;
-    setState(() {
-      _roundVersion++;
-      _feedback = null;
-    });
-  }
-
-  void _handleSolved(int scoreGained) {
-    if (_roundLocked) return;
-    setState(() {
-      _score += scoreGained;
-      _roundLocked = true;
-      _feedback = '정답입니다!'.tr;
-    });
-    widget.callbacks.onScoreChanged(_score);
-    unawaited(_advanceAfterSuccess());
-  }
-
-  Future<void> _advanceAfterSuccess() async {
-    await Future<void>.delayed(const Duration(milliseconds: 900));
-    if (!mounted) return;
-
-    final isSingleRound = widget.session.isDailyMode ||
-        widget.session.isTutorialMode ||
-        _round >= 200;
-    if (widget.session.isTutorialMode) {
-      await Get.find<SettingsService>().completeTutorial();
-      if (!mounted) return;
-    }
-    if (isSingleRound) {
-      widget.callbacks.onFinished(
-        GameResult(
-          score: _score,
-          detailLabel: '경과 시간'.tr,
-          detailValue: _formatElapsed(DateTime.now().difference(_startedAt)),
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _round++;
-      _problem = _generateProblem();
-      _roundLocked = false;
-      _feedback = null;
-    });
+  void _openLevel(int levelId) {
+    if (!_progress.isUnlocked(levelId)) return;
+    unawaited(_progress.rememberLevel(levelId));
+    setState(() => _selectedLevelId = levelId);
   }
 }
 
-class FormulaWorkshopRound extends StatefulWidget {
-  const FormulaWorkshopRound({
+class _LevelSelectionView extends StatelessWidget {
+  const _LevelSelectionView({
     super.key,
-    required this.problem,
+    required this.progress,
     required this.accent,
-    required this.onSolved,
-    required this.onReset,
-    this.isLandscape = false,
+    required this.onExit,
+    required this.onSelect,
   });
 
-  final FormulaProblem problem;
+  final LevelProgressService progress;
   final Color accent;
-  final ValueChanged<int> onSolved;
-  final VoidCallback onReset;
-  final bool isLandscape;
-
-  @override
-  State<FormulaWorkshopRound> createState() => _FormulaWorkshopRoundState();
-}
-
-class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
-  late final List<InlineOperator?> _operators;
-  final List<ParenthesisRange> _parentheses = [];
-  int? _selectedDigitIndex;
-  String? _message;
-  bool _solved = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _operators = List.filled(widget.problem.digits.length - 1, null);
-  }
-
-  String get _expression => assembleInlineExpression(
-        digits: widget.problem.digits,
-        operators: _operators,
-        parentheses: _parentheses,
-      );
+  final VoidCallback onExit;
+  final ValueChanged<int> onSelect;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompactHeight = constraints.maxHeight < 620;
-        final topGap = widget.isLandscape
-            ? (constraints.maxHeight * 0.05).clamp(16.0, 40.0)
-            : (constraints.maxHeight * 0.08).clamp(28.0, 72.0);
-        final horizontalPadding = constraints.maxWidth < 600 ? 0.0 : 24.0;
-
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: Column(
+        final columns = constraints.maxWidth >= 900
+            ? 8
+            : constraints.maxWidth >= 650
+                ? 6
+                : constraints.maxWidth >= 420
+                    ? 4
+                    : 3;
+        const rowExtent = 118.0;
+        return Obx(() {
+          final current = progress.highestUnlockedLevel;
+          final records = Map<int, LevelProgress>.of(progress.progress);
+          final controller = ScrollController(
+            initialScrollOffset:
+                (((current - 1) ~/ columns) * rowExtent - 80).clamp(0, 5000),
+          );
+          return Column(
             children: [
-              SizedBox(height: topGap),
-              _DragDropEditor(
-                digits: widget.problem.digits,
-                operators: _operators,
-                parentheses: _parentheses,
-                accent: widget.accent,
-                selectedDigitIndex: _selectedDigitIndex,
-                isLandscape: widget.isLandscape,
-                onDigitTapped: _handleDigitTap,
-                onOperatorChanged: (index, value) {
-                  setState(() => _operators[index] = value);
-                  _checkAnswer();
-                },
+              Row(
+                children: [
+                  SoftIconButton(
+                    icon: Icons.arrow_back_rounded,
+                    label: '뒤로 가기'.tr,
+                    onPressed: onExit,
+                    size: 40,
+                    iconSize: 20,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'LEVEL SELECT',
+                          style: GoogleFonts.blackHanSans(
+                            fontSize: 24,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          '현재 도전 · LEVEL $current',
+                          style: AppTypography.caption.copyWith(
+                            color: accent,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                    child: Text(
+                      '$current / 200',
+                      style: AppTypography.label.copyWith(color: accent),
+                    ),
+                  ),
+                ],
               ),
-              if (_message != null) ...[
-                SizedBox(height: isCompactHeight ? 16 : 28),
+              const SizedBox(height: AppSpacing.lg),
+              Expanded(
+                child: GridView.builder(
+                  controller: controller,
+                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    mainAxisExtent: 106,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemCount: LevelCatalog.all.length,
+                  itemBuilder: (context, index) {
+                    final level = LevelCatalog.all[index];
+                    final record =
+                        records[level.id] ?? LevelProgress(levelId: level.id);
+                    final unlocked = level.id <= current;
+                    return _LevelCard(
+                      level: level,
+                      record: record,
+                      unlocked: unlocked,
+                      current: level.id == current,
+                      accent: accent,
+                      onTap: () => onSelect(level.id),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+}
+
+class _LevelCard extends StatelessWidget {
+  const _LevelCard({
+    required this.level,
+    required this.record,
+    required this.unlocked,
+    required this.current,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final LevelData level;
+  final LevelProgress record;
+  final bool unlocked;
+  final bool current;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = current
+        ? accent
+        : record.cleared
+            ? AppColors.green.withValues(alpha: 0.5)
+            : AppColors.borderLight;
+    final background = !unlocked
+        ? AppColors.surfaceSecondary.withValues(alpha: 0.75)
+        : current
+            ? accent.withValues(alpha: 0.09)
+            : Colors.white;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: unlocked ? onTap : null,
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: BorderRadius.circular(AppRadius.medium),
+            border: Border.all(color: borderColor, width: current ? 1.8 : 1),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'LEVEL ${level.id}',
+                    style: AppTypography.tiny.copyWith(
+                      color: unlocked
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  if (record.cleared) ...[
+                    const SizedBox(width: 3),
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 12,
+                      color: AppColors.green,
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 7),
+              if (!unlocked)
+                const Icon(Icons.lock_rounded,
+                    size: 22, color: Color(0xFFAAB0BA))
+              else if (!record.cleared)
                 Text(
-                  _message!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
+                  current ? '진행 가능' : '도전 가능',
+                  style: AppTypography.tiny.copyWith(
+                    color: current ? accent : AppColors.textSecondary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                )
+              else ...[
+                Text(
+                  record.perfect ? 'PERFECT' : _stars(record.stars),
+                  style: AppTypography.tiny.copyWith(
+                    color: record.perfect
+                        ? AppColors.scoreOrange
+                        : AppColors.yellow,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '+${record.bestScore}점',
+                  style: AppTypography.tiny.copyWith(
                     color: AppColors.textSecondary,
-                    fontSize: isCompactHeight ? 12 : 14,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
-              const Spacer(),
-              _GameActionButtons(
-                onHint: _showHint,
-                onReset: widget.onReset,
-                isCompact: isCompactHeight,
-              ),
-              SizedBox(height: isCompactHeight ? 4 : 16),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LevelPlayView extends StatefulWidget {
+  const _LevelPlayView({
+    super.key,
+    required this.level,
+    required this.progress,
+    required this.accent,
+    required this.onShowLevels,
+    required this.onNext,
+  });
+
+  final LevelData level;
+  final LevelProgressService progress;
+  final Color accent;
+  final VoidCallback onShowLevels;
+  final ValueChanged<int> onNext;
+
+  @override
+  State<_LevelPlayView> createState() => _LevelPlayViewState();
+}
+
+class _LevelPlayViewState extends State<_LevelPlayView> {
+  final _editorKey = GlobalKey<_FormulaEditorState>();
+  int _usedHints = 0;
+  _CompletedAttempt? _completed;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+    return Stack(
+      children: [
+        Column(
+          children: [
+            _LevelHeader(
+              levelId: widget.level.id,
+              remainingHints: 3 - _usedHints,
+              accent: widget.accent,
+              onBack: widget.onShowLevels,
+              onHint: _showHint,
+              isLandscape: isLandscape,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _LevelGoalBanner(level: widget.level, accent: widget.accent),
+            const SizedBox(height: AppSpacing.sm),
+            Expanded(
+              child: _FormulaEditor(
+                key: _editorKey,
+                level: widget.level,
+                accent: widget.accent,
+                isLandscape: isLandscape,
+                onValidSubmission: _handleSubmission,
+              ),
+            ),
+          ],
+        ),
+        if (_completed case final completed?)
+          Positioned.fill(
+            child: _LevelResultOverlay(
+              level: widget.level,
+              attempt: completed,
+              usedHints: _usedHints,
+              accent: widget.accent,
+              onReplay: _replay,
+              onShowLevels: widget.onShowLevels,
+              onNext: widget.level.id < 200
+                  ? () => widget.onNext(widget.level.id + 1)
+                  : null,
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _showHint() {
+    if (_usedHints < 3) setState(() => _usedHints++);
+    final visibleCount = _usedHints;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SafeArea(
+        child: Container(
+          margin: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.large),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.lightbulb_rounded, color: AppColors.yellow),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    '힌트 $visibleCount/3',
+                    style: AppTypography.subtitle,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              for (var index = 0; index < visibleCount; index++) ...[
+                Text(
+                  '${index + 1}. ${widget.level.hints.at(index)}',
+                  style: AppTypography.bodySmall.copyWith(height: 1.5),
+                ),
+                if (index + 1 < visibleCount)
+                  const SizedBox(height: AppSpacing.sm),
+              ],
+              if (visibleCount == 3) ...[
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  '모든 힌트를 사용했어요.',
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleSubmission(String expression, int score) {
+    final evaluation = evaluateLevelScore(widget.level, score);
+    if (!evaluation.cleared) {
+      _editorKey.currentState?.showMessage(
+        '클리어하려면 최소 +${widget.level.minimumScore}점이 필요해요.',
+      );
+      return;
+    }
+    unawaited(
+      widget.progress.recordResult(
+        level: widget.level,
+        score: score,
+        evaluation: evaluation,
+        usedHints: _usedHints,
+      ),
+    );
+    setState(() {
+      _completed = _CompletedAttempt(
+        expression: expression,
+        score: score,
+        evaluation: evaluation,
+      );
+    });
+  }
+
+  void _replay() {
+    setState(() {
+      _usedHints = 0;
+      _completed = null;
+    });
+    _editorKey.currentState?.reset();
+  }
+}
+
+class _LevelHeader extends StatelessWidget {
+  const _LevelHeader({
+    required this.levelId,
+    required this.remainingHints,
+    required this.accent,
+    required this.onBack,
+    required this.onHint,
+    required this.isLandscape,
+  });
+
+  final int levelId;
+  final int remainingHints;
+  final Color accent;
+  final VoidCallback onBack;
+  final VoidCallback onHint;
+  final bool isLandscape;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SoftIconButton(
+          icon: Icons.arrow_back_rounded,
+          label: '레벨 목록',
+          onPressed: onBack,
+          size: isLandscape ? 36 : 40,
+          iconSize: 20,
+        ),
+        Expanded(
+          child: Text(
+            'LEVEL $levelId',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.blackHanSans(
+              fontSize: isLandscape ? 20 : 22,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        OutlinedButton.icon(
+          onPressed: onHint,
+          icon: const Icon(Icons.lightbulb_rounded, size: 19),
+          label: Text('$remainingHints'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor:
+                remainingHints == 0 ? AppColors.textSecondary : accent,
+            backgroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            side: const BorderSide(color: AppColors.borderLight),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LevelGoalBanner extends StatelessWidget {
+  const _LevelGoalBanner({required this.level, required this.accent});
+
+  final LevelData level;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('클리어 +${level.minimumScore}점', style: AppTypography.tiny),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Text('·', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          Text(
+            '★★★ +${level.targetScore}점',
+            style: AppTypography.tiny.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Text('·', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          const Text('더 높으면 PERFECT', style: AppTypography.tiny),
+        ],
+      ),
+    );
+  }
+}
+
+class _FormulaEditor extends StatefulWidget {
+  const _FormulaEditor({
+    super.key,
+    required this.level,
+    required this.accent,
+    required this.isLandscape,
+    required this.onValidSubmission,
+  });
+
+  final LevelData level;
+  final Color accent;
+  final bool isLandscape;
+  final void Function(String expression, int score) onValidSubmission;
+
+  @override
+  State<_FormulaEditor> createState() => _FormulaEditorState();
+}
+
+class _EditorSnapshot {
+  _EditorSnapshot(this.operators, this.parentheses);
+  final List<InlineOperator?> operators;
+  final List<ParenthesisRange> parentheses;
+}
+
+class _FormulaEditorState extends State<_FormulaEditor> {
+  late List<InlineOperator?> _operators;
+  final List<ParenthesisRange> _parentheses = [];
+  final List<_EditorSnapshot> _history = [];
+  int? _selectedDigitIndex;
+  String? _message;
+
+  String get _expression => assembleInlineExpression(
+        digits: widget.level.digits,
+        operators: _operators,
+        parentheses: _parentheses,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    _operators = List.filled(widget.level.digits.length - 1, null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxHeight < 470;
+        return Column(
+          children: [
+            SizedBox(height: compact ? 8 : 20),
+            Expanded(
+              child: SingleChildScrollView(
+                child: _DragDropEditor(
+                  digits: widget.level.digits,
+                  operators: _operators,
+                  parentheses: _parentheses,
+                  availableOperators: widget.level.availableOperators,
+                  accent: widget.accent,
+                  selectedDigitIndex: _selectedDigitIndex,
+                  isLandscape: widget.isLandscape,
+                  onDigitTapped: _handleDigitTap,
+                  onOperatorChanged: _changeOperator,
+                ),
+              ),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 160),
+              child: _message == null
+                  ? const SizedBox(height: 4)
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        _message!,
+                        textAlign: TextAlign.center,
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+            ),
+            _GameActionButtons(
+              onUndo: _undo,
+              onReset: reset,
+              onSubmit: _submit,
+              canUndo: _history.isNotEmpty,
+              isCompact: compact,
+              accent: widget.accent,
+            ),
+            SizedBox(height: compact ? 2 : 10),
+          ],
         );
       },
     );
   }
 
-  void _showHint() {
+  void _saveSnapshot() {
+    _history.add(_EditorSnapshot(List.of(_operators), List.of(_parentheses)));
+  }
+
+  void _changeOperator(int index, InlineOperator? value) {
+    _saveSnapshot();
     setState(() {
-      _message = '${'힌트'.tr}: ${widget.problem.knownSolution}';
-      _selectedDigitIndex = null;
+      _operators[index] = value;
+      _message = null;
     });
+    _previewValidation();
   }
 
   void _handleDigitTap(int index) {
@@ -282,7 +677,6 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
       setState(() => _selectedDigitIndex = null);
       return;
     }
-
     final candidate = ParenthesisRange(
       id: '${DateTime.now().microsecondsSinceEpoch}',
       startDigitIndex: _selectedDigitIndex!,
@@ -293,122 +687,82 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
       return normalized.startDigitIndex == candidate.startDigitIndex &&
           normalized.endDigitIndex == candidate.endDigitIndex;
     });
-
     if (existingIndex >= 0) {
+      _saveSnapshot();
       setState(() {
         _parentheses.removeAt(existingIndex);
         _selectedDigitIndex = null;
         _message = null;
       });
-      _checkAnswer();
       return;
     }
-
     final validation = validateParenthesisRange(
-      digitCount: widget.problem.digits.length,
+      digitCount: widget.level.digits.length,
       candidate: candidate,
       existing: _parentheses,
     );
-    if (validation.valid) {
+    if (!validation.valid) {
       setState(() {
-        _parentheses.add(candidate);
-        _message = null;
         _selectedDigitIndex = null;
-      });
-      _checkAnswer();
-    } else {
-      setState(() {
         _message = validation.message;
-        _selectedDigitIndex = null;
       });
-    }
-  }
-
-  void _checkAnswer() {
-    if (_solved) return;
-    final hasEquals = _operators.contains(InlineOperator.equals);
-    if (!hasEquals) {
-      setState(() => _message = null);
       return;
     }
-    final result = validateFormulaWorkshop(
-      digitString: widget.problem.digitString,
+    _saveSnapshot();
+    setState(() {
+      _parentheses.add(candidate);
+      _selectedDigitIndex = null;
+      _message = null;
+    });
+  }
+
+  void _previewValidation() {
+    if (!_operators.contains(InlineOperator.equals)) return;
+    final result = validateLevelFormula(
+      digitString: widget.level.digitString,
       expression: _expression,
+      availableOperators: widget.level.availableOperators,
     );
-    if (result.valid) {
-      _solved = true;
-      widget.onSolved(result.value!);
-    } else {
-      setState(() => _message = result.message);
+    if (!result.valid && mounted) setState(() => _message = result.message);
+  }
+
+  void _submit() {
+    final result = validateLevelFormula(
+      digitString: widget.level.digitString,
+      expression: _expression,
+      availableOperators: widget.level.availableOperators,
+    );
+    if (!result.valid) {
+      showMessage(result.message ?? '수식을 다시 확인해 주세요.');
+      return;
     }
+    widget.onValidSubmission(_expression, result.value!);
   }
-}
 
-class _GameHeader extends StatelessWidget {
-  const _GameHeader({
-    required this.accent,
-    required this.round,
-    required this.score,
-    required this.onExit,
-    this.isLandscape = false,
-  });
-
-  final Color accent;
-  final int round;
-  final int score;
-  final VoidCallback onExit;
-  final bool isLandscape;
-
-  @override
-  Widget build(BuildContext context) {
-    final buttonSize = isLandscape ? 36.0 : 40.0;
-    final iconSize = isLandscape ? 18.0 : 20.0;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-      child: Row(
-        children: [
-          SoftIconButton(
-            icon: Icons.arrow_back_rounded,
-            label: '뒤로 가기'.tr,
-            onPressed: onExit,
-            size: buttonSize,
-            iconSize: iconSize,
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${'라운드'.tr} $round',
-                  style: AppTypography.label.copyWith(
-                    color: AppColors.textSecondary,
-                    fontSize: isLandscape ? 12 : 14,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Container(
-                  width: 1,
-                  height: 12,
-                  color: AppColors.borderLight,
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Text(
-                  '${'점수'.tr} $score',
-                  style: GoogleFonts.blackHanSans(
-                    fontSize: isLandscape ? 14 : 16,
-                    color: accent,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: buttonSize.clamp(44, 64)),
-        ],
-      ),
-    );
+  void _undo() {
+    if (_history.isEmpty) return;
+    final previous = _history.removeLast();
+    setState(() {
+      _operators = List.of(previous.operators);
+      _parentheses
+        ..clear()
+        ..addAll(previous.parentheses);
+      _selectedDigitIndex = null;
+      _message = null;
+    });
   }
+
+  void reset() {
+    setState(() {
+      _operators = List.filled(widget.level.digits.length - 1, null);
+      _parentheses.clear();
+      _history.clear();
+      _selectedDigitIndex = null;
+      _message = null;
+    });
+  }
+
+  void showMessage(String message) => setState(() => _message = message);
 }
 
 class _DragDropEditor extends StatelessWidget {
@@ -416,16 +770,18 @@ class _DragDropEditor extends StatelessWidget {
     required this.digits,
     required this.operators,
     required this.parentheses,
+    required this.availableOperators,
     required this.accent,
     required this.selectedDigitIndex,
     required this.onDigitTapped,
     required this.onOperatorChanged,
-    this.isLandscape = false,
+    required this.isLandscape,
   });
 
   final List<String> digits;
   final List<InlineOperator?> operators;
   final List<ParenthesisRange> parentheses;
+  final Set<String> availableOperators;
   final Color accent;
   final int? selectedDigitIndex;
   final ValueChanged<int> onDigitTapped;
@@ -437,27 +793,13 @@ class _DragDropEditor extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewport = MediaQuery.sizeOf(context);
-        final isMobile = constraints.maxWidth < 600 || viewport.height < 500;
-        final isTablet = !isMobile && constraints.maxWidth < 1000;
-        final digitFontSize = isMobile
-            ? (constraints.maxWidth / (digits.length * 1.05)).clamp(48.0, 68.0)
-            : isTablet
-                ? (constraints.maxWidth * 0.105).clamp(72.0, 92.0)
-                : (constraints.maxWidth * 0.07).clamp(96.0, 120.0);
-        final digitPadding = isMobile
-            ? (digits.length >= 6 ? 6.0 : 10.0)
-            : isTablet
-                ? 16.0
-                : 22.0;
-        final digitVerticalPadding = isMobile ? 8.0 : 12.0;
-        final operatorGap = isLandscape && viewport.height < 600
-            ? 32.0
-            : isMobile
-                ? 48.0
-                : 64.0;
-        final operatorFontSize = (digitFontSize * 0.46).clamp(26.0, 52.0);
-
-        final digitItems = List<Widget>.generate(digits.length, (digitIndex) {
+        final compact = constraints.maxWidth < 600 || viewport.height < 560;
+        final digitFontSize = compact
+            ? (constraints.maxWidth / (digits.length * 1.12)).clamp(34.0, 58.0)
+            : (constraints.maxWidth * 0.08).clamp(62.0, 96.0);
+        final digitPadding = compact ? (digits.length >= 8 ? 3.0 : 7.0) : 13.0;
+        final operatorFontSize = (digitFontSize * 0.5).clamp(22.0, 44.0);
+        final items = List<Widget>.generate(digits.length, (digitIndex) {
           final openingCount = parentheses
               .where(
                   (range) => range.normalized().startDigitIndex == digitIndex)
@@ -465,33 +807,27 @@ class _DragDropEditor extends StatelessWidget {
           final closingCount = parentheses
               .where((range) => range.normalized().endDigitIndex == digitIndex)
               .length;
-          final isSelected = selectedDigitIndex == digitIndex;
-          final digit = MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => onDigitTapped(digitIndex),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: digitPadding,
-                  vertical: digitVerticalPadding,
+          final selected = selectedDigitIndex == digitIndex;
+          final digit = GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => onDigitTapped(digitIndex),
+            child: Padding(
+              padding:
+                  EdgeInsets.symmetric(horizontal: digitPadding, vertical: 8),
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 150),
+                style: TextStyle(
+                  fontSize: digitFontSize,
+                  height: 1,
+                  fontWeight: FontWeight.w800,
+                  color: selected ? accent : const Color(0xFF17191D),
                 ),
-                child: AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 160),
-                  style: TextStyle(
-                    fontSize: digitFontSize,
-                    height: 1,
-                    fontWeight: FontWeight.w800,
-                    color: isSelected ? accent : const Color(0xFF17191D),
-                  ),
-                  child: Text(
-                    '${'(' * openingCount}${digits[digitIndex]}${')' * closingCount}',
-                  ),
+                child: Text(
+                  '${'(' * openingCount}${digits[digitIndex]}${')' * closingCount}',
                 ),
               ),
             ),
           );
-
           if (digitIndex == 0) return digit;
           final slotIndex = digitIndex - 1;
           return _InlineOperatorTarget(
@@ -500,32 +836,28 @@ class _DragDropEditor extends StatelessWidget {
             accent: accent,
             operatorFontSize: operatorFontSize,
             horizontalPadding: digitPadding * 0.65,
-            verticalPadding: digitVerticalPadding,
-            onAccept: (op) => onOperatorChanged(slotIndex, op),
+            onAccept: (operator) => onOperatorChanged(slotIndex, operator),
             onRemove: () => onOperatorChanged(slotIndex, null),
           );
         });
 
         return Column(
           children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1080),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: digitItems,
-                  ),
-                ),
-              ),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(mainAxisSize: MainAxisSize.min, children: items),
             ),
-            SizedBox(height: operatorGap),
+            SizedBox(height: compact ? 20 : 38),
             _OperatorPalette(
               accent: accent,
-              isCompact: isMobile,
-              isDense: isLandscape && viewport.height < 600,
+              availableOperators: availableOperators,
+              compact: compact,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '기호를 숫자 사이로 끌어 놓으세요 · 숫자 두 개를 눌러 괄호 설정',
+              style:
+                  AppTypography.tiny.copyWith(color: AppColors.textSecondary),
             ),
           ],
         );
@@ -541,7 +873,6 @@ class _InlineOperatorTarget extends StatefulWidget {
     required this.accent,
     required this.operatorFontSize,
     required this.horizontalPadding,
-    required this.verticalPadding,
     required this.onAccept,
     required this.onRemove,
   });
@@ -551,7 +882,6 @@ class _InlineOperatorTarget extends StatefulWidget {
   final Color accent;
   final double operatorFontSize;
   final double horizontalPadding;
-  final double verticalPadding;
   final ValueChanged<InlineOperator> onAccept;
   final VoidCallback onRemove;
 
@@ -560,56 +890,48 @@ class _InlineOperatorTarget extends StatefulWidget {
 }
 
 class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
-  bool _isHovering = false;
+  bool _hovering = false;
 
   @override
   Widget build(BuildContext context) {
     return DragTarget<InlineOperator>(
       onWillAcceptWithDetails: (_) {
-        setState(() => _isHovering = true);
+        setState(() => _hovering = true);
         return true;
       },
-      onLeave: (_) => setState(() => _isHovering = false),
+      onLeave: (_) => setState(() => _hovering = false),
       onAcceptWithDetails: (details) {
-        setState(() => _isHovering = false);
+        setState(() => _hovering = false);
         widget.onAccept(details.data);
       },
-      builder: (context, candidateData, rejectedData) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              width: _isHovering && widget.current == null
-                  ? widget.operatorFontSize * 0.8
-                  : 0,
-            ),
-            if (widget.current case final current?)
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: widget.onRemove,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: widget.horizontalPadding,
-                    vertical: widget.verticalPadding,
-                  ),
-                  child: Text(
-                    current.symbol,
-                    style: TextStyle(
-                      fontSize: widget.operatorFontSize,
-                      height: 1,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          _isHovering ? widget.accent : const Color(0xFF253044),
-                    ),
+      builder: (context, candidateData, rejectedData) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            width: _hovering && widget.current == null
+                ? widget.operatorFontSize * 0.75
+                : 0,
+          ),
+          if (widget.current case final current?)
+            GestureDetector(
+              onTap: widget.onRemove,
+              child: Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: widget.horizontalPadding),
+                child: Text(
+                  current.symbol,
+                  style: TextStyle(
+                    fontSize: widget.operatorFontSize,
+                    fontWeight: FontWeight.w700,
+                    color: _hovering ? widget.accent : const Color(0xFF253044),
                   ),
                 ),
               ),
-            widget.digit,
-          ],
-        );
-      },
+            ),
+          widget.digit,
+        ],
+      ),
     );
   }
 }
@@ -617,179 +939,108 @@ class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
 class _OperatorPalette extends StatefulWidget {
   const _OperatorPalette({
     required this.accent,
-    required this.isCompact,
-    required this.isDense,
+    required this.availableOperators,
+    required this.compact,
   });
 
   final Color accent;
-  final bool isCompact;
-  final bool isDense;
+  final Set<String> availableOperators;
+  final bool compact;
 
   @override
   State<_OperatorPalette> createState() => _OperatorPaletteState();
 }
 
 class _OperatorPaletteState extends State<_OperatorPalette> {
-  InlineOperator? _draggingOperator;
+  InlineOperator? _dragging;
 
   @override
   Widget build(BuildContext context) {
-    const operators = [
-      InlineOperator.add,
-      InlineOperator.subtract,
-      InlineOperator.multiply,
-      InlineOperator.divide,
-      InlineOperator.equals,
-    ];
-    final buttonSize = widget.isDense
-        ? 46.0
-        : widget.isCompact
-            ? 52.0
-            : 68.0;
-    final buttonGap = widget.isDense
-        ? 8.0
-        : widget.isCompact
-            ? 8.0
-            : 16.0;
-    final horizontalPadding = widget.isDense
-        ? 16.0
-        : widget.isCompact
-            ? 20.0
-            : 32.0;
-    final verticalPadding = widget.isDense
-        ? 12.0
-        : widget.isCompact
-            ? 16.0
-            : 20.0;
-
-    final children = <Widget>[];
-    for (var index = 0; index < operators.length; index++) {
-      final op = operators[index];
-      final child = _OperatorButton(
-        operator: op,
-        accent: widget.accent,
-        size: buttonSize,
-        isActive: _draggingOperator == op,
-      );
-
-      if (index > 0) children.add(SizedBox(width: buttonGap));
-      children.add(
-        Draggable<InlineOperator>(
-          data: op,
-          onDragStarted: () => setState(() => _draggingOperator = op),
-          onDragCompleted: _clearDraggingOperator,
-          onDraggableCanceled: (_, __) => _clearDraggingOperator(),
-          onDragEnd: (_) => _clearDraggingOperator(),
-          feedback: Material(
-            color: Colors.transparent,
-            child: Opacity(
-              opacity: 0.9,
+    final operators = InlineOperator.values
+        .where(
+            (operator) => widget.availableOperators.contains(operator.symbol))
+        .toList();
+    final size = widget.compact ? 44.0 : 58.0;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: widget.compact ? 14 : 22,
+        vertical: widget.compact ? 10 : 14,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var index = 0; index < operators.length; index++) ...[
+            if (index > 0) const SizedBox(width: 8),
+            Draggable<InlineOperator>(
+              data: operators[index],
+              onDragStarted: () => setState(() => _dragging = operators[index]),
+              onDragEnd: (_) => setState(() => _dragging = null),
+              feedback: Material(
+                color: Colors.transparent,
+                child: _OperatorButton(
+                  operator: operators[index],
+                  accent: widget.accent,
+                  size: size,
+                  active: true,
+                ),
+              ),
+              childWhenDragging: Opacity(
+                opacity: 0.3,
+                child: _OperatorButton(
+                  operator: operators[index],
+                  accent: widget.accent,
+                  size: size,
+                  active: false,
+                ),
+              ),
               child: _OperatorButton(
-                operator: op,
+                operator: operators[index],
                 accent: widget.accent,
-                size: buttonSize,
-                isActive: true,
+                size: size,
+                active: _dragging == operators[index],
               ),
             ),
-          ),
-          childWhenDragging: Opacity(opacity: 0.35, child: child),
-          child: child,
-        ),
-      );
-    }
-
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 680),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: horizontalPadding,
-            vertical: verticalPadding,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            border: Border.all(color: AppColors.borderLight),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF334155).withValues(alpha: 0.08),
-                blurRadius: 28,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(mainAxisSize: MainAxisSize.min, children: children),
-        ),
+          ],
+        ],
       ),
     );
   }
-
-  void _clearDraggingOperator() {
-    if (mounted && _draggingOperator != null) {
-      setState(() => _draggingOperator = null);
-    }
-  }
 }
 
-class _OperatorButton extends StatefulWidget {
+class _OperatorButton extends StatelessWidget {
   const _OperatorButton({
     required this.operator,
     required this.accent,
     required this.size,
-    required this.isActive,
+    required this.active,
   });
 
   final InlineOperator operator;
   final Color accent;
   final double size;
-  final bool isActive;
-
-  @override
-  State<_OperatorButton> createState() => _OperatorButtonState();
-}
-
-class _OperatorButtonState extends State<_OperatorButton> {
-  bool _isHovered = false;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = widget.isActive
-        ? widget.accent
-        : _isHovered
-            ? const Color(0xFFEAF3FF)
-            : const Color(0xFFF5F7F9);
-    final foregroundColor = widget.isActive
-        ? Colors.white
-        : _isHovered
-            ? widget.accent
-            : const Color(0xFF253044);
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.grab,
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedScale(
-        scale: _isHovered || widget.isActive ? 1.05 : 1,
-        duration: const Duration(milliseconds: 140),
-        curve: Curves.easeOutCubic,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          width: widget.size,
-          height: widget.size,
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            widget.operator.symbol,
-            style: TextStyle(
-              fontSize: widget.size * 0.42,
-              height: 1,
-              color: foregroundColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: active ? accent : AppColors.surfaceSecondary,
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        operator.symbol,
+        style: TextStyle(
+          fontSize: size * 0.42,
+          color: active ? Colors.white : const Color(0xFF253044),
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -798,98 +1049,219 @@ class _OperatorButtonState extends State<_OperatorButton> {
 
 class _GameActionButtons extends StatelessWidget {
   const _GameActionButtons({
-    required this.onHint,
+    required this.onUndo,
     required this.onReset,
+    required this.onSubmit,
+    required this.canUndo,
     required this.isCompact,
+    required this.accent,
   });
 
-  final VoidCallback onHint;
+  final VoidCallback onUndo;
   final VoidCallback onReset;
+  final VoidCallback onSubmit;
+  final bool canUndo;
   final bool isCompact;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
-    final height = isCompact ? 48.0 : 56.0;
+    final height = isCompact ? 42.0 : 50.0;
 
-    Widget buildButton(String label, VoidCallback onPressed) {
-      return Expanded(
-        child: SizedBox(
-          height: height,
-          child: OutlinedButton(
-            onPressed: onPressed,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF253044),
-              backgroundColor: Colors.white.withValues(alpha: 0.72),
-              elevation: 0,
-              side: const BorderSide(color: AppColors.borderLight, width: 1.2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.small),
-              ),
-              textStyle: GoogleFonts.notoSans(
-                fontSize: isCompact ? 14 : 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            child: Text(label),
-          ),
+    Widget secondaryButton({
+      required String label,
+      required IconData icon,
+      required VoidCallback? onPressed,
+    }) {
+      final style = OutlinedButton.styleFrom(
+        minimumSize: Size.fromHeight(height),
+        padding: EdgeInsets.symmetric(horizontal: isCompact ? 4 : 12),
+        textStyle: TextStyle(
+          fontSize: isCompact ? 12 : 14,
+          fontWeight: FontWeight.w700,
         ),
+      );
+      if (isCompact) {
+        return OutlinedButton(
+          onPressed: onPressed,
+          style: style,
+          child: Text(label, maxLines: 1, overflow: TextOverflow.fade),
+        );
+      }
+      return OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 18),
+        label: Text(label),
+        style: style,
       );
     }
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 760),
-        child: Row(
-          children: [
-            buildButton('힌트'.tr, onHint),
-            SizedBox(width: isCompact ? 10 : 16),
-            buildButton('초기화'.tr, onReset),
-          ],
+    return Row(
+      children: [
+        Expanded(
+          child: secondaryButton(
+            onPressed: canUndo ? onUndo : null,
+            icon: Icons.undo_rounded,
+            label: '되돌리기',
+          ),
         ),
-      ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: secondaryButton(
+            onPressed: onReset,
+            icon: Icons.refresh_rounded,
+            label: '초기화',
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 2,
+          child: FilledButton(
+            onPressed: onSubmit,
+            style: FilledButton.styleFrom(
+              minimumSize: Size.fromHeight(height),
+              backgroundColor: accent,
+              padding: EdgeInsets.symmetric(horizontal: isCompact ? 6 : 16),
+            ),
+            child: const Text('정답 제출', maxLines: 1),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _InfoBanner extends StatelessWidget {
-  const _InfoBanner({
-    required this.text,
-    required this.accent,
-    required this.accentSoft,
-    this.success = false,
+class _CompletedAttempt {
+  const _CompletedAttempt({
+    required this.expression,
+    required this.score,
+    required this.evaluation,
   });
 
-  final String text;
+  final String expression;
+  final int score;
+  final LevelEvaluation evaluation;
+}
+
+class _LevelResultOverlay extends StatelessWidget {
+  const _LevelResultOverlay({
+    required this.level,
+    required this.attempt,
+    required this.usedHints,
+    required this.accent,
+    required this.onReplay,
+    required this.onShowLevels,
+    required this.onNext,
+  });
+
+  final LevelData level;
+  final _CompletedAttempt attempt;
+  final int usedHints;
   final Color accent;
-  final Color accentSoft;
-  final bool success;
+  final VoidCallback onReplay;
+  final VoidCallback onShowLevels;
+  final VoidCallback? onNext;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: success ? AppColors.green.withValues(alpha: 0.16) : accentSoft,
-        borderRadius: BorderRadius.circular(AppRadius.medium),
-      ),
-      child: Text(
-        text.tr,
-        textAlign: TextAlign.center,
-        style: AppTypography.bodySmall.copyWith(
-          color: success ? AppColors.green : accent,
-          fontWeight: FontWeight.w800,
+    final evaluation = attempt.evaluation;
+    return ColoredBox(
+      color: const Color(0xFF20242C).withValues(alpha: 0.44),
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 430),
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.large),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'LEVEL ${level.id} CLEAR',
+                  style: GoogleFonts.blackHanSans(
+                    fontSize: 25,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    attempt.expression,
+                    style: AppTypography.title,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  evaluation.perfect ? 'PERFECT' : _stars(evaluation.stars),
+                  style: GoogleFonts.blackHanSans(
+                    fontSize: 24,
+                    color: evaluation.perfect
+                        ? AppColors.scoreOrange
+                        : AppColors.yellow,
+                  ),
+                ),
+                if (evaluation.perfect)
+                  const Text(
+                    '★★★',
+                    style: TextStyle(fontSize: 18, color: AppColors.yellow),
+                  ),
+                Text(
+                  '+${attempt.score}점',
+                  style: GoogleFonts.blackHanSans(fontSize: 36, color: accent),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  '힌트 사용 $usedHints/3',
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                if (evaluation.stars == 1) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    '기준 점수까지 ${level.targetScore - attempt.score}점 남았어요.\n더 좋은 수식을 찾아보세요!',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.caption.copyWith(height: 1.4),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.xl),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: onReplay,
+                        child: const Text('다시 풀기'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: onShowLevels,
+                        child: const Text('레벨 목록'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: onNext,
+                        style: FilledButton.styleFrom(backgroundColor: accent),
+                        child: Text(onNext == null ? '완료' : '다음 레벨'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-String _formatElapsed(Duration elapsed) {
-  final minutes = elapsed.inMinutes.toString().padLeft(2, '0');
-  final seconds = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
-  return '$minutes:$seconds';
-}
+String _stars(int stars) => stars == 3 ? '★★★' : '★☆☆';

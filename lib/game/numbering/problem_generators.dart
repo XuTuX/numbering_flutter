@@ -143,25 +143,25 @@ _ExprNode _generateTree(
   return _LiteralNode(max(1, target));
 }
 
-FormulaProblem generateFormulaProblem(Random random, int round) {
-  bool allowMultDiv = round >= 10;
+FormulaProblem generateFormulaProblem(Random random, int level) {
+  bool allowMultDiv = level >= 10;
 
   int targetValue;
   int maxLhsNodes;
   int maxRhsNodes;
   int maxDigits = 7;
 
-  if (round <= 5) {
+  if (level <= 5) {
     targetValue = 2 + random.nextInt(10);
     maxLhsNodes = 2;
     maxRhsNodes = 1;
     maxDigits = 4;
-  } else if (round <= 20) {
+  } else if (level <= 20) {
     targetValue = 5 + random.nextInt(20);
     maxLhsNodes = 2;
     maxRhsNodes = 2;
     maxDigits = 5;
-  } else if (round <= 50) {
+  } else if (level <= 50) {
     targetValue = 10 + random.nextInt(30);
     maxLhsNodes = 2;
     maxRhsNodes = 2;
@@ -170,7 +170,7 @@ FormulaProblem generateFormulaProblem(Random random, int round) {
       maxRhsNodes = 1;
     }
     maxDigits = 6;
-  } else if (round <= 100) {
+  } else if (level <= 100) {
     targetValue = 15 + random.nextInt(50);
     maxLhsNodes = 3;
     maxRhsNodes = 2;
@@ -197,8 +197,8 @@ FormulaProblem generateFormulaProblem(Random random, int round) {
 
     digits = '$lhsStr$rhsStr'.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.length <= maxDigits && digits.length >= 3) {
-      // Ensure we don't accidentally generate identical sides like `5 = 5` unless it's a very early round
-      if (lhsStr == rhsStr && round > 2) {
+      // 아주 이른 레벨을 제외하면 양변이 그대로 같은 식은 피합니다.
+      if (lhsStr == rhsStr && level > 2) {
         targetValue += 1; // Mutate target and try again
         continue;
       }

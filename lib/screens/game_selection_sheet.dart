@@ -149,7 +149,7 @@ class GameSelectionSheet extends StatelessWidget {
                                   BorderRadius.circular(AppRadius.pill),
                             ),
                             child: Text(
-                              '무제한 라운드'.tr,
+                              '200개 고정 레벨'.tr,
                               style: AppTypography.tiny.copyWith(
                                 color: visuals.accent,
                               ),

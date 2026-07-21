@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:numbering/constant.dart';
 import 'package:numbering/config/app_config.dart';
 import 'package:numbering/controllers/score_controller.dart';
+import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/l10n/app_translations.dart';
 import 'package:numbering/screens/home_screen.dart';
 import 'package:numbering/services/auth_service.dart';
@@ -24,12 +25,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _installGlobalErrorHandlers();
 
-  // 모든 화면을 가로(landscape) 모드로 고정
+  // 레벨 그리드와 퍼즐 편집기는 세로·가로 모바일 화면을 모두 지원합니다.
   await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
   final settingsService = await SettingsService().init();
+  final levelProgressService = await LevelProgressService().init();
   await AudioService().initialize(
     isBgmEnabled: settingsService.isBgmOn.value,
     isSfxEnabled: settingsService.isSfxOn.value,
@@ -68,6 +72,7 @@ void main() async {
     runApp(
       NumberingApp(
         settingsService: settingsService,
+        levelProgressService: levelProgressService,
         authClient: authClient,
       ),
     );
@@ -108,10 +113,12 @@ void _installGlobalErrorHandlers() {
 
 class AppBinding extends Bindings {
   final SettingsService settingsService;
+  final LevelProgressService levelProgressService;
   final SupabaseClient? authClient;
 
   AppBinding({
     required this.settingsService,
+    required this.levelProgressService,
     required this.authClient,
   });
 
@@ -123,16 +130,19 @@ class AppBinding extends Bindings {
       Get.put(AdService(), permanent: true);
     }
     Get.put<SettingsService>(settingsService, permanent: true);
+    Get.put<LevelProgressService>(levelProgressService, permanent: true);
   }
 }
 
 class NumberingApp extends StatelessWidget {
   final SettingsService settingsService;
+  final LevelProgressService levelProgressService;
   final SupabaseClient? authClient;
 
   const NumberingApp({
     super.key,
     required this.settingsService,
+    required this.levelProgressService,
     required this.authClient,
   });
 
@@ -144,6 +154,7 @@ class NumberingApp extends StatelessWidget {
       scaffoldMessengerKey: appScaffoldMessengerKey,
       initialBinding: AppBinding(
         settingsService: settingsService,
+        levelProgressService: levelProgressService,
         authClient: authClient,
       ),
       navigatorKey: Get.key, // GetX 글로벌 키 설정

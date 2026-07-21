@@ -30,13 +30,13 @@ extension NumberingDifficultyLabel on NumberingDifficulty {
       };
 }
 
-NumberingDifficulty difficultyForRound(int round) {
-  assert(round >= 1);
-  if (round <= 10) return NumberingDifficulty.easy;
-  if (round <= 30) return NumberingDifficulty.normal;
-  if (round <= 60) return NumberingDifficulty.hard;
-  if (round <= 100) return NumberingDifficulty.expert;
-  if (round <= 150) return NumberingDifficulty.master;
+NumberingDifficulty difficultyForLevel(int level) {
+  assert(level >= 1);
+  if (level <= 10) return NumberingDifficulty.easy;
+  if (level <= 30) return NumberingDifficulty.normal;
+  if (level <= 60) return NumberingDifficulty.hard;
+  if (level <= 100) return NumberingDifficulty.expert;
+  if (level <= 150) return NumberingDifficulty.master;
   return NumberingDifficulty.grandmaster;
 }
 

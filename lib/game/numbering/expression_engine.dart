@@ -211,9 +211,27 @@ ValidationResult validateFormulaWorkshop({
   required String digitString,
   required String expression,
 }) {
+  return validateLevelFormula(
+    digitString: digitString,
+    expression: expression,
+    availableOperators: const {'+', '-', '×', '÷', '='},
+  );
+}
+
+ValidationResult validateLevelFormula({
+  required String digitString,
+  required String expression,
+  required Set<String> availableOperators,
+}) {
   final preservedDigits = expression.replaceAll(RegExp(r'[^0-9]'), '');
   if (preservedDigits != digitString) {
     return const ValidationResult.failure('주어진 숫자를 순서대로 모두 사용해야 합니다.');
+  }
+  for (final match in RegExp(r'[+\-×÷=]').allMatches(expression)) {
+    final symbol = match.group(0)!;
+    if (!availableOperators.contains(symbol)) {
+      return ValidationResult.failure('$symbol 기호는 이 레벨에서 사용할 수 없습니다.');
+    }
   }
   final equalsCount = '='.allMatches(expression).length;
   if (equalsCount != 1) {
