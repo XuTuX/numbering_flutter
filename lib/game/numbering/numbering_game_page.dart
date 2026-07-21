@@ -17,8 +17,6 @@ import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/numbering_visuals.dart';
 
-
-part 'views/level_selection_view.dart';
 part 'views/level_play_view.dart';
 part 'widgets/formula_editor.dart';
 part 'widgets/formula_editor_components.dart';
@@ -41,7 +39,7 @@ class NumberingGamePage extends StatefulWidget {
 
 class _NumberingGamePageState extends State<NumberingGamePage> {
   late final LevelProgressService _progress;
-  int? _selectedLevelId;
+  late int _selectedLevelId;
 
   @override
   void initState() {
@@ -50,7 +48,9 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     if (widget.session.isTutorialMode) {
       _selectedLevelId = 1;
     } else if (widget.session.startLevelId != null) {
-      _selectedLevelId = widget.session.startLevelId;
+      _selectedLevelId = widget.session.startLevelId!;
+    } else {
+      _selectedLevelId = _progress.highestUnlockedLevel;
     }
   }
 
@@ -58,29 +58,18 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 240),
-      child: _selectedLevelId == null
-          ? _LevelSelectionView(
-              key: const ValueKey('level-selection'),
-              progress: _progress,
-              accent: widget.game.visuals.accent,
-              onExit: widget.callbacks.onExit,
-              onSelect: _openLevel,
-            )
-          : _LevelPlayView(
-              key: ValueKey('level-$_selectedLevelId'),
-              level: LevelCatalog.byId(_selectedLevelId!),
-              progress: _progress,
-              accent: widget.game.visuals.accent,
-              onShowLevels: () => setState(() => _selectedLevelId = null),
-              onNext: (id) => setState(() => _selectedLevelId = id),
-            ),
+      child: _LevelPlayView(
+        key: ValueKey('level-$_selectedLevelId'),
+        level: LevelCatalog.byId(_selectedLevelId),
+        progress: _progress,
+        accent: widget.game.visuals.accent,
+        onShowLevels: widget.callbacks.onExit,
+        onNext: (id) {
+          if (!_progress.isUnlocked(id)) return;
+          unawaited(_progress.rememberLevel(id));
+          setState(() => _selectedLevelId = id);
+        },
+      ),
     );
   }
-
-  void _openLevel(int levelId) {
-    if (!_progress.isUnlocked(levelId)) return;
-    unawaited(_progress.rememberLevel(levelId));
-    setState(() => _selectedLevelId = levelId);
-  }
 }
-
