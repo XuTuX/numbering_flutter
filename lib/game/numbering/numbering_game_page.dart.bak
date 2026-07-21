@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/theme/app_radius.dart';
-import 'package:numbering/theme/app_spacing.dart';
-import 'package:numbering/theme/app_typography.dart';
-import 'package:numbering/widgets/common/soft_icon_button.dart';
-import 'package:numbering/game/game_module.dart';
-import 'package:numbering/game/numbering/expression_engine.dart';
-import 'package:numbering/game/numbering/level_catalog.dart';
-import 'package:numbering/game/numbering/level_models.dart';
-import 'package:numbering/game/numbering/level_progress_service.dart';
-import 'package:numbering/game/numbering/numbering_models.dart';
-import 'package:numbering/game/numbering/numbering_visuals.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_radius.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
+import '../../widgets/common/soft_icon_button.dart';
+import '../game_module.dart';
+import 'expression_engine.dart';
+import 'level_catalog.dart';
+import 'level_models.dart';
+import 'level_progress_service.dart';
+import 'numbering_models.dart';
+import 'numbering_visuals.dart';
 
 class NumberingGamePage extends StatefulWidget {
   const NumberingGamePage({
@@ -78,8 +78,6 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
   }
 }
 
-// ─── 레벨 선택 뷰 ─────────────────────────────────────────
-
 class _LevelSelectionView extends StatelessWidget {
   const _LevelSelectionView({
     super.key,
@@ -106,11 +104,9 @@ class _LevelSelectionView extends StatelessWidget {
                     ? 4
                     : 3;
         const rowExtent = 118.0;
-        return Obx(() {
           final highestLevel = progress.highestUnlockedLevel;
           final records = Map<int, LevelProgress>.of(progress.progress);
           final controller = ScrollController(
-            initialScrollOffset:
                 (((highestLevel - 1) ~/ columns) * rowExtent - 80)
                     .clamp(0, 5000),
           );
@@ -127,7 +123,6 @@ class _LevelSelectionView extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
-                    child: Text(
                       '$highestLevel / 200',
                       style: GoogleFonts.blackHanSans(
                         fontSize: 22,
@@ -157,7 +152,6 @@ class _LevelSelectionView extends StatelessWidget {
                     return _LevelCard(
                       level: level,
                       record: record,
-                      unlocked: unlocked,
                       current: level.id == highestLevel,
                       accent: accent,
                       onTap: () => onSelect(level.id),
@@ -244,8 +238,6 @@ class _LevelCard extends StatelessWidget {
     );
   }
 }
-
-// ─── 레벨 플레이 뷰 ─────────────────────────────────────────
 
 class _LevelPlayView extends StatefulWidget {
   const _LevelPlayView({
@@ -396,8 +388,6 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
   }
 }
 
-// ─── 레벨 헤더 ────────────────────────────────────────────
-
 class _LevelHeader extends StatelessWidget {
   const _LevelHeader({
     required this.levelId,
@@ -476,8 +466,6 @@ class _LevelHeader extends StatelessWidget {
     );
   }
 }
-
-// ─── 수식 편집기 ────────────────────────────────────────────
 
 class _FormulaEditor extends StatefulWidget {
   const _FormulaEditor({
@@ -686,8 +674,6 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   void showMessage(String message) => setState(() => _message = message);
 }
 
-// ─── 드래그 드롭 편집기 ──────────────────────────────────────
-
 class _DragDropEditor extends StatelessWidget {
   const _DragDropEditor({
     required this.digits,
@@ -783,8 +769,6 @@ class _DragDropEditor extends StatelessWidget {
   }
 }
 
-// ─── 인라인 연산자 타겟 ─────────────────────────────────────
-
 class _InlineOperatorTarget extends StatefulWidget {
   const _InlineOperatorTarget({
     required this.current,
@@ -854,8 +838,6 @@ class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
     );
   }
 }
-
-// ─── 연산자 팔레트 ─────────────────────────────────────────
 
 class _OperatorPalette extends StatefulWidget {
   const _OperatorPalette({
@@ -933,8 +915,6 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
   }
 }
 
-// ─── 연산자 버튼 ─────────────────────────────────────────
-
 class _OperatorButton extends StatelessWidget {
   const _OperatorButton({
     required this.operator,
@@ -970,8 +950,6 @@ class _OperatorButton extends StatelessWidget {
   }
 }
 
-// ─── 완료 시도 데이터 ────────────────────────────────────────
-
 class _CompletedAttempt {
   const _CompletedAttempt({
     required this.expression,
@@ -983,8 +961,6 @@ class _CompletedAttempt {
   final int score;
   final LevelEvaluation evaluation;
 }
-
-// ─── 레벨 결과 오버레이 ──────────────────────────────────────
 
 class _LevelResultOverlay extends StatelessWidget {
   const _LevelResultOverlay({

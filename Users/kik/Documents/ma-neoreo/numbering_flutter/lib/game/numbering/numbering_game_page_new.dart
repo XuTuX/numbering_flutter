@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/theme/app_radius.dart';
-import 'package:numbering/theme/app_spacing.dart';
-import 'package:numbering/theme/app_typography.dart';
-import 'package:numbering/widgets/common/soft_icon_button.dart';
-import 'package:numbering/game/game_module.dart';
-import 'package:numbering/game/numbering/expression_engine.dart';
-import 'package:numbering/game/numbering/level_catalog.dart';
-import 'package:numbering/game/numbering/level_models.dart';
-import 'package:numbering/game/numbering/level_progress_service.dart';
-import 'package:numbering/game/numbering/numbering_models.dart';
-import 'package:numbering/game/numbering/numbering_visuals.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_radius.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
+import '../../widgets/common/soft_icon_button.dart';
+import '../game_module.dart';
+import 'expression_engine.dart';
+import 'level_catalog.dart';
+import 'level_models.dart';
+import 'level_progress_service.dart';
+import 'numbering_models.dart';
+import 'numbering_visuals.dart';
 
 class NumberingGamePage extends StatefulWidget {
   const NumberingGamePage({
@@ -111,8 +111,7 @@ class _LevelSelectionView extends StatelessWidget {
           final records = Map<int, LevelProgress>.of(progress.progress);
           final controller = ScrollController(
             initialScrollOffset:
-                (((highestLevel - 1) ~/ columns) * rowExtent - 80)
-                    .clamp(0, 5000),
+                (((highestLevel - 1) ~/ columns) * rowExtent - 80).clamp(0, 5000),
           );
           return Column(
             children: [

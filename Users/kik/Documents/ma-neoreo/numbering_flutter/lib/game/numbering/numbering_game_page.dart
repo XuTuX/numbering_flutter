@@ -4,18 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/theme/app_radius.dart';
-import 'package:numbering/theme/app_spacing.dart';
-import 'package:numbering/theme/app_typography.dart';
-import 'package:numbering/widgets/common/soft_icon_button.dart';
-import 'package:numbering/game/game_module.dart';
-import 'package:numbering/game/numbering/expression_engine.dart';
-import 'package:numbering/game/numbering/level_catalog.dart';
-import 'package:numbering/game/numbering/level_models.dart';
-import 'package:numbering/game/numbering/level_progress_service.dart';
-import 'package:numbering/game/numbering/numbering_models.dart';
-import 'package:numbering/game/numbering/numbering_visuals.dart';
+import '../../constant.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_radius.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
+import '../../widgets/common/soft_icon_button.dart';
+import '../game_module.dart';
+import 'expression_engine.dart';
+import 'level_catalog.dart';
+import 'level_models.dart';
+import 'level_progress_service.dart';
+import 'numbering_models.dart';
+import 'numbering_visuals.dart';
 
 class NumberingGamePage extends StatefulWidget {
   const NumberingGamePage({
@@ -41,11 +42,7 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
   void initState() {
     super.initState();
     _progress = Get.find<LevelProgressService>();
-    if (widget.session.isTutorialMode) {
-      _selectedLevelId = 1;
-    } else if (widget.session.startLevelId != null) {
-      _selectedLevelId = widget.session.startLevelId;
-    }
+    if (widget.session.isTutorialMode) _selectedLevelId = 1;
   }
 
   @override
@@ -107,12 +104,11 @@ class _LevelSelectionView extends StatelessWidget {
                     : 3;
         const rowExtent = 118.0;
         return Obx(() {
-          final highestLevel = progress.highestUnlockedLevel;
+          final current = progress.highestUnlockedLevel;
           final records = Map<int, LevelProgress>.of(progress.progress);
           final controller = ScrollController(
             initialScrollOffset:
-                (((highestLevel - 1) ~/ columns) * rowExtent - 80)
-                    .clamp(0, 5000),
+                (((current - 1) ~/ columns) * rowExtent - 80).clamp(0, 5000),
           );
           return Column(
             children: [
@@ -128,10 +124,28 @@ class _LevelSelectionView extends StatelessWidget {
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(
-                      '$highestLevel / 200',
+                      'LEVEL',
                       style: GoogleFonts.blackHanSans(
-                        fontSize: 22,
+                        fontSize: 24,
                         color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                    child: Text(
+                      '$current / 200',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: accent,
                       ),
                     ),
                   ),
@@ -153,12 +167,12 @@ class _LevelSelectionView extends StatelessWidget {
                     final level = LevelCatalog.all[index];
                     final record =
                         records[level.id] ?? LevelProgress(levelId: level.id);
-                    final unlocked = level.id <= highestLevel;
+                    final unlocked = level.id <= current;
                     return _LevelCard(
                       level: level,
                       record: record,
                       unlocked: unlocked,
-                      current: level.id == highestLevel,
+                      current: level.id == current,
                       accent: accent,
                       onTap: () => onSelect(level.id),
                     );
@@ -288,7 +302,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
               onHint: _showHint,
               isLandscape: isLandscape,
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             Expanded(
               child: _FormulaEditor(
                 key: _editorKey,
@@ -395,8 +409,6 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
     _editorKey.currentState?.reset();
   }
 }
-
-// ─── 레벨 헤더 ────────────────────────────────────────────
 
 class _LevelHeader extends StatelessWidget {
   const _LevelHeader({
@@ -529,7 +541,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
         final compact = constraints.maxHeight < 470;
         return Column(
           children: [
-            SizedBox(height: compact ? 8 : 20),
+            SizedBox(height: compact ? 4 : 12),
             Expanded(
               child: SingleChildScrollView(
                 child: _DragDropEditor(
@@ -572,17 +584,14 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                   style: FilledButton.styleFrom(
                     backgroundColor: widget.accent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
                     ),
                   ),
-                  child: const Text(
-                    '제출',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-                  ),
+                  child: const Text('제출', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
                 ),
               ),
             ),
-            SizedBox(height: compact ? 2 : 10),
+            const SizedBox(height: 10),
           ],
         );
       },
@@ -673,16 +682,6 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     widget.onValidSubmission(_expression, result.value!);
   }
 
-  void reset() {
-    setState(() {
-      _operators = List.filled(widget.level.digits.length - 1, null);
-      _parentheses.clear();
-      _history.clear();
-      _selectedDigitIndex = null;
-      _message = null;
-    });
-  }
-
   void showMessage(String message) => setState(() => _message = message);
 }
 
@@ -770,7 +769,7 @@ class _DragDropEditor extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Row(mainAxisSize: MainAxisSize.min, children: items),
             ),
-            SizedBox(height: compact ? 20 : 38),
+            SizedBox(height: compact ? 16 : 32),
             _OperatorPalette(
               accent: accent,
               availableOperators: availableOperators,
@@ -782,8 +781,6 @@ class _DragDropEditor extends StatelessWidget {
     );
   }
 }
-
-// ─── 인라인 연산자 타겟 ─────────────────────────────────────
 
 class _InlineOperatorTarget extends StatefulWidget {
   const _InlineOperatorTarget({
@@ -854,8 +851,6 @@ class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
     );
   }
 }
-
-// ─── 연산자 팔레트 ─────────────────────────────────────────
 
 class _OperatorPalette extends StatefulWidget {
   const _OperatorPalette({
@@ -932,8 +927,6 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
     );
   }
 }
-
-// ─── 연산자 버튼 ─────────────────────────────────────────
 
 class _OperatorButton extends StatelessWidget {
   const _OperatorButton({

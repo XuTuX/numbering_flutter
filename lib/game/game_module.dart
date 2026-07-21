@@ -13,6 +13,7 @@ class GameSessionConfig {
     this.dateKey,
     this.weekKey,
     this.isOfficialScoreSubmission = false,
+    this.startLevelId,
   });
 
   const GameSessionConfig.normal()
@@ -21,7 +22,8 @@ class GameSessionConfig {
         seed = null,
         dateKey = null,
         weekKey = null,
-        isOfficialScoreSubmission = false;
+        isOfficialScoreSubmission = false,
+        startLevelId = null;
 
   final GameMode mode;
   final String? gameId;
@@ -29,6 +31,7 @@ class GameSessionConfig {
   final String? dateKey;
   final String? weekKey;
   final bool isOfficialScoreSubmission;
+  final int? startLevelId;
 
   bool get isTutorialMode => mode == GameMode.tutorial;
   bool get isDailyMode =>

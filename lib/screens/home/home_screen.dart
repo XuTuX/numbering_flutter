@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:numbering/controllers/score_controller.dart';
+import 'package:numbering/game/game_module.dart';
+import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/audio_service.dart';
 
@@ -98,7 +100,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       scoreController: scoreController,
       authService: authService,
       onSettingsTap: () => showSettingsScreen(authService),
-      onStartGame: () => openGameScreen(),
+      onStartGame: () => openGameScreen(
+        GameSessionConfig(
+          mode: GameMode.normal,
+          startLevelId: Get.find<LevelProgressService>().highestUnlockedLevel,
+        ),
+      ),
       onStartDaily: () => openDailyChallenge(authService),
       onStartDailyTest: openDailyChallengeTest,
       onShowDailyRanking: (dateKey) {

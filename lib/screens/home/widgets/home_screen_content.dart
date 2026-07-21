@@ -142,8 +142,7 @@ class _HomeDashboardPage extends StatelessWidget {
                             const SizedBox(width: 20),
                             Expanded(
                               flex: 4,
-                              child:
-                                  _AnimatedPlayButton(onPressed: onStartGame),
+                              child: _LevelStartButton(onPressed: onStartGame),
                             ),
                           ],
                         ),
@@ -158,7 +157,7 @@ class _HomeDashboardPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        _AnimatedPlayButton(onPressed: onStartGame),
+                        _LevelStartButton(onPressed: onStartGame),
                       ],
                     ),
             ),
@@ -265,88 +264,41 @@ class _HomeHeader extends StatelessWidget {
   }
 }
 
-class _AnimatedPlayButton extends StatefulWidget {
-  const _AnimatedPlayButton({
+class _LevelStartButton extends StatelessWidget {
+  const _LevelStartButton({
     required this.onPressed,
   });
 
   final VoidCallback onPressed;
 
   @override
-  State<_AnimatedPlayButton> createState() => _AnimatedPlayButtonState();
-}
-
-class _AnimatedPlayButtonState extends State<_AnimatedPlayButton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scaleAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
-    _scaleAnim = Tween<double>(begin: 1.0, end: 1.025).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final ms = MediaQuery.sizeOf(context);
-    final isLandscape = ms.width > ms.height;
-    final btnH = isLandscape
-        ? (ms.height * 0.12).clamp(48.0, 80.0)
-        : (ms.height * 0.078).clamp(52.0, 72.0);
-    final btnFs = isLandscape
-        ? (ms.width * 0.025).clamp(16.0, 26.0)
-        : (ms.width * 0.06).clamp(18.0, 26.0);
-    final br = (ms.width * 0.04).clamp(18.0, 28.0);
-
-    return AnimatedBuilder(
-      animation: _scaleAnim,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnim.value,
-          child: child,
-        );
-      },
-      child: Container(
+    final progress = Get.find<LevelProgressService>();
+    return Obx(() {
+      final current = progress.highestUnlockedLevel;
+      return SizedBox(
         width: double.infinity,
-        height: btnH,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(br),
-          boxShadow: AppShadows.buttonShadow,
-        ),
+        height: 56,
         child: ElevatedButton(
-          onPressed: widget.onPressed,
+          onPressed: onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF0095FF),
             foregroundColor: Colors.white,
             elevation: 0,
-            side: BorderSide.none,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(br),
+              borderRadius: BorderRadius.circular(20),
             ),
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.play_arrow_rounded, size: 26),
-              const SizedBox(width: 6),
+              const Icon(Icons.play_arrow_rounded, size: 24),
+              const SizedBox(width: 8),
               Text(
-                '게임 시작'.tr,
+                'LEVEL $current 시작하기',
                 style: GoogleFonts.blackHanSans(
-                  fontSize: btnFs,
+                  fontSize: 18,
                   letterSpacing: 0,
                   color: Colors.white,
                 ),
@@ -354,8 +306,8 @@ class _AnimatedPlayButtonState extends State<_AnimatedPlayButton>
             ],
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -387,51 +339,44 @@ class _LevelJourneyCard extends StatelessWidget {
               boxShadow: AppShadows.cardShadow,
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEAF4FF),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(
-                        Icons.route_rounded,
-                        color: Color(0xFF0095FF),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        'LEVEL $highest',
-                        style: GoogleFonts.blackHanSans(fontSize: 26),
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right_rounded),
-                  ],
-                ),
-                const SizedBox(height: 28),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(999),
                   child: LinearProgressIndicator(
                     value: ratio,
-                    minHeight: 10,
+                    minHeight: 8,
                     backgroundColor: AppColors.surfaceSecondary,
                     color: const Color(0xFF0095FF),
                   ),
                 ),
-                const SizedBox(height: 14),
-                Text(
-                  '$cleared / 200',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textSecondary,
-                  ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      '$cleared / 200',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'LEVEL $highest',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18,
+                      color: AppColors.textSecondary.withValues(alpha: 0.5),
+                    ),
+                  ],
                 ),
               ],
             ),
