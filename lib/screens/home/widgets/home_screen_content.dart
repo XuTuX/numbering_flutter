@@ -74,6 +74,12 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaSize = MediaQuery.sizeOf(context);
+    final isLandscape = mediaSize.width > mediaSize.height;
+    final horizontalPadding = (mediaSize.width * 0.06).clamp(24.0, 40.0);
+    final topPadding = isLandscape ? 20.0 : 24.0;
+    final contentTopGap = isLandscape ? 20.0 : 32.0;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -86,44 +92,55 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
             ),
           ),
           SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _HomeHeader(
-                    authService: widget.authService,
-                    activeIndex: _pageIndex,
-                    onSettingsTap: widget.onSettingsTap,
-                    onTabTap: _openTab,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    onPageChanged: (index) {
-                      setState(() => _pageIndex = index);
-                    },
-                    children: [
-                      _HomeDashboardPage(
-                        scoreController: widget.scoreController,
-                        authService: widget.authService,
-                        onStartGame: widget.onStartGame,
-                        onRankingTap: widget.onRankingTap,
+            child: Padding(
+              padding: EdgeInsets.only(top: topPadding),
+              child: Column(
+                children: [
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: isLandscape ? 820 : 480,
+                        ),
+                        child: _HomeHeader(
+                          authService: widget.authService,
+                          activeIndex: _pageIndex,
+                          onSettingsTap: widget.onSettingsTap,
+                          onTabTap: _openTab,
+                        ),
                       ),
-                      DailyRankingCalendarPage(
-                        authService: widget.authService,
-                        isVisible: _pageIndex == 1,
-                        onStartDaily: widget.onStartDaily,
-                        onStartDailyTest: widget.onStartDailyTest,
-                        onShowDailyRanking: widget.onShowDailyRanking,
-                        onRankingTap: widget.onRankingTap,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-              ],
+                  SizedBox(height: contentTopGap),
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() => _pageIndex = index);
+                      },
+                      children: [
+                        _HomeDashboardPage(
+                          scoreController: widget.scoreController,
+                          authService: widget.authService,
+                          onStartGame: widget.onStartGame,
+                          onRankingTap: widget.onRankingTap,
+                        ),
+                        DailyRankingCalendarPage(
+                          authService: widget.authService,
+                          isVisible: _pageIndex == 1,
+                          onStartDaily: widget.onStartDaily,
+                          onStartDailyTest: widget.onStartDailyTest,
+                          onShowDailyRanking: widget.onShowDailyRanking,
+                          onRankingTap: widget.onRankingTap,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: isLandscape ? 8 : 12),
+                ],
+              ),
             ),
           ),
         ],
@@ -151,8 +168,8 @@ class _HomeDashboardPage extends StatelessWidget {
     final isLandscape = mediaSize.width > mediaSize.height;
     final sw = mediaSize.width;
     final sh = mediaSize.height;
-    final horizontalPadding = (sw * 0.04).clamp(16.0, 40.0);
-    final bottomPad = (sh * 0.02).clamp(8.0, 20.0);
+    final horizontalPadding = (sw * 0.06).clamp(24.0, 40.0);
+    final bottomPad = (sh * 0.025).clamp(16.0, 28.0);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -182,7 +199,7 @@ class _HomeDashboardPage extends StatelessWidget {
                                 onViewAll: onRankingTap,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 20),
                             SizedBox(
                               height: 64,
                               child: Row(
@@ -211,23 +228,23 @@ class _HomeDashboardPage extends StatelessWidget {
                         ),
                       ),
                     )
-                  : SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          ScoreDisplay(
-                            scoreController: scoreController,
-                            authService: authService,
-                          ),
-                          const SizedBox(height: 12),
-                          WeeklyRankingPreview(
+                  : Column(
+                      children: [
+                        ScoreDisplay(
+                          scoreController: scoreController,
+                          authService: authService,
+                        ),
+                        const SizedBox(height: 28),
+                        Expanded(
+                          child: WeeklyRankingPreview(
                             isAllTime: false,
                             limit: 5,
                             onViewAll: onRankingTap,
                           ),
-                          const SizedBox(height: 16),
-                          _AnimatedPlayButton(onPressed: onStartGame),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 24),
+                        _AnimatedPlayButton(onPressed: onStartGame),
+                      ],
                     ),
             ),
           ),
@@ -252,83 +269,89 @@ class _HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sw = MediaQuery.sizeOf(context).width;
+    final mediaSize = MediaQuery.sizeOf(context);
+    final sw = mediaSize.width;
+    final isLandscape = mediaSize.width > mediaSize.height;
     final titleFs = (sw * 0.035).clamp(18.0, 24.0);
 
     return Obx(() {
       final nickname = authService.userNickname.value?.trim();
       final hasNickname = nickname != null && nickname.isNotEmpty;
 
-      return SizedBox(
-        height: 48,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: sw * 0.26),
-                child: GestureDetector(
-                  onTap: hasNickname
-                      ? () {
-                          Get.dialog(
-                            EditNicknameDialog(
-                              currentNickname: nickname,
-                              onSave: (newNickname) async {
-                                return authService.updateNickname(newNickname);
-                              },
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 48,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: hasNickname
+                          ? () {
+                              Get.dialog(
+                                EditNicknameDialog(
+                                  currentNickname: nickname,
+                                  onSave: (newNickname) async {
+                                    return authService
+                                        .updateNickname(newNickname);
+                                  },
+                                ),
+                                barrierDismissible: false,
+                              );
+                            }
+                          : null,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF0095FF),
+                              shape: BoxShape.circle,
                             ),
-                            barrierDismissible: false,
-                          );
-                        }
-                      : null,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF0095FF),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 9),
-                      Flexible(
-                        child: Text(
-                          hasNickname ? nickname : 'NUMBERING',
-                          style: GoogleFonts.blackHanSans(
-                            fontSize: titleFs,
-                            color: charcoalBlack,
-                            height: 1.0,
-                            letterSpacing: 0,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                          const SizedBox(width: 9),
+                          Flexible(
+                            child: Text(
+                              hasNickname ? nickname : 'NUMBERING',
+                              style: GoogleFonts.blackHanSans(
+                                fontSize: titleFs,
+                                color: charcoalBlack,
+                                height: 1.0,
+                                letterSpacing: 0,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (hasNickname) ...[
+                            const SizedBox(width: 6),
+                            Icon(
+                              Icons.edit_rounded,
+                              size: 14,
+                              color: charcoalBlack.withValues(alpha: 0.2),
+                            ),
+                          ],
+                        ],
                       ),
-                      if (hasNickname) ...[
-                        const SizedBox(width: 6),
-                        Icon(
-                          Icons.edit_rounded,
-                          size: 14,
-                          color: charcoalBlack.withValues(alpha: 0.2),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 20),
+                TopIconButton(
+                  icon: Icons.settings_rounded,
+                  onTap: onSettingsTap,
+                ),
+              ],
             ),
-            _HomePageTabs(activeIndex: activeIndex, onTap: onTabTap),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TopIconButton(
-                icon: Icons.settings_rounded,
-                onTap: onSettingsTap,
-              ),
-            ),
-          ],
-        ),
+          ),
+          SizedBox(height: isLandscape ? 16 : 20),
+          _HomePageTabs(activeIndex: activeIndex, onTap: onTabTap),
+        ],
       );
     });
   }

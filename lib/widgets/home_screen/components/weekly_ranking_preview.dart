@@ -57,10 +57,10 @@ class _WeeklyRankingPreviewState extends State<WeeklyRankingPreview> {
         ? (sw * 0.014).clamp(10.0, 13.0)
         : (sw * 0.028).clamp(9.0, 12.0);
     final headerGap = isLandscape
-        ? 12.0
+        ? 16.0
         : isTablet
-            ? 16.0
-            : (ms.height * 0.016).clamp(10.0, 16.0);
+            ? 24.0
+            : (ms.height * 0.026).clamp(20.0, 24.0);
 
     return LayoutBuilder(
       builder: (context, constraints) {
