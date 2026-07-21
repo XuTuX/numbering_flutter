@@ -106,6 +106,9 @@ LevelEvaluation evaluateLevelScore(LevelData level, int score, {int usedHints = 
   bool perfect = false;
 
   if (score < level.minimumScore) {
+    cleared = false;
+    stars = 0;
+  } else if (score == level.minimumScore) {
     stars = 1;
   } else if (score < level.targetScore) {
     stars = 2;

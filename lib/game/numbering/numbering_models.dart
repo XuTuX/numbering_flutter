@@ -32,11 +32,11 @@ extension NumberingDifficultyLabel on NumberingDifficulty {
 
 NumberingDifficulty difficultyForLevel(int level) {
   assert(level >= 1);
-  if (level <= 10) return NumberingDifficulty.easy;
-  if (level <= 30) return NumberingDifficulty.normal;
-  if (level <= 60) return NumberingDifficulty.hard;
-  if (level <= 100) return NumberingDifficulty.expert;
-  if (level <= 150) return NumberingDifficulty.master;
+  if (level <= 40) return NumberingDifficulty.easy;
+  if (level <= 80) return NumberingDifficulty.normal;
+  if (level <= 120) return NumberingDifficulty.hard;
+  if (level <= 160) return NumberingDifficulty.expert;
+  if (level <= 200) return NumberingDifficulty.master;
   return NumberingDifficulty.grandmaster;
 }
 

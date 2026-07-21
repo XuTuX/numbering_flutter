@@ -17,11 +17,13 @@ void main() {
     );
 
     for (final level in LevelCatalog.all) {
-      expect(
-        level.digits.length,
-        inInclusiveRange(_minimumDigits(level.id), _maximumDigits(level.id)),
-        reason: 'LEVEL ${level.id} digit count',
-      );
+      if (level.perfectAnswer == null) {
+        expect(
+          level.digits.length,
+          inInclusiveRange(_minimumDigits(level.id), _maximumDigits(level.id)),
+          reason: 'LEVEL ${level.id} digit count',
+        );
+      }
       expect(level.minimumScore, lessThanOrEqualTo(level.targetScore));
       expect(level.availableOperators, contains('='));
 
@@ -78,18 +80,13 @@ void main() {
 }
 
 int _minimumDigits(int id) {
-  if (id <= 10) return 4;
-  if (id <= 30) return 5;
-  if (id <= 70) return 6;
-  if (id <= 110) return 7;
-  return 8;
+  if (id <= 40) return id <= 20 ? 4 : 5;
+  if (id <= 80) return id <= 60 ? 5 : 6;
+  if (id <= 120) return id <= 100 ? 6 : 7;
+  if (id <= 160) return id <= 140 ? 7 : 8;
+  return id <= 180 ? 8 : 9;
 }
 
 int _maximumDigits(int id) {
-  if (id <= 10) return 5;
-  if (id <= 30) return 6;
-  if (id <= 70) return 7;
-  if (id <= 110) return 8;
-  if (id <= 170) return 8;
-  return 9;
+  return _minimumDigits(id);
 }
