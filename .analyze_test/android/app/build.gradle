@@ -1,0 +1,85 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+def readSecret = { String key ->
+    def envValue = System.getenv(key)
+    if (envValue != null && !envValue.trim().isEmpty()) {
+        return envValue.trim()
+    }
+    return keystoreProperties[key]
+}
+
+def requiredSigningKeys = ["storeFile", "storePassword", "keyAlias", "keyPassword"]
+def missingSigningKeys = requiredSigningKeys.findAll { !readSecret(it) }
+def releaseStoreFilePath = readSecret('storeFile')
+def releaseStoreFile = releaseStoreFilePath ? rootProject.file(releaseStoreFilePath) : null
+def hasReleaseSigning = missingSigningKeys.isEmpty() && releaseStoreFile?.exists()
+
+
+android {
+    namespace = "com.neoreo.numbering"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "com.neoreo.numbering"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                keyPassword = readSecret('keyPassword')
+                storeFile = releaseStoreFile
+                storePassword = readSecret('storePassword')
+                keyAlias = readSecret('keyAlias')
+            }
+        }
+    }
+
+
+    buildTypes {
+        release {
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.release
+            }
+
+            ndk {
+                debugSymbolLevel = 'FULL'
+            }
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+if (!hasReleaseSigning) {
+    logger.lifecycle("Release signing is not configured. Release artifacts will be generated unsigned unless signing secrets are provided.")
+}

@@ -1,0 +1,276 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'package:numbering/constant.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_radius.dart';
+import 'package:numbering/theme/app_shadows.dart';
+import 'package:numbering/game/game_palette.dart';
+import 'package:numbering/l10n/app_translations.dart';
+
+class NicknameStickerCard extends StatelessWidget {
+  const NicknameStickerCard({
+    super.key,
+    required this.nickname,
+    required this.score,
+    this.isLoading = false,
+    this.onTapNickname,
+    this.tierLabel,
+    this.tierColor,
+    this.tierRank,
+  });
+
+  final String? nickname;
+  final int score;
+  final bool isLoading;
+  final VoidCallback? onTapNickname;
+  final String? tierLabel;
+  final Color? tierColor;
+  final int? tierRank;
+
+  bool get _hasTier => tierLabel != null && tierColor != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final mediaSize = MediaQuery.sizeOf(context);
+        final isLandscape = mediaSize.width > mediaSize.height;
+        final sw = mediaSize.width;
+        final sh = mediaSize.height;
+        final maxCardWidth = isLandscape ? sw * 0.8 : double.infinity;
+        final scoreFontSize = isLandscape
+            ? (sh * 0.08).clamp(24.0, 44.0)
+            : (sw * 0.11).clamp(32.0, 48.0);
+        final cardPadH = isLandscape
+            ? (sw * 0.02).clamp(12.0, 24.0)
+            : (sw * 0.06).clamp(18.0, 28.0);
+        final cardPadV = isLandscape
+            ? (sh * 0.015).clamp(10.0, 20.0)
+            : (sh * 0.03).clamp(20.0, 32.0);
+        final tierFs = isLandscape
+            ? (sh * 0.015).clamp(9.0, 12.0)
+            : (sw * 0.03).clamp(10.0, 13.0);
+        final hexRow = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _TinyHex(
+              color:
+                  GamePalette.colorFor(GameColor.coral).withValues(alpha: 0.4),
+            ),
+            const SizedBox(width: 4),
+            _TinyHex(
+              color:
+                  GamePalette.colorFor(GameColor.azure).withValues(alpha: 0.4),
+            ),
+            const SizedBox(width: 4),
+            _TinyHex(
+              color:
+                  GamePalette.colorFor(GameColor.mint).withValues(alpha: 0.4),
+            ),
+            const SizedBox(width: 4),
+            _TinyHex(
+              color:
+                  GamePalette.colorFor(GameColor.amber).withValues(alpha: 0.4),
+            ),
+          ],
+        );
+        final scoreValue = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          child: isLoading
+              ? SizedBox(
+                  key: const ValueKey('loading'),
+                  height: scoreFontSize,
+                  child: const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: charcoalBlack,
+                        strokeWidth: 2.5,
+                      ),
+                    ),
+                  ),
+                )
+              : Text(
+                  _formatScore(score),
+                  key: const ValueKey('score'),
+                  style: GoogleFonts.blackHanSans(
+                    fontSize: scoreFontSize,
+                    color: charcoalBlack,
+                    height: 1.0,
+                  ),
+                ),
+        );
+        final tierRow = _hasTier
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: tierColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    tierRank != null
+                        ? '$tierLabel · ${AppTranslations.rank(tierRank!)}'
+                        : tierLabel!,
+                    style: GoogleFonts.notoSans(
+                      fontSize: tierFs,
+                      fontWeight: FontWeight.w800,
+                      color: charcoalBlack.withValues(alpha: 0.4),
+                    ),
+                  ),
+                ],
+              )
+            : null;
+
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxCardWidth),
+            child: Container(
+              width: double.infinity,
+              height: isLandscape && constraints.hasBoundedHeight
+                  ? constraints.maxHeight
+                  : null,
+              padding: EdgeInsets.symmetric(
+                horizontal: cardPadH,
+                vertical: cardPadV,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                border: Border.all(color: AppColors.borderLight),
+                boxShadow: AppShadows.cardShadow,
+              ),
+              child: isLandscape
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '최고 기록'.tr,
+                              style: GoogleFonts.notoSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: charcoalBlack.withValues(alpha: 0.34),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            hexRow,
+                          ],
+                        ),
+                        const SizedBox(width: 22),
+                        scoreValue,
+                        if (tierRow != null) ...[
+                          const SizedBox(width: 16),
+                          tierRow,
+                        ],
+                      ],
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '최고 기록'.tr,
+                          style: GoogleFonts.notoSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: charcoalBlack.withValues(alpha: 0.34),
+                          ),
+                        ),
+                        SizedBox(height: cardPadV * 0.65),
+                        hexRow,
+                        SizedBox(height: cardPadV * 0.5),
+                        scoreValue,
+                        if (tierRow != null) ...[
+                          SizedBox(height: cardPadV * 0.4),
+                          tierRow,
+                        ],
+                      ],
+                    ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatScore(int value) {
+    final digits = value.toString();
+    if (digits.length <= 3) {
+      return digits;
+    }
+
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) {
+        buffer.write(',');
+      }
+      buffer.write(digits[i]);
+    }
+    return buffer.toString();
+  }
+}
+
+class _TinyHex extends StatelessWidget {
+  const _TinyHex({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 10,
+      height: 10,
+      child: CustomPaint(painter: _TinyHexPainter(color)),
+    );
+  }
+}
+
+class _TinyHexPainter extends CustomPainter {
+  _TinyHexPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final r = size.width / 2;
+    final path = Path();
+
+    for (int i = 0; i < 6; i++) {
+      final angle = (math.pi / 180) * (60 * i - 30);
+      final x = cx + r * math.cos(angle);
+      final y = cy + r * math.sin(angle);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
