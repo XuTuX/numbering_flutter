@@ -10,7 +10,6 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
-import '../../widgets/common/soft_card.dart';
 import '../../widgets/common/soft_icon_button.dart';
 import '../game_module.dart';
 import 'expression_engine.dart';
@@ -130,8 +129,7 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
   }
 
   Object _generateProblem() {
-    final difficulty = difficultyForRound(_round);
-    return generateFormulaProblem(_random, difficulty);
+    return generateFormulaProblem(_random, _round);
   }
 
   void _resetCurrentRound() {
@@ -157,8 +155,9 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     await Future<void>.delayed(const Duration(milliseconds: 900));
     if (!mounted) return;
 
-    final isSingleRound =
-        widget.session.isDailyMode || widget.session.isTutorialMode;
+    final isSingleRound = widget.session.isDailyMode ||
+        widget.session.isTutorialMode ||
+        _round >= 200;
     if (widget.session.isTutorialMode) {
       await Get.find<SettingsService>().completeTutorial();
       if (!mounted) return;
@@ -227,12 +226,6 @@ class _FormulaWorkshopRoundState extends State<FormulaWorkshopRound> {
       ),
       child: Column(
         children: [
-          Text(
-            '숫자 순서를 바꾸지 않고 등식을 만드세요.'.tr,
-            textAlign: TextAlign.center,
-            style: AppTypography.body.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: AppSpacing.xxl),
           _DragDropEditor(
             digits: widget.problem.digits,
             operators: _operators,
@@ -359,100 +352,162 @@ class _GameHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SoftCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(AppRadius.large),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         children: [
+          // Top Row: Controls & Title
           Row(
             children: [
               SoftIconButton(
-                icon: Icons.close_rounded,
-                label: '홈'.tr,
+                icon: Icons.arrow_back_rounded,
+                label: '뒤로 가기'.tr,
                 onPressed: onExit,
-                size: 44,
-                iconSize: 22,
+                size: 40,
+                iconSize: 20,
               ),
-              const SizedBox(width: AppSpacing.md),
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: accentSoft,
-                  borderRadius: BorderRadius.circular(AppRadius.medium),
-                ),
-                child: Icon(icon, color: accent, size: 24),
-              ),
-              const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: Text(
-                  title.tr,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.blackHanSans(
-                    fontSize: 20,
-                    color: AppColors.textPrimary,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: accentSoft,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: accent, size: 18),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Flexible(
+                      child: Text(
+                        title.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.blackHanSans(
+                          fontSize: 22,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
               SoftIconButton(
                 icon: Icons.refresh_rounded,
                 label: '초기화'.tr,
                 onPressed: onReset,
-                size: 44,
-                iconSize: 22,
+                size: 40,
+                iconSize: 20,
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
+          const SizedBox(height: AppSpacing.lg),
+          // Bottom Row: Stats
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.medium),
+            ),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.sm,
+              children: [
+                // Difficulty & Round
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: accent,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                        boxShadow: [
+                          BoxShadow(
+                            color: accent.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        difficulty.label,
+                        style: AppTypography.label.copyWith(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      '${'라운드'.tr} $round',
+                      style: AppTypography.label.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
-                decoration: BoxDecoration(
-                  color: accentSoft,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                // Score & Time
+                Row(
+                  children: [
+                    Text(
+                      '${'점수'.tr} $score',
+                      style: GoogleFonts.blackHanSans(
+                        fontSize: 16,
+                        color: accent,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppRadius.small),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.timer_outlined,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatElapsed(elapsed),
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  difficulty.label,
-                  style: AppTypography.label.copyWith(
-                    color: accent,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                '${'라운드'.tr} $round',
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '${'점수'.tr} $score',
-                style: GoogleFonts.blackHanSans(
-                  fontSize: 16,
-                  color: accent,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              const Icon(
-                Icons.timer_outlined,
-                size: 15,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                _formatElapsed(elapsed),
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -483,66 +538,54 @@ class _DragDropEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minWidth: constraints.maxWidth),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: List.generate(digits.length, (digitIndex) {
-                  final openingCount = parentheses
-                      .where((range) =>
-                          range.normalized().startDigitIndex == digitIndex)
-                      .length;
-                  final closingCount = parentheses
-                      .where((range) =>
-                          range.normalized().endDigitIndex == digitIndex)
-                      .length;
-                  final digit = GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => onDigitTapped(digitIndex),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Text(
-                        '${'(' * openingCount}${digits[digitIndex]}${')' * closingCount}',
-                        style: GoogleFonts.blackHanSans(
-                          fontSize: 42,
-                          color: selectedDigitIndex == digitIndex
-                              ? accent
-                              : AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                  );
+        SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            runSpacing: 12,
+            children: List.generate(digits.length, (digitIndex) {
+              final openingCount = parentheses
+                  .where((range) =>
+                      range.normalized().startDigitIndex == digitIndex)
+                  .length;
+              final closingCount = parentheses
+                  .where(
+                      (range) => range.normalized().endDigitIndex == digitIndex)
+                  .length;
 
-                  if (digitIndex == 0) return digit;
-                  final slotIndex = digitIndex - 1;
-                  return _InlineOperatorTarget(
-                    current: operators[slotIndex],
-                    digit: digit,
-                    accent: accent,
-                    onAccept: (op) => onOperatorChanged(slotIndex, op),
-                    onRemove: () => onOperatorChanged(slotIndex, null),
-                  );
-                }),
-              ),
-            ),
+              final isSelected = selectedDigitIndex == digitIndex;
+              final digit = GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onDigitTapped(digitIndex),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                  child: Text(
+                    '${'(' * openingCount}${digits[digitIndex]}${')' * closingCount}',
+                    style: TextStyle(
+                      fontSize: 56,
+                      fontWeight: FontWeight.w500,
+                      color: isSelected ? accent : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              );
+
+              if (digitIndex == 0) return digit;
+              final slotIndex = digitIndex - 1;
+              return _InlineOperatorTarget(
+                current: operators[slotIndex],
+                digit: digit,
+                accent: accent,
+                onAccept: (op) => onOperatorChanged(slotIndex, op),
+                onRemove: () => onOperatorChanged(slotIndex, null),
+              );
+            }),
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          '숫자 두 개를 눌러 괄호를 추가하거나 해제하세요.\n연산자는 넣을 위치의 오른쪽 숫자로 끌어 놓으세요.'.tr,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            height: 1.4,
-          ),
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.xl),
         _OperatorPalette(accent: accent),
       ],
     );
@@ -597,12 +640,14 @@ class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
                 behavior: HitTestBehavior.opaque,
                 onTap: widget.onRemove,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                   child: Text(
                     current.symbol,
-                    style: GoogleFonts.blackHanSans(
-                      fontSize: 32,
-                      color: widget.accent,
+                    style: const TextStyle(
+                      fontSize: 44,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -632,35 +677,55 @@ class _OperatorPalette extends StatelessWidget {
       InlineOperator.equals,
     ];
 
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 12,
-      runSpacing: 12,
-      children: operators.map((op) {
-        final child = SizedBox(
-          width: 52,
-          height: 52,
-          child: Center(
-            child: Text(
-              op.symbol,
-              style: GoogleFonts.blackHanSans(
-                fontSize: 34,
-                color: accent,
-              ),
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
             ),
-          ),
-        );
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: operators.map((op) {
+            final child = Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.textSecondary.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  op.symbol,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            );
 
-        return Draggable<InlineOperator>(
-          data: op,
-          feedback: Material(
-            color: Colors.transparent,
-            child: Opacity(opacity: 0.8, child: child),
-          ),
-          childWhenDragging: Opacity(opacity: 0.3, child: child),
-          child: child,
-        );
-      }).toList(),
+            return Draggable<InlineOperator>(
+              data: op,
+              feedback: Material(
+                color: Colors.transparent,
+                child: Opacity(opacity: 0.8, child: child),
+              ),
+              childWhenDragging: Opacity(opacity: 0.3, child: child),
+              child: child,
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

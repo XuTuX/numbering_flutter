@@ -17,21 +17,27 @@ enum NumberingGame {
   }
 }
 
-enum NumberingDifficulty { easy, normal, hard }
+enum NumberingDifficulty { easy, normal, hard, expert, master, grandmaster }
 
 extension NumberingDifficultyLabel on NumberingDifficulty {
   String get label => switch (this) {
         NumberingDifficulty.easy => 'EASY',
         NumberingDifficulty.normal => 'NORMAL',
         NumberingDifficulty.hard => 'HARD',
+        NumberingDifficulty.expert => 'EXPERT',
+        NumberingDifficulty.master => 'MASTER',
+        NumberingDifficulty.grandmaster => 'GRANDMASTER',
       };
 }
 
 NumberingDifficulty difficultyForRound(int round) {
   assert(round >= 1);
-  if (round <= 2) return NumberingDifficulty.easy;
-  if (round <= 4) return NumberingDifficulty.normal;
-  return NumberingDifficulty.hard;
+  if (round <= 10) return NumberingDifficulty.easy;
+  if (round <= 30) return NumberingDifficulty.normal;
+  if (round <= 60) return NumberingDifficulty.hard;
+  if (round <= 100) return NumberingDifficulty.expert;
+  if (round <= 150) return NumberingDifficulty.master;
+  return NumberingDifficulty.grandmaster;
 }
 
 @immutable
