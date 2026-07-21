@@ -3,12 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:hexor/constant.dart';
-import 'package:hexor/theme/app_colors.dart';
-import 'package:hexor/theme/app_radius.dart';
-import 'package:hexor/theme/app_shadows.dart';
-import 'package:hexor/game/game_palette.dart';
-import 'package:hexor/l10n/app_translations.dart';
+import 'package:numbering/constant.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_radius.dart';
+import 'package:numbering/theme/app_shadows.dart';
+import 'package:numbering/game/game_palette.dart';
+import 'package:numbering/l10n/app_translations.dart';
 
 class NicknameStickerCard extends StatelessWidget {
   const NicknameStickerCard({

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hexor/services/auth_service.dart';
+import 'package:numbering/services/auth_service.dart';
 
 void main() {
   test('auth service supports offline guest mode without Supabase', () async {

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:hexor/theme/app_colors.dart';
+import 'package:numbering/theme/app_colors.dart';
 
 /// A quiet honeycomb texture shared by the app backgrounds.
 class GridPatternPainter extends CustomPainter {

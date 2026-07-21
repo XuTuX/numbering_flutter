@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import 'package:hexor/l10n/app_translations.dart';
+import 'package:numbering/l10n/app_translations.dart';
 
 class WeeklyResetInfo {
   const WeeklyResetInfo({

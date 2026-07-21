@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:hexor/constant.dart';
-import 'package:hexor/services/database_models.dart';
-import 'package:hexor/theme/app_typography.dart';
+import 'package:numbering/constant.dart';
+import 'package:numbering/services/database_models.dart';
+import 'package:numbering/theme/app_typography.dart';
 
 class RankListItem extends StatelessWidget {
   const RankListItem({

@@ -1,4 +1,4 @@
-package com.neoreo.hexor
+package com.neoreo.numbering
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle

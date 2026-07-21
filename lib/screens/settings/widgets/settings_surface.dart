@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:hexor/theme/app_typography.dart';
-import 'package:hexor/theme/app_colors.dart';
-import 'package:hexor/theme/app_radius.dart';
-import 'package:hexor/theme/app_shadows.dart';
+import 'package:numbering/theme/app_typography.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_radius.dart';
+import 'package:numbering/theme/app_shadows.dart';
 
 class SettingsCard extends StatelessWidget {
   const SettingsCard({

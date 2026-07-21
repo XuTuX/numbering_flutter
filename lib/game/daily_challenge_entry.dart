@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
-import 'package:hexor/game/game_module.dart';
-import 'package:hexor/services/database_models.dart';
+import 'package:numbering/game/game_module.dart';
+import 'package:numbering/services/database_models.dart';
 
 class DailyChallengeLaunchDecision {
   const DailyChallengeLaunchDecision({

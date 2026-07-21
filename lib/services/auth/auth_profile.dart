@@ -1,4 +1,4 @@
-part of 'package:hexor/services/auth_service.dart';
+part of 'package:numbering/services/auth_service.dart';
 
 String _nicknameKey(String userId) => 'auth_nickname_$userId';
 

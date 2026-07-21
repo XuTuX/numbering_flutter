@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hexor/theme/app_colors.dart';
-import 'package:hexor/theme/app_radius.dart';
-import 'package:hexor/theme/app_shadows.dart';
-import 'package:hexor/theme/app_text_styles.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_radius.dart';
+import 'package:numbering/theme/app_shadows.dart';
+import 'package:numbering/theme/app_text_styles.dart';
 
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({

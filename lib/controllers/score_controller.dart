@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:hexor/services/auth_service.dart';
+import 'package:numbering/services/auth_service.dart';
 
 part 'score/score_auth.dart';
 part 'score/score_gameplay.dart';

@@ -232,35 +232,3 @@ ValidationResult validateFormulaWorkshop({
   }
   return ValidationResult.success(left.value!);
 }
-
-ValidationResult validateNumberVault({
-  required List<int> numbers,
-  required int target,
-  required String expression,
-}) {
-  final integerTokens = RegExp(r'[0-9]+')
-      .allMatches(expression)
-      .map((match) => match.group(0)!)
-      .toList();
-  if (integerTokens.length != numbers.length ||
-      integerTokens.any((token) => token.length != 1)) {
-    return const ValidationResult.failure('모든 숫자 사이에 연산자를 넣어야 합니다.');
-  }
-  final usedDigits = expression
-      .replaceAll(RegExp(r'[^0-9]'), '')
-      .split('')
-      .where((digit) => digit.isNotEmpty)
-      .map(int.parse)
-      .toList()
-    ..sort();
-  final expected = [...numbers]..sort();
-  if (!listEquals(usedDigits, expected)) {
-    return const ValidationResult.failure('모든 숫자를 정확히 한 번 사용해야 합니다.');
-  }
-  final result = evaluateIntegerExpression(expression);
-  if (!result.valid) return result;
-  if (result.value != target) {
-    return const ValidationResult.failure('계산 결과가 목표값과 다릅니다.');
-  }
-  return result;
-}

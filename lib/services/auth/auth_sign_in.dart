@@ -1,4 +1,4 @@
-part of 'package:hexor/services/auth_service.dart';
+part of 'package:numbering/services/auth_service.dart';
 
 Future<String?> _signInWithGoogle(AuthService service) async {
   final supabase = service._supabase;

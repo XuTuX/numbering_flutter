@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:hexor/controllers/score_controller.dart';
-import 'package:hexor/services/auth_service.dart';
-import 'package:hexor/services/audio_service.dart';
-import 'package:hexor/services/settings_service.dart';
-import 'package:hexor/game/game_module.dart';
-import 'package:hexor/screens/game_selection_sheet.dart';
+import 'package:numbering/controllers/score_controller.dart';
+import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/audio_service.dart';
+import 'package:numbering/services/settings_service.dart';
+import 'package:numbering/game/game_module.dart';
+import 'package:numbering/screens/game_selection_sheet.dart';
 
 import 'home_screen_flows.dart';
 import 'widgets/home_screen_content.dart';

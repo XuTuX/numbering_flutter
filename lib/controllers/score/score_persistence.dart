@@ -1,4 +1,4 @@
-part of 'package:hexor/controllers/score_controller.dart';
+part of 'package:numbering/controllers/score_controller.dart';
 
 String _scoreStorageKeyFor(ScoreController controller) {
   final userId = controller._currentUserId;

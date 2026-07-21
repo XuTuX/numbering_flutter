@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:hexor/controllers/score_controller.dart';
-import 'package:hexor/services/auth_service.dart';
-import 'package:hexor/services/database_models.dart';
-import 'package:hexor/widgets/dialogs/edit_nickname_dialog.dart';
-import 'package:hexor/widgets/home_screen/nickname_sticker_card.dart';
+import 'package:numbering/controllers/score_controller.dart';
+import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/database_models.dart';
+import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
+import 'package:numbering/widgets/home_screen/nickname_sticker_card.dart';
 
 class ScoreDisplay extends StatelessWidget {
   const ScoreDisplay({

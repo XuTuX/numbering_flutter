@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hexor/game/daily_challenge_entry.dart';
-import 'package:hexor/services/database_models.dart';
+import 'package:numbering/game/daily_challenge_entry.dart';
+import 'package:numbering/services/database_models.dart';
 
 void main() {
   test('already scored daily challenge is blocked with notice', () {

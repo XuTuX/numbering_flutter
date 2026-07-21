@@ -1,4 +1,4 @@
-# 새 게임 연결 방법
+# NUMBERING 게임 모듈 연결 방법
 
 이 템플릿은 홈, 로그인, 랭킹, 일일 도전, 설정, 광고, 오디오와 디자인을 그대로
 유지합니다. 새 게임을 추가할 때는 공통 화면을 수정하지 않고 게임 모듈만
@@ -8,7 +8,7 @@
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:hexor/game/game_module.dart';
+import 'package:numbering/game/game_module.dart';
 
 class MyGameModule extends GameModule {
   const MyGameModule();

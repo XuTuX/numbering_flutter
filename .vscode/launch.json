@@ -5,20 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Game Template",
+            "name": "NUMBERING",
             "request": "launch",
             "type": "dart",
             "toolArgs": ["--dart-define-from-file", ".env"]
         },
         {
-            "name": "Game Template (profile mode)",
+            "name": "NUMBERING (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
             "toolArgs": ["--dart-define-from-file", ".env"]
         },
         {
-            "name": "Game Template (release mode)",
+            "name": "NUMBERING (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",

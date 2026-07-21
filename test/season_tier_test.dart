@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hexor/services/database_models.dart';
+import 'package:numbering/services/database_models.dart';
 
 void main() {
   test('score based season tiers include the Jesus threshold', () {

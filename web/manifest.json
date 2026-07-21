@@ -1,11 +1,11 @@
 {
-    "name": "Bee House",
-    "short_name": "Bee House",
+    "name": "NUMBERING",
+    "short_name": "NUMBERING",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#F8F9FA",
     "theme_color": "#1A1A1A",
-    "description": "Real-time hex drag puzzle game with synced scores and ranking.",
+    "description": "Equation, sequence, and number puzzle games.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

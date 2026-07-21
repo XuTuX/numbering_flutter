@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:hexor/game/game_module.dart';
-import 'package:hexor/game/numbering/numbering_models.dart';
-import 'package:hexor/screens/game_screen.dart';
-import 'package:hexor/screens/ranking_screen.dart';
-import 'package:hexor/screens/settings_screen.dart';
-import 'package:hexor/services/auth_service.dart';
-import 'package:hexor/utils/app_snackbar.dart';
-import 'package:hexor/utils/kst_clock.dart';
-import 'package:hexor/widgets/dialogs/edit_nickname_dialog.dart';
-import 'package:hexor/widgets/home_screen/login_sheet.dart';
+import 'package:numbering/game/game_module.dart';
+import 'package:numbering/game/numbering/numbering_models.dart';
+import 'package:numbering/screens/game_screen.dart';
+import 'package:numbering/screens/ranking_screen.dart';
+import 'package:numbering/screens/settings_screen.dart';
+import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/utils/app_snackbar.dart';
+import 'package:numbering/utils/kst_clock.dart';
+import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
+import 'package:numbering/widgets/home_screen/login_sheet.dart';
 
 void handleRankingPress() {
   showRankingSheet();

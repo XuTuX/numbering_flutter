@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hexor/constant.dart';
+import 'package:numbering/constant.dart';
 
 /// Unified typography system for NUMBERING and the shared app shell.
 ///

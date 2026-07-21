@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:hexor/constant.dart';
-import 'package:hexor/theme/app_colors.dart';
-import 'package:hexor/theme/app_radius.dart';
-import 'package:hexor/theme/app_shadows.dart';
-import 'package:hexor/l10n/app_translations.dart';
-import 'package:hexor/services/auth_service.dart';
-import 'package:hexor/services/database_models.dart';
-import 'package:hexor/theme/app_typography.dart';
-import 'package:hexor/utils/kst_clock.dart';
+import 'package:numbering/constant.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_radius.dart';
+import 'package:numbering/theme/app_shadows.dart';
+import 'package:numbering/l10n/app_translations.dart';
+import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/database_models.dart';
+import 'package:numbering/theme/app_typography.dart';
+import 'package:numbering/utils/kst_clock.dart';
 
 class HomeProgressPanel extends StatefulWidget {
   const HomeProgressPanel({

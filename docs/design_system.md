@@ -1,6 +1,6 @@
-# Hexor (Bee House) 네오 브루탈리즘(Neo-brutalism) 디자인 가이드
+# NUMBERING (NUMBERING) 네오 브루탈리즘(Neo-brutalism) 디자인 가이드
 
-이 문서는 **Hexor (Bee House)** 프로젝트에서 사용된 **네오 브루탈리즘(Neo-brutalism)** 디자인 스타일의 핵심 규칙과 구현 코드를 정의합니다. 이 스타일은 복고풍(Retro)의 장난스럽고 현대적인 고대비(High-contrast) 비주얼이 특징입니다.
+이 문서는 **NUMBERING (NUMBERING)** 프로젝트에서 사용된 **네오 브루탈리즘(Neo-brutalism)** 디자인 스타일의 핵심 규칙과 구현 코드를 정의합니다. 이 스타일은 복고풍(Retro)의 장난스럽고 현대적인 고대비(High-contrast) 비주얼이 특징입니다.
 
 ---
 

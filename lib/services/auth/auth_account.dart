@@ -1,4 +1,4 @@
-part of 'package:hexor/services/auth_service.dart';
+part of 'package:numbering/services/auth_service.dart';
 
 Future<void> _signOut(AuthService service) async {
   service._invalidateProfileLoadRequests();

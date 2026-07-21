@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hexor/l10n/app_translations.dart';
+import 'package:numbering/l10n/app_translations.dart';
 
 void main() {
   final translations = AppTranslations().keys;

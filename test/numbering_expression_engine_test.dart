@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hexor/game/numbering/expression_engine.dart';
+import 'package:numbering/game/numbering/expression_engine.dart';
 
 void main() {
   group('build and evaluate expressions', () {

@@ -23,15 +23,5 @@ extension NumberingGameVisuals on NumberingGame {
             accent: AppColors.blue,
             accentSoft: Color(0xFFE5F4FF),
           ),
-        NumberingGame.sequenceDetective => const NumberingVisuals(
-            icon: Icons.manage_search_rounded,
-            accent: AppColors.purple,
-            accentSoft: Color(0xFFF2E8FF),
-          ),
-        NumberingGame.numberVault => const NumberingVisuals(
-            icon: Icons.lock_rounded,
-            accent: AppColors.scoreOrange,
-            accentSoft: Color(0xFFFFEFE5),
-          ),
       };
 }

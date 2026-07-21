@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:hexor/constant.dart';
-import 'package:hexor/theme/app_typography.dart';
-import 'package:hexor/theme/app_colors.dart';
-import 'package:hexor/theme/app_radius.dart';
-import 'package:hexor/theme/app_shadows.dart';
-import 'package:hexor/utils/random_nickname_generator.dart';
+import 'package:numbering/constant.dart';
+import 'package:numbering/theme/app_typography.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_radius.dart';
+import 'package:numbering/theme/app_shadows.dart';
+import 'package:numbering/utils/random_nickname_generator.dart';
 
 part 'nickname/edit_nickname_dialog_view.dart';
 

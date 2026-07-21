@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:hexor/constant.dart';
-import 'package:hexor/theme/app_colors.dart';
+import 'package:numbering/constant.dart';
+import 'package:numbering/theme/app_colors.dart';
 import '../ranking_period.dart';
 
 class RankingLoadingState extends StatelessWidget {

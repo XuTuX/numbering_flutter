@@ -1,9 +1,8 @@
 # NUMBERING
 
 NUMBERING is a Flutter number-puzzle collection with three continuously
-playable solo games. It keeps the existing Bee House shell, authentication,
-settings, audio, and visual design while replacing the game slot with the new
-number logic.
+playable solo games with shared authentication, settings, audio, and a unified
+visual design.
 
 ## Highlights
 
@@ -92,5 +91,3 @@ Source code is provided for review. Third-party packages remain under their
 respective licenses. Before redistributing the project media independently,
 confirm the authorship or license records for the files in `assets/icons/` and
 `assets/bgm/`. The NAN 2026 asset checklist tracks the remaining evidence.
-# game_template
-# numbering_flutter

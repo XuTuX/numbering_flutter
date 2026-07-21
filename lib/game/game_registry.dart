@@ -7,8 +7,6 @@ import 'numbering/numbering_models.dart';
 abstract final class GameRegistry {
   static const List<GameModule> modules = [
     NumberingGameModule(NumberingGame.formulaWorkshop),
-    NumberingGameModule(NumberingGame.sequenceDetective),
-    NumberingGameModule(NumberingGame.numberVault),
   ];
 
   static GameModule byId(String? id) {

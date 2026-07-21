@@ -139,6 +139,8 @@ class AppTranslations extends Translations {
     '경과 시간': 'Elapsed',
     '숫자 순서를 바꾸지 않고 등식을 만드세요.':
         'Make an equation without changing the digit order.',
+    '숫자를 2개 연속으로 터치하면 괄호가 씌워집니다.\n아래 연산자를 빈칸으로 끌어다 놓으세요.\n잘못 놓은 연산자는 터치하면 지워집니다.':
+        'Tap two digits in sequence to add parentheses.\nDrag an operator into an empty slot below.\nTap a misplaced operator to remove it.',
     '순서가 있는 두 시작 수를 맞혀보세요.': 'Find the two ordered starting numbers.',
     '전체 항 개수': 'Terms',
     '마지막 값': 'Last Value',
@@ -211,7 +213,7 @@ class AppTranslations extends Translations {
     '이미지로 공유하기': 'Share as Image',
     '이미지가 갤러리에 저장되거나 친구에게 공유됩니다':
         'The image will be saved to your gallery or shared with friends.',
-    'Bee House 게임 결과': 'Bee House Game Result',
+    'NUMBERING 게임 결과': 'NUMBERING Game Result',
     '매치 수': 'Matches',
     '최고 콤보': 'Best Combo',
     '육각형 게임 보드': 'Hexagonal game board',
@@ -333,8 +335,8 @@ class AppTranslations extends Translations {
     '시작하기': 'Start',
     '다음': 'Next',
     'NEOREO GAMES 계정을\n삭제할까요?': 'Delete your\nNEOREO GAMES account?',
-    'NEOREO GAMES와 관련된 계정인\nOverlap, Fill Your Area, Bee House 등의\n게임 데이터가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.':
-        'All game data linked to your NEOREO GAMES account, including Overlap, Fill Your Area, and Bee House, will be deleted.\n\nThis action cannot be undone.',
+    'NEOREO GAMES와 관련된 계정인\nOverlap, Fill Your Area, NUMBERING 등의\n게임 데이터가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.':
+        'All game data linked to your NEOREO GAMES account, including Overlap, Fill Your Area, and NUMBERING, will be deleted.\n\nThis action cannot be undone.',
     '삭제 실패': 'Delete Failed',
     '삭제 완료': 'Deleted',
     '삭제': 'Delete',
@@ -351,8 +353,8 @@ class AppTranslations extends Translations {
     '닉네임 업데이트 중 오류가 발생했습니다': 'An error occurred while updating nickname',
     '계정 삭제 중 오류가 발생했습니다. 다시 시도해주세요.':
         'An error occurred while deleting your account. Please try again.',
-    'Bee House 기록 삭제 중 오류가 발생했습니다. 다시 시도해주세요.':
-        'An error occurred while deleting Bee House records. Please try again.',
+    'NUMBERING 기록 삭제 중 오류가 발생했습니다. 다시 시도해주세요.':
+        'An error occurred while deleting NUMBERING records. Please try again.',
     '월': 'Mon',
     '화': 'Tue',
     '수': 'Wed',
@@ -362,8 +364,8 @@ class AppTranslations extends Translations {
     '일': 'Sun',
     '같은 색 육각형을 연결하여\n선을 만들면 사용한 구간이 사라집니다.':
         'Connect same-colored hexes to make a line. Used segments disappear.',
-    '반가워요! Hexor는 육각형 타일을 연결하는 게임이에요.':
-        'Welcome! Hexor is a game about connecting hex tiles.',
+    '반가워요! NUMBERING은 숫자로 답을 만드는 퍼즐 게임이에요.':
+        'Welcome! NUMBERING is a collection of number puzzle games.',
     '상단 컬러바의 처음 세 색상대로 연결해 보세요!\n(보너스 점수와 추가 시간을 얻습니다)':
         'Connect the first three colors in the top color bar!\n(You earn bonus score and extra time)',
     '시퀀스는 꼭 처음부터 시작하지 않아도 돼요.\n컬러바의 중간 어디든 3개 이상 이어지면 보너스!':
@@ -384,6 +386,8 @@ class AppTranslations extends Translations {
     '정답입니다!': '正解です！',
     '경과 시간': '経過時間',
     '숫자 순서를 바꾸지 않고 등식을 만드세요.': '数字の順番を変えずに等式を作ろう。',
+    '숫자를 2개 연속으로 터치하면 괄호가 씌워집니다.\n아래 연산자를 빈칸으로 끌어다 놓으세요.\n잘못 놓은 연산자는 터치하면 지워집니다.':
+        '数字を2つ続けてタップすると括弧で囲めます。\n下の演算子を空欄にドラッグしてください。\n置き間違えた演算子はタップすると削除できます。',
     '순서가 있는 두 시작 수를 맞혀보세요.': '順序のある2つの開始数を当てよう。',
     '전체 항 개수': '項数',
     '마지막 값': '最後の値',
@@ -545,8 +549,8 @@ class AppTranslations extends Translations {
     '시작하기': '開始',
     '다음': '次へ',
     'NEOREO GAMES 계정을\n삭제할까요?': 'NEOREO GAMESアカウントを\n削除しますか?',
-    'NEOREO GAMES와 관련된 계정인\nOverlap, Fill Your Area, Bee House 등의\n게임 데이터가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.':
-        'NEOREO GAMESアカウントに関連するOverlap、Fill Your Area、Bee Houseなどのゲームデータがすべて削除されます。\n\nこの操作は元に戻せません。',
+    'NEOREO GAMES와 관련된 계정인\nOverlap, Fill Your Area, NUMBERING 등의\n게임 데이터가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.':
+        'NEOREO GAMESアカウントに関連するOverlap、Fill Your Area、NUMBERINGなどのゲームデータがすべて削除されます。\n\nこの操作は元に戻せません。',
     '삭제 실패': '削除失敗',
     '삭제 완료': '削除完了',
     '삭제': '削除',
@@ -559,13 +563,13 @@ class AppTranslations extends Translations {
     '로그인 기능을 사용하려면 Supabase 설정이 필요합니다.': 'ログイン機能を使用するにはSupabaseの設定が必要です。',
     '업데이트 중 오류가 발생했습니다.': '更新中にエラーが発生しました。',
     '계정 삭제 중 오류가 발생했습니다. 다시 시도해주세요.': 'アカウント削除中にエラーが発生しました。もう一度お試しください。',
-    'Bee House 기록 삭제 중 오류가 발생했습니다. 다시 시도해주세요.':
-        'Bee Houseの記録削除中にエラーが発生しました。もう一度お試しください。',
+    'NUMBERING 기록 삭제 중 오류가 발생했습니다. 다시 시도해주세요.':
+        'NUMBERINGの記録削除中にエラーが発生しました。もう一度お試しください。',
     '설정': '設定',
     '튜토리얼': 'チュートリアル',
     '리플레이 재생 중': 'リプレイ再生中',
     '터치해서 계속하기': 'タップして続行',
-    'Bee House 게임 결과': 'Bee House ゲーム結果',
+    'NUMBERING 게임 결과': 'NUMBERING ゲーム結果',
     '매치 수': 'マッチ数',
     '시드': 'シード',
     '닉네임 업데이트 중 오류가 발생했습니다': 'ニックネーム更新中にエラーが発生しました',
@@ -577,7 +581,7 @@ class AppTranslations extends Translations {
     '토': '土',
     '일': '日',
     '같은 색 육각형을 연결하여\n선을 만들면 사용한 구간이 사라집니다.': '同じ色の六角形をつなげて線を作ると、使った区間が消えます。',
-    '반가워요! Hexor는 육각형 타일을 연결하는 게임이에요.': 'ようこそ! Hexorは六角形タイルをつなげるゲームです。',
+    '반가워요! NUMBERING은 숫자로 답을 만드는 퍼즐 게임이에요.': 'ようこそ！NUMBERINGは数字パズルを集めたゲームです。',
     '상단 컬러바의 처음 세 색상대로 연결해 보세요!\n(보너스 점수와 추가 시간을 얻습니다)':
         '上部カラーバーの最初の3色どおりにつなげてみましょう!\n(ボーナス点と追加時間を獲得できます)',
     '시퀀스는 꼭 처음부터 시작하지 않아도 돼요.\n컬러바의 중간 어디든 3개 이상 이어지면 보너스!':
@@ -597,6 +601,8 @@ class AppTranslations extends Translations {
     '정답입니다!': '回答正确！',
     '경과 시간': '用时',
     '숫자 순서를 바꾸지 않고 등식을 만드세요.': '不要改变数字顺序，组成等式。',
+    '숫자를 2개 연속으로 터치하면 괄호가 씌워집니다.\n아래 연산자를 빈칸으로 끌어다 놓으세요.\n잘못 놓은 연산자는 터치하면 지워집니다.':
+        '依次点击两个数字即可添加括号。\n将下方运算符拖到空位中。\n点击放错的运算符即可删除。',
     '순서가 있는 두 시작 수를 맞혀보세요.': '找出有顺序的两个起始数。',
     '전체 항 개수': '项数',
     '마지막 값': '最后的值',
@@ -754,8 +760,8 @@ class AppTranslations extends Translations {
     '시작하기': '开始',
     '다음': '下一步',
     'NEOREO GAMES 계정을\n삭제할까요?': '要删除\nNEOREO GAMES 账号吗？',
-    'NEOREO GAMES와 관련된 계정인\nOverlap, Fill Your Area, Bee House 등의\n게임 데이터가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.':
-        '与 NEOREO GAMES 账号相关的 Overlap、Fill Your Area、Bee House 等游戏数据都将被删除。\n\n此操作无法撤销。',
+    'NEOREO GAMES와 관련된 계정인\nOverlap, Fill Your Area, NUMBERING 등의\n게임 데이터가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.':
+        '与 NEOREO GAMES 账号相关的 Overlap、Fill Your Area、NUMBERING 等游戏数据都将被删除。\n\n此操作无法撤销。',
     '삭제 실패': '删除失败',
     '삭제 완료': '已删除',
     '삭제': '删除',
@@ -767,12 +773,12 @@ class AppTranslations extends Translations {
     '로그인 기능을 사용하려면 Supabase 설정이 필요합니다.': '登录功能需要配置Supabase。',
     '업데이트 중 오류가 발생했습니다.': '更新时发生错误。',
     '계정 삭제 중 오류가 발생했습니다. 다시 시도해주세요.': '删除账号时发生错误，请重试。',
-    'Bee House 기록 삭제 중 오류가 발생했습니다. 다시 시도해주세요.': '删除 Bee House 记录时发生错误，请重试。',
+    'NUMBERING 기록 삭제 중 오류가 발생했습니다. 다시 시도해주세요.': '删除 NUMBERING 记录时发生错误，请重试。',
     '설정': '设置',
     '튜토리얼': '教程',
     '리플레이 재생 중': '正在播放回放',
     '터치해서 계속하기': '点击继续',
-    'Bee House 게임 결과': 'Bee House 游戏结果',
+    'NUMBERING 게임 결과': 'NUMBERING 游戏结果',
     '매치 수': '匹配数',
     '시드': '种子',
     '닉네임 업데이트 중 오류가 발생했습니다': '更新昵称时发生错误',
@@ -784,7 +790,7 @@ class AppTranslations extends Translations {
     '토': '周六',
     '일': '周日',
     '같은 색 육각형을 연결하여\n선을 만들면 사용한 구간이 사라집니다.': '连接相同颜色的六边形形成线后，使用过的区段会消失。',
-    '반가워요! Hexor는 육각형 타일을 연결하는 게임이에요.': '欢迎！Hexor 是连接六边形格子的游戏。',
+    '반가워요! NUMBERING은 숫자로 답을 만드는 퍼즐 게임이에요.': '欢迎！NUMBERING 是一款数字益智游戏合集。',
     '상단 컬러바의 처음 세 색상대로 연결해 보세요!\n(보너스 점수와 추가 시간을 얻습니다)':
         '试着按顶部颜色条的前三个颜色连接！\n（可获得奖励分数和额外时间）',
     '시퀀스는 꼭 처음부터 시작하지 않아도 돼요.\n컬러바의 중간 어디든 3개 이상 이어지면 보너스!':
@@ -803,6 +809,8 @@ class AppTranslations extends Translations {
     '정답입니다!': 'सही उत्तर!',
     '경과 시간': 'बीता समय',
     '숫자 순서를 바꾸지 않고 등식을 만드세요.': 'अंकों का क्रम बदले बिना समीकरण बनाएँ।',
+    '숫자를 2개 연속으로 터치하면 괄호가 씌워집니다.\n아래 연산자를 빈칸으로 끌어다 놓으세요.\n잘못 놓은 연산자는 터치하면 지워집니다.':
+        'कोष्ठक लगाने के लिए क्रम से दो अंकों पर टैप करें।\nनीचे दिए ऑपरेटर को खाली जगह पर खींचें।\nगलत ऑपरेटर हटाने के लिए उस पर टैप करें।',
     '순서가 있는 두 시작 수를 맞혀보세요.': 'क्रम में दो शुरुआती संख्याएँ खोजें।',
     '전체 항 개수': 'पदों की संख्या',
     '마지막 값': 'अंतिम मान',
@@ -979,8 +987,8 @@ class AppTranslations extends Translations {
     '시작하기': 'शुरू करें',
     '다음': 'अगला',
     'NEOREO GAMES 계정을\n삭제할까요?': 'NEOREO GAMES खाता\nहटाएं?',
-    'NEOREO GAMES와 관련된 계정인\nOverlap, Fill Your Area, Bee House 등의\n게임 데이터가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.':
-        'NEOREO GAMES खाते से जुड़ा Overlap, Fill Your Area, Bee House आदि गेम डेटा हट जाएगा।\n\nयह कार्रवाई वापस नहीं की जा सकती।',
+    'NEOREO GAMES와 관련된 계정인\nOverlap, Fill Your Area, NUMBERING 등의\n게임 데이터가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.':
+        'NEOREO GAMES खाते से जुड़ा Overlap, Fill Your Area, NUMBERING आदि गेम डेटा हट जाएगा।\n\nयह कार्रवाई वापस नहीं की जा सकती।',
     '삭제 실패': 'हटाना विफल',
     '삭제 완료': 'हटा दिया गया',
     '삭제': 'हटाएं',
@@ -996,13 +1004,13 @@ class AppTranslations extends Translations {
     '업데이트 중 오류가 발생했습니다.': 'अपडेट के दौरान त्रुटि हुई।',
     '계정 삭제 중 오류가 발생했습니다. 다시 시도해주세요.':
         'खाता हटाते समय त्रुटि हुई। कृपया फिर कोशिश करें।',
-    'Bee House 기록 삭제 중 오류가 발생했습니다. 다시 시도해주세요.':
-        'Bee House रिकॉर्ड हटाते समय त्रुटि हुई। कृपया फिर कोशिश करें।',
+    'NUMBERING 기록 삭제 중 오류가 발생했습니다. 다시 시도해주세요.':
+        'NUMBERING रिकॉर्ड हटाते समय त्रुटि हुई। कृपया फिर कोशिश करें।',
     '설정': 'सेटिंग्स',
     '튜토리얼': 'ट्यूटोरियल',
     '리플레이 재생 중': 'रीप्ले चल रहा है',
     '터치해서 계속하기': 'जारी रखने के लिए टैप करें',
-    'Bee House 게임 결과': 'Bee House गेम परिणाम',
+    'NUMBERING 게임 결과': 'NUMBERING गेम परिणाम',
     '매치 수': 'मैच',
     '시드': 'सीड',
     '닉네임 업데이트 중 오류가 발생했습니다': 'निकनेम अपडेट करते समय त्रुटि हुई',
@@ -1015,8 +1023,8 @@ class AppTranslations extends Translations {
     '일': 'रवि',
     '같은 색 육각형을 연결하여\n선을 만들면 사용한 구간이 사라집니다.':
         'एक ही रंग के हेक्स जोड़कर लाइन बनाएं। इस्तेमाल हिस्से हट जाते हैं।',
-    '반가워요! Hexor는 육각형 타일을 연결하는 게임이에요.':
-        'स्वागत है! Hexor हेक्स टाइलों को जोड़ने वाला गेम है।',
+    '반가워요! NUMBERING은 숫자로 답을 만드는 퍼즐 게임이에요.':
+        'स्वागत है! NUMBERING संख्या पहेली खेलों का संग्रह है।',
     '상단 컬러바의 처음 세 색상대로 연결해 보세요!\n(보너스 점수와 추가 시간을 얻습니다)':
         'ऊपर के कलर बार के पहले तीन रंगों को जोड़ें!\n(बोनस स्कोर और अतिरिक्त समय मिलेगा)',
     '시퀀스는 꼭 처음부터 시작하지 않아도 돼요.\n컬러바의 중간 어디든 3개 이상 이어지면 보너스!':

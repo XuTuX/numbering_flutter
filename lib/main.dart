@@ -1,19 +1,19 @@
 import 'dart:ui';
 
-import 'package:hexor/constant.dart';
-import 'package:hexor/config/app_config.dart';
-import 'package:hexor/controllers/score_controller.dart';
-import 'package:hexor/l10n/app_translations.dart';
-import 'package:hexor/screens/home_screen.dart';
-import 'package:hexor/services/auth_service.dart';
-import 'package:hexor/services/settings_service.dart';
-import 'package:hexor/services/ad_service.dart';
-import 'package:hexor/services/audio_service.dart';
-import 'package:hexor/utils/app_snackbar.dart';
-import 'package:hexor/theme/app_colors.dart';
-import 'package:hexor/theme/app_radius.dart';
-import 'package:hexor/theme/app_shadows.dart';
-import 'package:hexor/theme/app_theme.dart';
+import 'package:numbering/constant.dart';
+import 'package:numbering/config/app_config.dart';
+import 'package:numbering/controllers/score_controller.dart';
+import 'package:numbering/l10n/app_translations.dart';
+import 'package:numbering/screens/home_screen.dart';
+import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/settings_service.dart';
+import 'package:numbering/services/ad_service.dart';
+import 'package:numbering/services/audio_service.dart';
+import 'package:numbering/utils/app_snackbar.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_radius.dart';
+import 'package:numbering/theme/app_shadows.dart';
+import 'package:numbering/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -59,7 +59,7 @@ void main() async {
     }
 
     runApp(
-      BeeHouseApp(
+      NumberingApp(
         settingsService: settingsService,
         authClient: authClient,
       ),
@@ -119,11 +119,11 @@ class AppBinding extends Bindings {
   }
 }
 
-class BeeHouseApp extends StatelessWidget {
+class NumberingApp extends StatelessWidget {
   final SettingsService settingsService;
   final SupabaseClient? authClient;
 
-  const BeeHouseApp({
+  const NumberingApp({
     super.key,
     required this.settingsService,
     required this.authClient,

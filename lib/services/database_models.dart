@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:hexor/utils/kst_clock.dart';
+import 'package:numbering/utils/kst_clock.dart';
 
 enum SeasonTier {
   bronze,

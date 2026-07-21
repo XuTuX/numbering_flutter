@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:hexor/services/auth_service.dart';
-import 'package:hexor/services/settings_service.dart';
-import 'package:hexor/widgets/dialogs/edit_nickname_dialog.dart';
-import 'package:hexor/game/game_module.dart';
-import 'package:hexor/screens/home/home_screen_flows.dart';
-import 'package:hexor/widgets/home_screen/background_painter.dart';
-import 'package:hexor/widgets/home_screen/login_sheet.dart';
-import 'package:hexor/theme/app_colors.dart';
+import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/settings_service.dart';
+import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
+import 'package:numbering/game/game_module.dart';
+import 'package:numbering/screens/home/home_screen_flows.dart';
+import 'package:numbering/widgets/home_screen/background_painter.dart';
+import 'package:numbering/widgets/home_screen/login_sheet.dart';
+import 'package:numbering/theme/app_colors.dart';
 
 import 'widgets/settings_components.dart';
 
