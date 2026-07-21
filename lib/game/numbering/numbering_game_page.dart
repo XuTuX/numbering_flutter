@@ -120,30 +120,18 @@ class _LevelSelectionView extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'LEVEL SELECT',
-                          style: GoogleFonts.blackHanSans(
-                            fontSize: 24,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          '현재 도전 · LEVEL $current',
-                          style: AppTypography.caption.copyWith(
-                            color: accent,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      'LEVEL SELECT',
+                      style: GoogleFonts.blackHanSans(
+                        fontSize: 24,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
+                      horizontal: 14,
+                      vertical: 8,
                     ),
                     decoration: BoxDecoration(
                       color: accent.withValues(alpha: 0.1),
@@ -151,7 +139,11 @@ class _LevelSelectionView extends StatelessWidget {
                     ),
                     child: Text(
                       '$current / 200',
-                      style: AppTypography.label.copyWith(color: accent),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: accent,
+                      ),
                     ),
                   ),
                 ],
@@ -238,59 +230,24 @@ class _LevelCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'LEVEL ${level.id}',
-                    style: AppTypography.tiny.copyWith(
-                      color: unlocked
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  if (record.cleared) ...[
-                    const SizedBox(width: 3),
-                    const Icon(
-                      Icons.check_circle_rounded,
-                      size: 12,
-                      color: AppColors.green,
-                    ),
-                  ],
-                ],
+              Text(
+                '${level.id}',
+                style: GoogleFonts.blackHanSans(
+                  fontSize: 22,
+                  color: unlocked
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
+                ),
               ),
-              const SizedBox(height: 7),
-              if (!unlocked)
-                const Icon(Icons.lock_rounded,
-                    size: 22, color: Color(0xFFAAB0BA))
-              else if (!record.cleared)
-                Text(
-                  current ? '진행 가능' : '도전 가능',
-                  style: AppTypography.tiny.copyWith(
-                    color: current ? accent : AppColors.textSecondary,
-                    fontWeight: FontWeight.w800,
-                  ),
+              if (record.cleared)
+                const Icon(
+                  Icons.check_circle_rounded,
+                  size: 18,
+                  color: AppColors.green,
                 )
-              else ...[
-                Text(
-                  record.perfect ? 'PERFECT' : _stars(record.stars),
-                  style: AppTypography.tiny.copyWith(
-                    color: record.perfect
-                        ? AppColors.scoreOrange
-                        : AppColors.yellow,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '+${record.bestScore}점',
-                  style: AppTypography.tiny.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
+              else if (!unlocked)
+                const Icon(Icons.lock_rounded,
+                    size: 18, color: Color(0xFFAAB0BA)),
             ],
           ),
         ),
@@ -404,19 +361,10 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
               for (var index = 0; index < visibleCount; index++) ...[
                 Text(
                   '${index + 1}. ${widget.level.hints.at(index)}',
-                  style: AppTypography.bodySmall.copyWith(height: 1.5),
+                  style: const TextStyle(fontSize: 15, height: 1.5),
                 ),
                 if (index + 1 < visibleCount)
                   const SizedBox(height: AppSpacing.sm),
-              ],
-              if (visibleCount == 3) ...[
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  '모든 힌트를 사용했어요.',
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
               ],
             ],
           ),
@@ -429,7 +377,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
     final evaluation = evaluateLevelScore(widget.level, score);
     if (!evaluation.cleared) {
       _editorKey.currentState?.showMessage(
-        '클리어하려면 최소 +${widget.level.minimumScore}점이 필요해요.',
+        '+${widget.level.minimumScore}점 이상 필요',
       );
       return;
     }
@@ -497,18 +445,39 @@ class _LevelHeader extends StatelessWidget {
             ),
           ),
         ),
-        OutlinedButton.icon(
-          onPressed: onHint,
-          icon: const Icon(Icons.lightbulb_rounded, size: 19),
-          label: Text('$remainingHints'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor:
-                remainingHints == 0 ? AppColors.textSecondary : accent,
-            backgroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            side: const BorderSide(color: AppColors.borderLight),
-            shape: RoundedRectangleBorder(
+        Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onHint,
               borderRadius: BorderRadius.circular(AppRadius.pill),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.lightbulb_rounded,
+                        size: 18, color: AppColors.yellow),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$remainingHints',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: remainingHints == 0
+                            ? AppColors.textSecondary
+                            : accent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -527,31 +496,20 @@ class _LevelGoalBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppRadius.medium),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
         children: [
-          Text('클리어 +${level.minimumScore}점', style: AppTypography.tiny),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: Text('·', style: TextStyle(color: AppColors.textSecondary)),
-          ),
           Text(
-            '★★★ +${level.targetScore}점',
-            style: AppTypography.tiny.copyWith(
+            '목표 점수: +${level.targetScore}점',
+            style: GoogleFonts.blackHanSans(
+              fontSize: 16,
               color: accent,
-              fontWeight: FontWeight.w900,
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: Text('·', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          const Text('더 높으면 PERFECT', style: AppTypography.tiny),
         ],
       ),
     );
@@ -633,7 +591,8 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                       child: Text(
                         _message!,
                         textAlign: TextAlign.center,
-                        style: AppTypography.caption.copyWith(
+                        style: const TextStyle(
+                          fontSize: 14,
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w700,
                         ),
@@ -733,7 +692,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       availableOperators: widget.level.availableOperators,
     );
     if (!result.valid) {
-      showMessage(result.message ?? '수식을 다시 확인해 주세요.');
+      showMessage(result.message ?? '수식을 확인하세요');
       return;
     }
     widget.onValidSubmission(_expression, result.value!);
@@ -852,12 +811,6 @@ class _DragDropEditor extends StatelessWidget {
               accent: accent,
               availableOperators: availableOperators,
               compact: compact,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '기호를 숫자 사이로 끌어 놓으세요 · 숫자 두 개를 눌러 괄호 설정',
-              style:
-                  AppTypography.tiny.copyWith(color: AppColors.textSecondary),
             ),
           ],
         );
@@ -1102,7 +1055,7 @@ class _GameActionButtons extends StatelessWidget {
           child: secondaryButton(
             onPressed: canUndo ? onUndo : null,
             icon: Icons.undo_rounded,
-            label: '되돌리기',
+            label: '실행 취소',
           ),
         ),
         const SizedBox(width: 8),
@@ -1123,7 +1076,7 @@ class _GameActionButtons extends StatelessWidget {
               backgroundColor: accent,
               padding: EdgeInsets.symmetric(horizontal: isCompact ? 6 : 16),
             ),
-            child: const Text('정답 제출', maxLines: 1),
+            child: const Text('제출', maxLines: 1),
           ),
         ),
       ],
@@ -1181,60 +1134,36 @@ class _LevelResultOverlay extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'LEVEL ${level.id} CLEAR',
+                  'LEVEL ${level.id}',
                   style: GoogleFonts.blackHanSans(
-                    fontSize: 25,
+                    fontSize: 28,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    attempt.expression,
-                    style: AppTypography.title,
-                  ),
+                Text(
+                  '+${attempt.score}점',
+                  style: GoogleFonts.blackHanSans(fontSize: 48, color: accent),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  evaluation.perfect ? 'PERFECT' : _stars(evaluation.stars),
+                  evaluation.perfect ? 'PERFECT' : '★★★',
                   style: GoogleFonts.blackHanSans(
-                    fontSize: 24,
+                    fontSize: 22,
                     color: evaluation.perfect
                         ? AppColors.scoreOrange
                         : AppColors.yellow,
                   ),
                 ),
-                if (evaluation.perfect)
-                  const Text(
-                    '★★★',
-                    style: TextStyle(fontSize: 18, color: AppColors.yellow),
-                  ),
-                Text(
-                  '+${attempt.score}점',
-                  style: GoogleFonts.blackHanSans(fontSize: 36, color: accent),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  '힌트 사용 $usedHints/3',
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                if (evaluation.stars == 1) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    '기준 점수까지 ${level.targetScore - attempt.score}점 남았어요.\n더 좋은 수식을 찾아보세요!',
-                    textAlign: TextAlign.center,
-                    style: AppTypography.caption.copyWith(height: 1.4),
-                  ),
-                ],
                 const SizedBox(height: AppSpacing.xl),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
                         onPressed: onReplay,
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                        ),
                         child: const Text('다시 풀기'),
                       ),
                     ),
@@ -1242,6 +1171,9 @@ class _LevelResultOverlay extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: onShowLevels,
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                        ),
                         child: const Text('레벨 목록'),
                       ),
                     ),
@@ -1249,8 +1181,11 @@ class _LevelResultOverlay extends StatelessWidget {
                     Expanded(
                       child: FilledButton(
                         onPressed: onNext,
-                        style: FilledButton.styleFrom(backgroundColor: accent),
-                        child: Text(onNext == null ? '완료' : '다음 레벨'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: accent,
+                          minimumSize: const Size.fromHeight(50),
+                        ),
+                        child: Text(onNext == null ? '완료' : '다음'),
                       ),
                     ),
                   ],
@@ -1263,5 +1198,3 @@ class _LevelResultOverlay extends StatelessWidget {
     );
   }
 }
-
-String _stars(int stars) => stars == 3 ? '★★★' : '★☆☆';

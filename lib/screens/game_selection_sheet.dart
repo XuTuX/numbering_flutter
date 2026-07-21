@@ -7,7 +7,6 @@ import '../game/numbering/numbering_visuals.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
-import '../theme/app_typography.dart';
 import '../widgets/common/soft_card.dart';
 
 Future<NumberingGame?> showGameSelectionSheet() {
@@ -80,14 +79,6 @@ class GameSelectionSheet extends StatelessWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          '플레이할 NUMBERING 게임을 고르세요.'.tr,
-          textAlign: TextAlign.center,
-          style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
         const SizedBox(height: AppSpacing.xl),
         ...NumberingGame.values.map((game) {
           final visuals = game.visuals;
@@ -131,13 +122,6 @@ class GameSelectionSheet extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            game.description.tr,
-                            style: AppTypography.caption.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 9,
@@ -149,8 +133,10 @@ class GameSelectionSheet extends StatelessWidget {
                                   BorderRadius.circular(AppRadius.pill),
                             ),
                             child: Text(
-                              '200개 고정 레벨'.tr,
-                              style: AppTypography.tiny.copyWith(
+                              '200 레벨'.tr,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
                                 color: visuals.accent,
                               ),
                             ),

@@ -131,9 +131,9 @@ class MyRankCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       weeklyResetInfo.koreanLabel,
-                      style: AppTypography.caption.copyWith(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
                         color: charcoalBlack.withValues(alpha: 0.3),
                       ),
                     ),
@@ -142,9 +142,9 @@ class MyRankCard extends StatelessWidget {
               else
                 Text(
                   period.statusLabel,
-                  style: AppTypography.caption.copyWith(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                     color: charcoalBlack.withValues(alpha: 0.3),
                   ),
                 ),

@@ -11,7 +11,6 @@ import 'package:numbering/widgets/home_screen/background_painter.dart';
 import 'package:numbering/widgets/home_screen/home_components.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_shadows.dart';
-import 'package:numbering/theme/app_typography.dart';
 
 class HomeScreenContent extends StatefulWidget {
   const HomeScreenContent({
@@ -372,7 +371,6 @@ class _LevelJourneyCard extends StatelessWidget {
       final highest = progress.highestUnlockedLevel;
       final records = progress.progress.values;
       final cleared = records.where((record) => record.cleared).length;
-      final perfect = records.where((record) => record.perfect).length;
       final ratio = cleared / 200;
       return Material(
         color: Colors.transparent,
@@ -408,21 +406,9 @@ class _LevelJourneyCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 14),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '나의 레벨 여정',
-                            style: GoogleFonts.blackHanSans(fontSize: 22),
-                          ),
-                          Text(
-                            '다음 도전 · LEVEL $highest',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: const Color(0xFF0095FF),
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        'LEVEL $highest',
+                        style: GoogleFonts.blackHanSans(fontSize: 26),
                       ),
                     ),
                     const Icon(Icons.chevron_right_rounded),
@@ -438,19 +424,14 @@ class _LevelJourneyCard extends StatelessWidget {
                     color: const Color(0xFF0095FF),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Text(
-                      '$cleared / 200 클리어',
-                      style: AppTypography.label,
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.auto_awesome_rounded,
-                        size: 17, color: AppColors.scoreOrange),
-                    const SizedBox(width: 5),
-                    Text('PERFECT $perfect', style: AppTypography.label),
-                  ],
+                const SizedBox(height: 14),
+                Text(
+                  '$cleared / 200',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
