@@ -35,6 +35,7 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
       }
       _message = null;
     });
+    _checkAutoSubmit();
   }
 
   void _backspace() {
@@ -45,6 +46,7 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
       _recalculateUsedDigits();
       _message = null;
     });
+    _checkAutoSubmit();
   }
   
   void _recalculateUsedDigits() {
@@ -60,16 +62,25 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
     }
   }
 
-  void _submit() {
+  void _checkAutoSubmit() {
+    if (!_usedDigits.every((used) => used)) {
+      if (_message != null) setState(() => _message = null);
+      return;
+    }
+    
     final result = validateDailyPuzzleFormula(
       digitString: widget.digits.join(''),
       expression: _expression,
     );
-    if (!result.valid) {
-      setState(() => _message = result.message);
-      return;
+    
+    if (result.valid) {
+      setState(() => _message = '정답입니다! 🎉');
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (mounted) widget.onValidSubmission(_expression, result.value!);
+      });
+    } else {
+      if (_message != null) setState(() => _message = null);
     }
-    widget.onValidSubmission(_expression, result.value!);
   }
   
   void reset() {
@@ -178,26 +189,7 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                
-                // Submit Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: FilledButton(
-                    onPressed: _submit,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: widget.accent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: const Text(
-                      '제출',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                ),
+                // Removed Submit Button Space
                 const SizedBox(height: 20),
               ],
             ),

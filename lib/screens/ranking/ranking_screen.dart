@@ -124,50 +124,38 @@ class _RankingScreenState extends State<RankingScreen> {
     final mediaSize = MediaQuery.sizeOf(context);
     final isLandscape = mediaSize.width > mediaSize.height;
 
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight:
-              isLandscape ? mediaSize.height * 0.95 : mediaSize.height * 0.9,
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Ranking',
+          style: TextStyle(color: charcoalBlack, fontWeight: FontWeight.bold),
         ),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
-          border: Border.all(
-            color: charcoalBlack.withValues(alpha: 0.12),
-            width: 1.5,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              if (!isLandscape) ...[
-                const RankingSheetHandle(),
-                const SizedBox(height: 12),
-              ],
-              RankingHeader(
-                period: _period,
-                onPeriodChanged: _handlePeriodChanged,
-                isDailyOnly: widget.isDailyOnly,
-                dailyDateKey: widget.dailyDateKey,
-              ),
-              SizedBox(height: isLandscape ? 8 : 16),
-              Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: isLandscape ? mediaSize.width * 0.85 : 480,
-                    ),
-                    child: _buildContent(myId),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            RankingHeader(
+              period: _period,
+              onPeriodChanged: _handlePeriodChanged,
+              isDailyOnly: widget.isDailyOnly,
+              dailyDateKey: widget.dailyDateKey,
+            ),
+            SizedBox(height: isLandscape ? 8 : 16),
+            Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: isLandscape ? mediaSize.width * 0.85 : 480,
                   ),
+                  child: _buildContent(myId),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

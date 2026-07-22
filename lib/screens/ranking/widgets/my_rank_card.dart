@@ -221,7 +221,7 @@ class _TierBadge extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: _tierBorderColors(tier)),
+        color: color,
         borderRadius: BorderRadius.circular(999),
         boxShadow: [
           if (tier == SeasonTier.jesus ||
@@ -291,47 +291,5 @@ class _TierBadge extends StatelessWidget {
     };
   }
 
-  List<Color> _tierBorderColors(SeasonTier tier) {
-    return switch (tier) {
-      SeasonTier.jesus => const [
-          Color(0xFFFF7F7F),
-          Color(0xFFF9D86D),
-          Color(0xFFA3D9A5),
-          Color(0xFFA3CFFF),
-          Color(0xFFC4A3FF),
-        ],
-      SeasonTier.challenger => const [
-          Color(0xFFFFD166),
-          Color(0xFFFB7185),
-          Color(0xFFA855F7),
-          Color(0xFF38BDF8),
-        ],
-      SeasonTier.master => const [
-          Color(0xFFEF4444),
-          Color(0xFFF97316),
-          Color(0xFFFACC15),
-        ],
-      SeasonTier.diamond => const [
-          Color(0xFF67E8F9),
-          Color(0xFF38BDF8),
-          Color(0xFF2563EB),
-        ],
-      SeasonTier.platinum => const [
-          Color(0xFFCBD5E1),
-          Color(0xFF64748B),
-        ],
-      SeasonTier.gold => const [
-          Color(0xFFFDE68A),
-          Color(0xFFF59E0B),
-        ],
-      SeasonTier.silver => const [
-          Color(0xFFE2E8F0),
-          Color(0xFF94A3B8),
-        ],
-      SeasonTier.bronze => const [
-          Color(0xFFFCD9B6),
-          Color(0xFFB45309),
-        ],
-    };
-  }
+  // Removed _tierBorderColors to eliminate AI gradient look
 }

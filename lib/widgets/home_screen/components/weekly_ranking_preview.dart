@@ -260,7 +260,7 @@ class CleanRankRow extends StatelessWidget {
       row = Container(
         padding: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
-          gradient: LinearGradient(colors: frameStyle.borderColors),
+          color: frameStyle.borderColor,
           borderRadius: BorderRadius.circular(11),
           boxShadow: [
             BoxShadow(
@@ -303,7 +303,7 @@ class CleanRankRow extends StatelessWidget {
 
 class _PreviewFrameStyle {
   const _PreviewFrameStyle({
-    required this.borderColors,
+    required this.borderColor,
     required this.backgroundColor,
     required this.rankColor,
     required this.scoreColor,
@@ -311,7 +311,7 @@ class _PreviewFrameStyle {
     required this.glowColor,
   });
 
-  final List<Color> borderColors;
+  final Color borderColor;
   final Color backgroundColor;
   final Color rankColor;
   final Color scoreColor;
@@ -321,13 +321,7 @@ class _PreviewFrameStyle {
   static _PreviewFrameStyle? forTier(SeasonTier tier) {
     return switch (tier) {
       SeasonTier.jesus => const _PreviewFrameStyle(
-          borderColors: [
-            Color(0xFFFF7F7F),
-            Color(0xFFF9D86D),
-            Color(0xFFA3D9A5),
-            Color(0xFFA3CFFF),
-            Color(0xFFC4A3FF),
-          ],
+          borderColor: Color(0xFF4F46E5),
           backgroundColor: Colors.white,
           rankColor: Color(0xFF4F46E5),
           scoreColor: Color(0xFF1A1A1A),
@@ -335,12 +329,7 @@ class _PreviewFrameStyle {
           glowColor: Color(0xFFC4A3FF),
         ),
       SeasonTier.challenger => const _PreviewFrameStyle(
-          borderColors: [
-            Color(0xFFFFD166),
-            Color(0xFFFB7185),
-            Color(0xFFA855F7),
-            Color(0xFF38BDF8),
-          ],
+          borderColor: Color(0xFFA855F7),
           backgroundColor: Color(0xFFFFFBEB),
           rankColor: Color(0xFFA855F7),
           scoreColor: Color(0xFF7C2D12),
@@ -348,11 +337,7 @@ class _PreviewFrameStyle {
           glowColor: Color(0xFFF59E0B),
         ),
       SeasonTier.master => const _PreviewFrameStyle(
-          borderColors: [
-            Color(0xFFEF4444),
-            Color(0xFFF97316),
-            Color(0xFFFACC15),
-          ],
+          borderColor: Color(0xFFDC2626),
           backgroundColor: Color(0xFFFFF7ED),
           rankColor: Color(0xFFDC2626),
           scoreColor: Color(0xFF7F1D1D),
@@ -360,11 +345,7 @@ class _PreviewFrameStyle {
           glowColor: Color(0xFFEF4444),
         ),
       SeasonTier.diamond => const _PreviewFrameStyle(
-          borderColors: [
-            Color(0xFF67E8F9),
-            Color(0xFF38BDF8),
-            Color(0xFF2563EB),
-          ],
+          borderColor: Color(0xFF0284C7),
           backgroundColor: Color(0xFFF0F9FF),
           rankColor: Color(0xFF0284C7),
           scoreColor: Color(0xFF075985),

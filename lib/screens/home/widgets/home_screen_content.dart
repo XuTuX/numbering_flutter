@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:numbering/constant.dart';
 import 'package:numbering/controllers/score_controller.dart';
-import 'package:numbering/game/numbering/level_models.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
-import 'package:numbering/widgets/home_screen/background_painter.dart';
 import 'package:numbering/widgets/home_screen/home_components.dart';
 import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/screens/home/level_list_screen.dart';
-import 'package:numbering/utils/kst_clock.dart';
-
-// ─── 레벨 팩 ────────────────────────────────────────────────────
+import 'package:numbering/screens/home/arcade_screen.dart';
 
 part 'home_screen_content_components.dart';
 
@@ -34,45 +28,29 @@ const levelPacks = [
   LevelPack('Paris', 121, 160),
 ];
 
-// ─── 홈 화면 ────────────────────────────────────────────────────
-
-class HomeScreenContent extends StatefulWidget {
+class HomeScreenContent extends StatelessWidget {
   const HomeScreenContent({
     super.key,
     required this.scoreController,
     required this.authService,
     required this.onSettingsTap,
+    required this.onProfileTap,
     required this.onStartGame,
     required this.onOpenLevelList,
     required this.onStartDaily,
     required this.onStartDailyTest,
-    required this.onShowDailyRanking,
     required this.onRankingTap,
   });
 
   final ScoreController scoreController;
   final AuthService authService;
   final VoidCallback onSettingsTap;
+  final VoidCallback onProfileTap;
   final VoidCallback onStartGame;
   final VoidCallback onOpenLevelList;
   final Future<void> Function() onStartDaily;
   final Future<void> Function() onStartDailyTest;
-  final ValueChanged<String> onShowDailyRanking;
   final VoidCallback onRankingTap;
-
-  @override
-  State<HomeScreenContent> createState() => _HomeScreenContentState();
-}
-
-class _HomeScreenContentState extends State<HomeScreenContent> {
-  final PageController _mainPageController = PageController();
-  int _currentPageIndex = 0;
-
-  @override
-  void dispose() {
-    _mainPageController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,19 +58,16 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     final isLandscape = mediaSize.width > mediaSize.height;
     final hPad = (mediaSize.width * 0.06).clamp(24.0, 40.0);
     final topPad = isLandscape ? 20.0 : 24.0;
+    
+    final progress = Get.find<LevelProgressService>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomPaint(painter: GridPatternPainter()),
-            ),
-          ),
           SafeArea(
-            child: Padding(
-              padding: EdgeInsets.only(top: topPad),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(top: topPad, bottom: 64),
               child: Column(
                 children: [
                   Padding(
@@ -100,54 +75,49 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                     child: Center(
                       child: ConstrainedBox(
                         constraints: BoxConstraints(maxWidth: isLandscape ? 820 : 480),
-                        child: _HomeHeader(
-                          authService: widget.authService,
-                          onSettingsTap: widget.onSettingsTap,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _HomeHeader(
+                              authService: authService,
+                              onSettingsTap: onSettingsTap,
+                              onProfileTap: onProfileTap,
+                            ),
+                            const SizedBox(height: 24),
+                            // Top 3 Ranking Card
+                            _Top3RankingCard(
+                              onShowRanking: onRankingTap,
+                            ),
+                            const SizedBox(height: 24),
+                            // Arcade & Today's Puzzle row
+                            IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(
+                                    child: Obx(() {
+                                      final current = progress.highestUnlockedLevel;
+                                      return _CompactArcadeButton(
+                                        currentLevel: current,
+                                        onOpenLevelList: () {
+                                          Get.to(() => ArcadeScreen(onStartGame: onStartGame));
+                                        },
+                                        onPlayCurrent: onStartGame,
+                                      );
+                                    }),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _CompactDailyButton(
+                                      onTap: onStartDaily,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    child: PageView(
-                      controller: _mainPageController,
-                      onPageChanged: (index) {
-                        setState(() => _currentPageIndex = index);
-                      },
-                      children: [
-                        _DailyPuzzleHero(
-                          onStartDaily: widget.onStartDaily,
-                          onShowRanking: () => widget.onShowDailyRanking(KstClock.currentDateKey()),
-                        ),
-                        _LevelPackPage(onStartGame: widget.onStartGame),
-                      ],
-                    ),
-                  ),
-                  // Segmented control / indicators (Moved to bottom)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _PageIndicator(
-                          title: '오늘의 퍼즐',
-                          isActive: _currentPageIndex == 0,
-                          onTap: () => _mainPageController.animateToPage(
-                            0,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        _PageIndicator(
-                          title: '혼자 하기',
-                          isActive: _currentPageIndex == 1,
-                          onTap: () => _mainPageController.animateToPage(
-                            1,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ],
@@ -159,6 +129,3 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     );
   }
 }
-
-// ─── 팩 페이지 ──────────────────────────────────────────────────
-

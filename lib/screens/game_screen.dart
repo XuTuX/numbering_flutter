@@ -7,7 +7,6 @@ import '../game/game_module.dart';
 import '../game/game_registry.dart';
 import '../services/audio_service.dart';
 import '../theme/app_colors.dart';
-import '../widgets/home_screen/background_painter.dart';
 import 'home/home_screen.dart';
 
 class GameScreen extends StatefulWidget {
@@ -63,11 +62,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         backgroundColor: AppColors.background,
         body: Stack(
           children: [
-            Positioned.fill(
-              child: RepaintBoundary(
-                child: CustomPaint(painter: GridPatternPainter()),
-              ),
-            ),
+            // Removed GridPatternPainter for clean Figma aesthetic
             SafeArea(
               child: Center(
                 child: ConstrainedBox(

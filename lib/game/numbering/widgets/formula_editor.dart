@@ -85,27 +85,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                       ),
                     ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: FilledButton(
-                  onPressed: _submit,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: widget.accent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: const Text(
-                    '제출',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: compact ? 2 : 10),
+            SizedBox(height: compact ? 8 : 20),
           ],
         );
       },
@@ -175,25 +155,31 @@ class _FormulaEditorState extends State<_FormulaEditor> {
 
   void _previewValidation() {
     if (!_operators.contains(InlineOperator.equals)) return;
-    final result = validateLevelFormula(
-      digitString: widget.level.digitString,
-      expression: _expression,
-      availableOperators: widget.level.availableOperators,
-    );
-    if (!result.valid && mounted) setState(() => _message = result.message);
-  }
-
-  void _submit() {
-    final result = validateLevelFormula(
-      digitString: widget.level.digitString,
-      expression: _expression,
-      availableOperators: widget.level.availableOperators,
-    );
-    if (!result.valid) {
-      showMessage(result.message ?? '수식을 확인하세요');
-      return;
+    
+    // Only auto-submit if all operators are filled
+    if (_operators.contains(null)) {
+      // Still show preview message if they somehow filled an equals but not everything
+      // Wait, in this game, all operator slots must be filled.
+      return; 
     }
-    widget.onValidSubmission(_expression, result.value!);
+    
+    final result = validateLevelFormula(
+      digitString: widget.level.digitString,
+      expression: _expression,
+      availableOperators: widget.level.availableOperators,
+    );
+    
+    if (!result.valid && mounted) {
+      setState(() => _message = result.message);
+    } else if (result.valid) {
+      // Show success briefly before completing
+      setState(() => _message = '정답입니다! 🎉');
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (mounted) {
+          widget.onValidSubmission(_expression, result.value!);
+        }
+      });
+    }
   }
 
   void reset() {

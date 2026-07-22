@@ -75,44 +75,29 @@ class _DailyPlayButtonState extends State<_DailyPlayButton>
               ),
               padding: EdgeInsets.zero,
             ),
-            child: ShaderMask(
-              blendMode: BlendMode.srcIn,
-              shaderCallback: (bounds) {
-                return LinearGradient(
-                  begin: Alignment(_shimmer.value - 1, 0),
-                  end: Alignment(_shimmer.value, 0),
-                  colors: const [
-                    Colors.white,
-                    Color(0xFFFFF3D6),
-                    Colors.white,
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ).createShader(bounds);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (widget.isLoading) ...[
-                    SizedBox(
-                      width: btnFs * 0.8,
-                      height: btnFs * 0.8,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2.4,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                  Text(
-                    widget.isLoading ? '입장 중...'.tr : '오늘의 퍼즐'.tr,
-                    style: GoogleFonts.blackHanSans(
-                      fontSize: btnFs,
-                      letterSpacing: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (widget.isLoading) ...[
+                  SizedBox(
+                    width: btnFs * 0.8,
+                    height: btnFs * 0.8,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2.4,
                       color: Colors.white,
                     ),
                   ),
+                  const SizedBox(width: 10),
                 ],
-              ),
+                Text(
+                  widget.isLoading ? '입장 중...'.tr : '오늘의 퍼즐'.tr,
+                  style: GoogleFonts.blackHanSans(
+                    fontSize: btnFs,
+                    letterSpacing: 0,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           );
         },

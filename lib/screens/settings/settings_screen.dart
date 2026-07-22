@@ -7,7 +7,6 @@ import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
 import 'package:numbering/game/game_module.dart';
 import 'package:numbering/screens/home/home_screen_flows.dart';
-import 'package:numbering/widgets/home_screen/background_painter.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
 import 'package:numbering/theme/app_colors.dart';
 
@@ -29,19 +28,12 @@ class SettingsScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomPaint(painter: GridPatternPainter()),
-            ),
-          ),
+          // Removed GridPatternPainter for clean Figma aesthetic
           SafeArea(
             child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.sizeOf(context).width >
-                          MediaQuery.sizeOf(context).height
-                      ? MediaQuery.sizeOf(context).width * 0.85
-                      : 600,
+                constraints: const BoxConstraints(
+                  maxWidth: 600,
                 ),
                 child: Column(
                   children: [

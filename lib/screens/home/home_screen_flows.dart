@@ -99,20 +99,18 @@ void showSettingsScreen(AuthService authService) {
 }
 
 void showRankingSheet() {
-  Get.bottomSheet(
-    const RankingScreen(),
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    enterBottomSheetDuration: const Duration(milliseconds: 300),
+  Get.to(
+    () => const RankingScreen(),
+    transition: Transition.rightToLeft,
+    duration: const Duration(milliseconds: 300),
   );
 }
 
 void showDailyRankingSheet({String? dateKey}) {
-  Get.bottomSheet(
-    RankingScreen(isDailyOnly: true, dailyDateKey: dateKey),
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    enterBottomSheetDuration: const Duration(milliseconds: 300),
+  Get.to(
+    () => RankingScreen(isDailyOnly: true, dailyDateKey: dateKey),
+    transition: Transition.rightToLeft,
+    duration: const Duration(milliseconds: 300),
   );
 }
 
