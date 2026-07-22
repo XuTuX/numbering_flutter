@@ -101,16 +101,16 @@ void showSettingsScreen(AuthService authService) {
 void showRankingSheet() {
   Get.to(
     () => const RankingScreen(),
-    transition: Transition.rightToLeft,
-    duration: const Duration(milliseconds: 300),
+    transition: Transition.zoom,
+    duration: const Duration(milliseconds: 250),
   );
 }
 
 void showDailyRankingSheet({String? dateKey}) {
   Get.to(
     () => RankingScreen(isDailyOnly: true, dailyDateKey: dateKey),
-    transition: Transition.rightToLeft,
-    duration: const Duration(milliseconds: 300),
+    transition: Transition.zoom,
+    duration: const Duration(milliseconds: 250),
   );
 }
 

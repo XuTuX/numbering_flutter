@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:numbering/constant.dart';
 import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/database_models.dart';
 import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
+import 'package:numbering/theme/app_colors.dart';
 
 import 'ranking_period.dart';
 import 'widgets/my_rank_card.dart';
@@ -125,13 +125,19 @@ class _RankingScreenState extends State<RankingScreen> {
     final isLandscape = mediaSize.width > mediaSize.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Ranking',
-          style: TextStyle(color: charcoalBlack, fontWeight: FontWeight.bold),
+        iconTheme: const IconThemeData(color: AppColors.ink),
+        title: Text(
+          widget.isDailyOnly ? 'DAILY PUZZLE'.tr : 'RANKING'.tr,
+          style: const TextStyle(
+            color: AppColors.ink,
+            fontWeight: FontWeight.w900,
+            fontSize: 20,
+            letterSpacing: 0.5,
+          ),
         ),
         centerTitle: true,
       ),
