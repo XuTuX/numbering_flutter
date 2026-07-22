@@ -21,6 +21,7 @@ void main() {
           onStartGame: () {},
           onStartDaily: () async {},
           onRankingTap: () {},
+          currentLevel: 3,
         ),
       ),
     );
@@ -32,14 +33,24 @@ void main() {
 
     expect(find.text('NUMBERING'), findsOneWidget);
     expect(find.text("Today's\nChallenge"), findsOneWidget);
-    expect(find.text('Play'), findsOneWidget);
+    expect(find.text('Play'), findsNothing);
+    final challengeDate = find.byKey(const ValueKey('challenge-date'));
+    expect(challengeDate, findsOneWidget);
     expect(
-        find.byKey(const ValueKey('challenge-puzzle-number')), findsOneWidget);
+      tester.widget<Text>(challengeDate).data,
+      matches(RegExp(r'^\d{2}\.\d{2}$')),
+    );
     expect(find.text('Arcade'), findsOneWidget);
+    expect(find.text('SEOUL'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('arcade-round-background')),
+      findsOneWidget,
+    );
     expect(find.text('PLAY AT YOUR PACE'), findsNothing);
     expect(find.textContaining('JUL'), findsNothing);
     expect(find.textContaining('7-day streak'), findsNothing);
     expect(find.text('#24'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_forward_rounded), findsNWidgets(3));
     expect(find.textContaining('+3 today'), findsNothing);
     expect(find.text('Statistics'), findsNothing);
     expect(find.byType(SingleChildScrollView), findsNothing);
@@ -52,7 +63,7 @@ void main() {
 
     expect(find.text("Today's\nChallenge"), findsOneWidget);
     expect(find.text('Arcade'), findsOneWidget);
-    expect(find.text('View Ranking'), findsOneWidget);
+    expect(find.text('View Ranking'), findsNothing);
     expect(find.byType(SingleChildScrollView), findsNothing);
     expect(tester.takeException(), isNull);
   });

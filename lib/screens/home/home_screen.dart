@@ -94,18 +94,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final authService = Get.find<AuthService>();
+    final levelProgress = Get.find<LevelProgressService>();
 
-    return HomeScreenContent(
-      onSettingsTap: () => showSettingsScreen(authService),
-      onProfileTap: () => Get.to(() => const ProfileScreen()),
-      onStartGame: () => openGameScreen(
-        GameSessionConfig(
-          mode: GameMode.normal,
-          startLevelId: Get.find<LevelProgressService>().highestUnlockedLevel,
+    return Obx(() {
+      final currentLevel = levelProgress.highestUnlockedLevel;
+      return HomeScreenContent(
+        currentLevel: currentLevel,
+        onSettingsTap: () => showSettingsScreen(authService),
+        onProfileTap: () => Get.to(() => const ProfileScreen()),
+        onStartGame: () => openGameScreen(
+          GameSessionConfig(
+            mode: GameMode.normal,
+            startLevelId: currentLevel,
+          ),
         ),
-      ),
-      onStartDaily: () => openDailyChallenge(authService),
-      onRankingTap: handleRankingPress,
-    );
+        onStartDaily: () => openDailyChallenge(authService),
+        onRankingTap: handleRankingPress,
+      );
+    });
   }
 }

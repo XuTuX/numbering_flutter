@@ -9,11 +9,11 @@ const _homeBorder = AppColors.hairline;
 
 class _ChallengeCard extends StatelessWidget {
   const _ChallengeCard({
-    required this.puzzleNumber,
+    required this.dateLabel,
     required this.onTap,
   });
 
-  final int puzzleNumber;
+  final String dateLabel;
   final Future<void> Function() onTap;
 
   @override
@@ -24,18 +24,18 @@ class _ChallengeCard extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            right: -18,
-            top: -34,
+            left: -10,
+            bottom: -26,
             child: ExcludeSemantics(
               child: Text(
-                '$puzzleNumber',
-                key: const ValueKey('challenge-puzzle-number'),
+                dateLabel,
+                key: const ValueKey('challenge-date'),
                 style: const TextStyle(
-                  color: Color(0x0A171716),
-                  fontSize: 168,
+                  color: Color(0x0C171716),
+                  fontSize: 132,
                   height: 1,
                   fontWeight: FontWeight.w900,
-                  letterSpacing: -12,
+                  letterSpacing: -8,
                 ),
               ),
             ),
@@ -56,9 +56,9 @@ class _ChallengeCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Align(
+                const Align(
                   alignment: Alignment.bottomRight,
-                  child: _PlayButton(onPressed: onTap),
+                  child: _ArrowCircle(),
                 ),
               ],
             ),
@@ -69,50 +69,13 @@ class _ChallengeCard extends StatelessWidget {
   }
 }
 
-class _PlayButton extends StatelessWidget {
-  const _PlayButton({required this.onPressed});
-
-  final Future<void> Function() onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 46,
-      child: FilledButton(
-        onPressed: () async => onPressed(),
-        style: FilledButton.styleFrom(
-          backgroundColor: const Color(0xFFE0DED7),
-          foregroundColor: _homeInk,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          side: const BorderSide(color: _homeBorder),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Play',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.1,
-              ),
-            ),
-            SizedBox(width: 18),
-            Icon(Icons.arrow_forward_rounded, size: 17),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _ArcadeCard extends StatelessWidget {
-  const _ArcadeCard({required this.onTap});
+  const _ArcadeCard({
+    required this.roundLabel,
+    required this.onTap,
+  });
 
+  final String roundLabel;
   final VoidCallback onTap;
 
   @override
@@ -120,11 +83,34 @@ class _ArcadeCard extends StatelessWidget {
     return _HomeCard(
       color: _arcadeSurface,
       onTap: onTap,
-      child: const Padding(
-        padding: EdgeInsets.all(18),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
         child: Stack(
           children: [
-            Align(
+            Positioned(
+              left: -6,
+              right: -6,
+              bottom: -8,
+              child: ExcludeSemantics(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    roundLabel,
+                    key: const ValueKey('arcade-round-background'),
+                    maxLines: 1,
+                    style: const TextStyle(
+                      color: Color(0x0A171716),
+                      fontSize: 58,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -3,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const Align(
               alignment: Alignment.topLeft,
               child: FittedBox(
                 fit: BoxFit.scaleDown,
@@ -140,7 +126,7 @@ class _ArcadeCard extends StatelessWidget {
                 ),
               ),
             ),
-            Align(
+            const Align(
               alignment: Alignment.bottomRight,
               child: _ArrowCircle(),
             ),
@@ -191,24 +177,9 @@ class _RankingCard extends StatelessWidget {
               ),
             ),
             Spacer(),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'View Ranking',
-                    style: TextStyle(
-                      color: _homeInk,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(width: 5),
-                  Icon(Icons.arrow_forward_rounded, color: _homeInk, size: 15),
-                ],
-              ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: _ArrowCircle(),
             ),
           ],
         ),

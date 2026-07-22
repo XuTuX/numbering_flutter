@@ -31,6 +31,7 @@ class HomeScreenContent extends StatelessWidget {
     required this.onStartGame,
     required this.onStartDaily,
     required this.onRankingTap,
+    this.currentLevel = 1,
   });
 
   final VoidCallback onSettingsTap;
@@ -38,13 +39,14 @@ class HomeScreenContent extends StatelessWidget {
   final VoidCallback onStartGame;
   final Future<void> Function() onStartDaily;
   final VoidCallback onRankingTap;
+  final int currentLevel;
 
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
     final horizontalPadding = (mediaSize.width * 0.055).clamp(22.0, 48.0);
     final today = KstClock.nowInKst();
-    final puzzleNumber = _dayOfYear(today);
+    final challengeDate = _formatChallengeDate(today);
 
     return Scaffold(
       backgroundColor: _homeBackground,
@@ -66,10 +68,17 @@ class HomeScreenContent extends StatelessWidget {
                     child: Builder(
                       builder: (context) {
                         final challenge = _ChallengeCard(
-                          puzzleNumber: puzzleNumber,
+                          dateLabel: challengeDate,
                           onTap: onStartDaily,
                         );
+                        final currentPack = levelPacks.firstWhere(
+                          (pack) =>
+                              currentLevel >= pack.startLevel &&
+                              currentLevel <= pack.endLevel,
+                          orElse: () => levelPacks.first,
+                        );
                         final arcade = _ArcadeCard(
+                          roundLabel: currentPack.name.toUpperCase(),
                           onTap: () => _openArcade(onStartGame),
                         );
                         final ranking = _RankingCard(onTap: onRankingTap);
@@ -113,7 +122,7 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-  int _dayOfYear(DateTime date) {
-    return date.difference(DateTime(date.year, 1, 1)).inDays + 1;
-  }
+  String _formatChallengeDate(DateTime date) =>
+      '${date.month.toString().padLeft(2, '0')}.'
+      '${date.day.toString().padLeft(2, '0')}';
 }
