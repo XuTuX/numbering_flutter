@@ -3,14 +3,13 @@ import 'package:get/get.dart';
 
 import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/services/auth_service.dart';
-import 'package:numbering/services/database_models.dart';
+
 import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/utils/mock_data.dart';
 
 import 'ranking_period.dart';
-import 'widgets/my_rank_card.dart';
 import 'widgets/ranking_chrome.dart';
 import 'widgets/rank_list_item.dart';
 import 'widgets/ranking_states.dart';
@@ -32,10 +31,7 @@ class RankingScreen extends StatefulWidget {
 class _RankingScreenState extends State<RankingScreen> {
   bool _isLoading = true;
   String? _error;
-  int? _myRank;
-  int? _myScore;
   List<Map<String, dynamic>> _scores = [];
-  WeeklySeasonSummary? _weeklySeasonSummary;
   late RankingPeriod _period;
   late final Worker _authWorker;
 
@@ -86,19 +82,10 @@ class _RankingScreenState extends State<RankingScreen> {
     }
     
     final mockScores = MockData.getScores(myId, authService.userNickname.value, localScore);
-    int? calculatedRank;
-    if (myId != null && localScore != null) {
-      final myIndex = mockScores.indexWhere((item) => item['user_id'] == myId);
-      if (myIndex >= 0) {
-        calculatedRank = myIndex + 1;
-      }
-    }
+
     
     setState(() {
-      _myRank = calculatedRank;
-      _myScore = localScore;
       _scores = mockScores;
-      _weeklySeasonSummary = null;
       _isLoading = false;
     });
   }
@@ -186,45 +173,80 @@ class _RankingScreenState extends State<RankingScreen> {
       return RankingErrorState(onRetry: _loadRankingData);
     }
 
-    return Column(
-      children: [
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: MyRankCard(
-            rank: _myRank,
-            score: _myScore,
-            isLoggedIn: myId != null,
-            period: _period,
-            weeklySeasonSummary: _weeklySeasonSummary,
-            onLoginTap: _showLoginSheet,
-          ),
-        ),
-        if (_scores.isEmpty) ...[
-          const SizedBox(height: 16),
-          Expanded(child: EmptyRankingState(period: _period)),
-        ] else ...[
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: TopPlayersLabel(period: _period),
-          ),
-          const SizedBox(height: 8),
+    if (_scores.isEmpty) {
+      return EmptyRankingState(period: _period);
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      itemCount: _scores.length + (myId == null ? 1 : 0),
+      itemBuilder: (context, index) {
+        // Show compact login bar at the top when not logged in
+        if (myId == null && index == 0) {
+          return _LoginPromptBar(onLoginTap: _showLoginSheet);
+        }
+
+        final scoreIndex = myId == null ? index - 1 : index;
+        return RankListItem(
+          scoreData: _scores[scoreIndex],
+          index: scoreIndex,
+          myId: myId,
+        );
+      },
+    );
+  }
+}
+
+/// Compact inline login prompt — replaces bulky MyRankCard for non-logged-in users.
+class _LoginPromptBar extends StatelessWidget {
+  const _LoginPromptBar({required this.onLoginTap});
+  final VoidCallback onLoginTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceSoft,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.hairline),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.person_outline_rounded, size: 18, color: AppColors.ink.withValues(alpha: 0.35)),
+          const SizedBox(width: 10),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-              itemCount: _scores.length,
-              itemBuilder: (context, index) {
-                return RankListItem(
-                  scoreData: _scores[index],
-                  index: index,
-                  myId: myId,
-                );
-              },
+            child: Text(
+              '로그인하면 랭킹에 참여할 수 있어요',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onLoginTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: const Text(
+                '로그인',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.onPrimary,
+                ),
+              ),
             ),
           ),
         ],
-      ],
+      ),
     );
   }
 }

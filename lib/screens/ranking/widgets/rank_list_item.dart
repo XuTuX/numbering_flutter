@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import 'package:numbering/constant.dart';
-import 'package:numbering/services/database_models.dart';
-import 'package:numbering/theme/app_typography.dart';
+import 'package:numbering/theme/app_colors.dart';
 
 class RankListItem extends StatelessWidget {
   const RankListItem({
@@ -32,9 +29,6 @@ class RankListItem extends StatelessWidget {
     final score = _parseScore(scoreVal);
     final userId = scoreData['user_id'];
     final isMe = userId != null && userId == myId;
-    final tier = SeasonTier.fromScore(score);
-    final frameStyle = _RankFrameStyle.forTier(tier);
-    final hasTierFrame = frameStyle != null;
     final rankValue = scoreData['rank'];
     final rank = switch (rankValue) {
       int value => value,
@@ -43,72 +37,68 @@ class RankListItem extends StatelessWidget {
       _ => index + 1,
     };
 
-    final Color rankColor = switch (rank) {
-      1 => const Color(0xFFFB7185), // Coral Red
-      2 => const Color(0xFFFB923C), // Orange
-      3 => const Color(0xFFFBBF24), // Amber Yellow
-      _ => charcoalBlack.withValues(alpha: 0.25),
-    };
-
-    Color itemBgColor = const Color(0xFFF8FAFC);
-    Color borderColor = charcoalBlack.withValues(alpha: 0.08);
-
-    if (isMe) {
-      itemBgColor = const Color(0xFFEFF6FF);
-      borderColor = const Color(0xFF2563EB).withValues(alpha: 0.2);
+    // Top 3 get pastel backgrounds matching the home screen design tokens
+    final Color bgColor;
+    final Color rankColor;
+    if (rank == 1) {
+      bgColor = AppColors.blockLilac;
+      rankColor = AppColors.ink;
+    } else if (rank == 2) {
+      bgColor = AppColors.blockLime;
+      rankColor = AppColors.ink;
+    } else if (rank == 3) {
+      bgColor = AppColors.blockCream;
+      rankColor = AppColors.ink;
+    } else if (isMe) {
+      bgColor = AppColors.surfaceSoft;
+      rankColor = AppColors.ink;
+    } else {
+      bgColor = AppColors.canvas;
+      rankColor = AppColors.ink.withValues(alpha: 0.3);
     }
 
-    final content = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: frameStyle?.backgroundColor ?? itemBgColor,
-        borderRadius: BorderRadius.circular(hasTierFrame ? 12 : 14),
-        border: hasTierFrame
-            ? null
-            : Border.all(
-                color: borderColor,
-                width: 1,
-              ),
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: rank > 3 ? Border.all(color: AppColors.hairline) : null,
       ),
       child: Row(
         children: [
           SizedBox(
-            width: 36,
+            width: 32,
             child: Text(
               '$rank',
-              style: GoogleFonts.blackHanSans(
+              style: TextStyle(
                 fontSize: 18,
-                color: frameStyle?.rankColor ?? rankColor,
+                fontWeight: FontWeight.w900,
+                color: rankColor,
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        nickname,
-                        style: GoogleFonts.notoSans(
-                          fontSize: 14,
-                          fontWeight: isMe ? FontWeight.w900 : FontWeight.w700,
-                          color: charcoalBlack,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                Text(
+                  nickname,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: isMe ? FontWeight.w900 : FontWeight.w600,
+                    color: AppColors.ink,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 if (isMe)
                   Text(
                     'YOU',
-                    style: AppTypography.label.copyWith(
+                    style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w900,
-                      color: const Color(0xFF2563EB),
+                      color: AppColors.ink.withValues(alpha: 0.4),
                       letterSpacing: 1.0,
                     ),
                   ),
@@ -117,56 +107,26 @@ class RankListItem extends StatelessWidget {
           ),
           Text(
             _formatScore(score),
-            style: GoogleFonts.blackHanSans(
-              fontSize: 15,
-              color: frameStyle?.scoreColor ??
-                  charcoalBlack.withValues(alpha: 0.8),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: AppColors.ink.withValues(alpha: 0.8),
             ),
           ),
         ],
       ),
     );
-
-    if (hasTierFrame) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: frameStyle.borderColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: frameStyle.glowColor.withValues(alpha: 0.32),
-              blurRadius: 14,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: content,
-      );
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: content,
-    );
   }
 
   String _formatScore(dynamic score) {
     final value = _parseScore(score);
-    if (value < 1000) {
-      return value.toString();
-    }
-
+    if (value < 1000) return value.toString();
     final digits = value.toString();
     final buffer = StringBuffer();
-    for (var index = 0; index < digits.length; index++) {
-      if (index > 0 && (digits.length - index) % 3 == 0) {
-        buffer.write(',');
-      }
-      buffer.write(digits[index]);
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) buffer.write(',');
+      buffer.write(digits[i]);
     }
-
     return buffer.toString();
   }
 
@@ -175,58 +135,4 @@ class RankListItem extends StatelessWidget {
   }
 }
 
-class _RankFrameStyle {
-  const _RankFrameStyle({
-    required this.borderColor,
-    required this.backgroundColor,
-    required this.rankColor,
-    required this.scoreColor,
-    required this.iconColor,
-    required this.glowColor,
-  });
 
-  final Color borderColor;
-  final Color backgroundColor;
-  final Color rankColor;
-  final Color scoreColor;
-  final Color iconColor;
-  final Color glowColor;
-
-  static _RankFrameStyle? forTier(SeasonTier tier) {
-    return switch (tier) {
-      SeasonTier.jesus => const _RankFrameStyle(
-          borderColor: Color(0xFF4F46E5),
-          backgroundColor: Colors.white,
-          rankColor: Color(0xFF4F46E5),
-          scoreColor: Color(0xFF1A1A1A),
-          iconColor: Color(0xFF4F46E5),
-          glowColor: Color(0xFFC4A3FF),
-        ),
-      SeasonTier.challenger => const _RankFrameStyle(
-          borderColor: Color(0xFFA855F7),
-          backgroundColor: Color(0xFFFFFBEB),
-          rankColor: Color(0xFFA855F7),
-          scoreColor: Color(0xFF7C2D12),
-          iconColor: Color(0xFFF59E0B),
-          glowColor: Color(0xFFF59E0B),
-        ),
-      SeasonTier.master => const _RankFrameStyle(
-          borderColor: Color(0xFFDC2626),
-          backgroundColor: Color(0xFFFFF7ED),
-          rankColor: Color(0xFFDC2626),
-          scoreColor: Color(0xFF7F1D1D),
-          iconColor: Color(0xFFF97316),
-          glowColor: Color(0xFFEF4444),
-        ),
-      SeasonTier.diamond => const _RankFrameStyle(
-          borderColor: Color(0xFF0284C7),
-          backgroundColor: Color(0xFFF0F9FF),
-          rankColor: Color(0xFF0284C7),
-          scoreColor: Color(0xFF075985),
-          iconColor: Color(0xFF38BDF8),
-          glowColor: Color(0xFF38BDF8),
-        ),
-      _ => null,
-    };
-  }
-}
