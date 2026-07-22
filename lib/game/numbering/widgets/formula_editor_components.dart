@@ -1,6 +1,6 @@
 part of '../numbering_game_page.dart';
 
-class _DragDropEditor extends StatelessWidget {
+class _DragDropEditor extends StatefulWidget {
   const _DragDropEditor({
     required this.digits,
     required this.operators,
@@ -24,6 +24,34 @@ class _DragDropEditor extends StatelessWidget {
   final bool isLandscape;
 
   @override
+  State<_DragDropEditor> createState() => _DragDropEditorState();
+}
+
+class _DragDropEditorState extends State<_DragDropEditor> {
+  final GlobalKey _formulaRowKey = GlobalKey();
+  late List<GlobalKey> _slotKeys;
+  int? _hoveredSlotIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _slotKeys = _createSlotKeys();
+  }
+
+  @override
+  void didUpdateWidget(covariant _DragDropEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final slotCount = widget.digits.length - 1;
+    if (_slotKeys.length != slotCount) {
+      _slotKeys = _createSlotKeys();
+      _hoveredSlotIndex = null;
+    }
+  }
+
+  List<GlobalKey> _createSlotKeys() =>
+      List.generate(widget.digits.length - 1, (_) => GlobalKey());
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -31,25 +59,26 @@ class _DragDropEditor extends StatelessWidget {
         final isLandscape = viewport.width > viewport.height;
         final compact = constraints.maxWidth < 600 || viewport.height < 560;
         final digitFontSize = compact
-            ? (constraints.maxWidth / (digits.length * 1.12))
+            ? (constraints.maxWidth / (widget.digits.length * 1.12))
                 .clamp(isLandscape ? 56.0 : 34.0, isLandscape ? 78.0 : 58.0)
             : (constraints.maxWidth * 0.08).clamp(62.0, 96.0);
         final digitPadding = compact
-            ? (digits.length >= 8 ? 3.0 : (isLandscape ? 14.0 : 7.0))
+            ? (widget.digits.length >= 8 ? 3.0 : (isLandscape ? 14.0 : 7.0))
             : 13.0;
         final operatorFontSize = (digitFontSize * 0.55).clamp(24.0, 48.0);
-        final items = List<Widget>.generate(digits.length, (digitIndex) {
-          final openingCount = parentheses
+        final items = List<Widget>.generate(widget.digits.length, (digitIndex) {
+          final openingCount = widget.parentheses
               .where(
                   (range) => range.normalized().startDigitIndex == digitIndex)
               .length;
-          final closingCount = parentheses
+          final closingCount = widget.parentheses
               .where((range) => range.normalized().endDigitIndex == digitIndex)
               .length;
-          final selected = selectedDigitIndex == digitIndex;
+          final selected = widget.selectedDigitIndex == digitIndex;
           final digit = GestureDetector(
+            key: ValueKey('formula-digit-$digitIndex'),
             behavior: HitTestBehavior.opaque,
-            onTap: () => onDigitTapped(digitIndex),
+            onTap: () => widget.onDigitTapped(digitIndex),
             child: Padding(
               padding:
                   EdgeInsets.symmetric(horizontal: digitPadding, vertical: 8),
@@ -59,10 +88,10 @@ class _DragDropEditor extends StatelessWidget {
                   fontSize: digitFontSize,
                   height: 1,
                   fontWeight: FontWeight.w800,
-                  color: selected ? accent : const Color(0xFF17191D),
+                  color: selected ? widget.accent : const Color(0xFF17191D),
                 ),
                 child: Text(
-                  '${'(' * openingCount}${digits[digitIndex]}${')' * closingCount}',
+                  '${'(' * openingCount}${widget.digits[digitIndex]}${')' * closingCount}',
                 ),
               ),
             ),
@@ -70,45 +99,100 @@ class _DragDropEditor extends StatelessWidget {
           if (digitIndex == 0) return digit;
           final slotIndex = digitIndex - 1;
           return _InlineOperatorTarget(
-            current: operators[slotIndex],
+            key: _slotKeys[slotIndex],
+            current: widget.operators[slotIndex],
             digit: digit,
-            accent: accent,
+            accent: widget.accent,
             operatorFontSize: operatorFontSize,
             horizontalPadding: digitPadding * 0.65,
-            onAccept: (operator) => onOperatorChanged(slotIndex, operator),
-            onRemove: () => onOperatorChanged(slotIndex, null),
+            hovering: _hoveredSlotIndex == slotIndex,
+            onRemove: () => widget.onOperatorChanged(slotIndex, null),
           );
         });
 
         return Column(
           children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(mainAxisSize: MainAxisSize.min, children: items),
+            Container(
+              key: _formulaRowKey,
+              alignment: Alignment.center,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(mainAxisSize: MainAxisSize.min, children: items),
+              ),
             ),
             const Spacer(),
             _OperatorPalette(
-              accent: accent,
-              availableOperators: availableOperators,
+              accent: widget.accent,
+              availableOperators: widget.availableOperators,
               compact: compact,
+              onDragUpdate: _updateOperatorHover,
+              onDragEnd: _placeOperator,
             ),
           ],
         );
       },
     );
   }
+
+  void _updateOperatorHover(Offset feedbackCenter) {
+    final slotIndex = _slotIndexAt(feedbackCenter);
+    if (slotIndex == _hoveredSlotIndex) return;
+    setState(() => _hoveredSlotIndex = slotIndex);
+  }
+
+  void _placeOperator(InlineOperator operator, Offset feedbackCenter) {
+    final slotIndex = _slotIndexAt(feedbackCenter);
+    if (_hoveredSlotIndex != null) {
+      setState(() => _hoveredSlotIndex = null);
+    }
+    if (slotIndex != null) {
+      widget.onOperatorChanged(slotIndex, operator);
+    }
+  }
+
+  int? _slotIndexAt(Offset globalFeedbackCenter) {
+    final editorBox =
+        _formulaRowKey.currentContext?.findRenderObject() as RenderBox?;
+    if (editorBox == null || !editorBox.hasSize) return null;
+
+    // Convert the floating feedback center from global coordinates into the
+    // formula row, then compare it with each rendered slot. This mirrors the
+    // board GlobalKey coordinate conversion used by the block drag system.
+    final localFeedbackCenter = editorBox.globalToLocal(globalFeedbackCenter);
+    for (var index = 0; index < _slotKeys.length; index++) {
+      final slotBox =
+          _slotKeys[index].currentContext?.findRenderObject() as RenderBox?;
+      if (slotBox == null || !slotBox.hasSize) continue;
+
+      final topLeft = slotBox.localToGlobal(Offset.zero, ancestor: editorBox);
+      final bottomRight = slotBox.localToGlobal(
+        slotBox.size.bottomRight(Offset.zero),
+        ancestor: editorBox,
+      );
+      final slotRect = Rect.fromPoints(topLeft, bottomRight);
+      final dropRect = Rect.fromLTRB(
+        slotRect.left,
+        slotRect.top - 12,
+        slotRect.right,
+        slotRect.bottom + 12,
+      );
+      if (dropRect.contains(localFeedbackCenter)) return index;
+    }
+    return null;
+  }
 }
 
 // ─── 인라인 연산자 타겟 ─────────────────────────────────────
 
-class _InlineOperatorTarget extends StatefulWidget {
+class _InlineOperatorTarget extends StatelessWidget {
   const _InlineOperatorTarget({
+    super.key,
     required this.current,
     required this.digit,
     required this.accent,
     required this.operatorFontSize,
     required this.horizontalPadding,
-    required this.onAccept,
+    required this.hovering,
     required this.onRemove,
   });
 
@@ -117,59 +201,36 @@ class _InlineOperatorTarget extends StatefulWidget {
   final Color accent;
   final double operatorFontSize;
   final double horizontalPadding;
-  final ValueChanged<InlineOperator> onAccept;
+  final bool hovering;
   final VoidCallback onRemove;
 
   @override
-  State<_InlineOperatorTarget> createState() => _InlineOperatorTargetState();
-}
-
-class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
-  bool _hovering = false;
-
-  @override
   Widget build(BuildContext context) {
-    return DragTarget<InlineOperator>(
-      onWillAcceptWithDetails: (_) {
-        if (!_hovering) setState(() => _hovering = true);
-        return true;
-      },
-      onLeave: (_) {
-        if (_hovering) setState(() => _hovering = false);
-      },
-      onAcceptWithDetails: (details) {
-        if (_hovering) setState(() => _hovering = false);
-        widget.onAccept(details.data);
-      },
-      builder: (context, candidateData, rejectedData) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 70),
-            curve: Curves.easeOutCubic,
-            width: _hovering && widget.current == null
-                ? widget.operatorFontSize * 0.75
-                : 0,
-          ),
-          if (widget.current case final current?)
-            GestureDetector(
-              onTap: widget.onRemove,
-              child: Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: widget.horizontalPadding),
-                child: Text(
-                  current.symbol,
-                  style: TextStyle(
-                    fontSize: widget.operatorFontSize,
-                    fontWeight: FontWeight.w700,
-                    color: _hovering ? widget.accent : const Color(0xFF253044),
-                  ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 70),
+          curve: Curves.easeOutCubic,
+          width: hovering && current == null ? operatorFontSize * 0.75 : 0,
+        ),
+        if (current case final current?)
+          GestureDetector(
+            onTap: onRemove,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              child: Text(
+                current.symbol,
+                style: TextStyle(
+                  fontSize: operatorFontSize,
+                  fontWeight: FontWeight.w700,
+                  color: hovering ? accent : const Color(0xFF253044),
                 ),
               ),
             ),
-          widget.digit,
-        ],
-      ),
+          ),
+        digit,
+      ],
     );
   }
 }
@@ -181,11 +242,15 @@ class _OperatorPalette extends StatefulWidget {
     required this.accent,
     required this.availableOperators,
     required this.compact,
+    required this.onDragUpdate,
+    required this.onDragEnd,
   });
 
   final Color accent;
   final Set<String> availableOperators;
   final bool compact;
+  final ValueChanged<Offset> onDragUpdate;
+  final void Function(InlineOperator operator, Offset feedbackCenter) onDragEnd;
 
   @override
   State<_OperatorPalette> createState() => _OperatorPaletteState();
@@ -219,9 +284,31 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
           for (var index = 0; index < operators.length; index++) ...[
             if (index > 0) const SizedBox(width: 8),
             Draggable<InlineOperator>(
+              key: ValueKey('operator-drag-${operators[index].symbol}'),
               data: operators[index],
               onDragStarted: () => setState(() => _dragging = operators[index]),
-              onDragEnd: (_) => setState(() => _dragging = null),
+              dragAnchorStrategy: (_, __, ___) => Offset(size / 2, size * 1.35),
+              onDragUpdate: (details) {
+                const feedbackCenterFactor = 0.5;
+                final anchor = Offset(size / 2, size * 1.35);
+                final feedbackTopLeft = details.globalPosition - anchor;
+                widget.onDragUpdate(
+                  feedbackTopLeft +
+                      Offset(
+                        size * feedbackCenterFactor,
+                        size * feedbackCenterFactor,
+                      ),
+                );
+              },
+              onDragEnd: (details) {
+                setState(() => _dragging = null);
+                // DragEndDetails.offset is already the feedback's global
+                // top-left, unlike DragUpdateDetails.globalPosition (pointer).
+                widget.onDragEnd(
+                  operators[index],
+                  details.offset + Offset(size / 2, size / 2),
+                );
+              },
               feedback: Material(
                 color: Colors.transparent,
                 child: _OperatorButton(
