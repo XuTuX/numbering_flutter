@@ -9,13 +9,14 @@ class _Top3RankingCard extends StatelessWidget {
     return GestureDetector(
       onTap: onShowRanking,
       child: Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         decoration: BoxDecoration(
           color: AppColors.blockLilac,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -23,20 +24,19 @@ class _Top3RankingCard extends StatelessWidget {
                 Text(
                   '명예의 전당 (TOP 3)',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: AppColors.ink,
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: AppColors.ink, size: 24),
+                Icon(Icons.chevron_right_rounded, color: AppColors.ink, size: 22),
               ],
             ),
-            const SizedBox(height: 24),
-            // Placeholder rows for 1st, 2nd, 3rd
+            const SizedBox(height: 16),
             _buildRankRow(1, '-', '-'),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             _buildRankRow(2, '-', '-'),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             _buildRankRow(3, '-', '-'),
           ],
         ),
@@ -48,7 +48,7 @@ class _Top3RankingCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 28, height: 28,
+          width: 26, height: 26,
           decoration: const BoxDecoration(
             color: AppColors.canvas,
             shape: BoxShape.circle,
@@ -56,20 +56,20 @@ class _Top3RankingCard extends StatelessWidget {
           child: Center(
             child: Text(
               '$rank',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.ink),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink),
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Expanded(
           child: Text(
             name,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.ink),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.ink),
           ),
         ),
         Text(
           score,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink),
         ),
       ],
     );
@@ -93,7 +93,7 @@ class _CompactArcadeButton extends StatelessWidget {
     return GestureDetector(
       onTap: onOpenLevelList,
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.blockLime,
           borderRadius: BorderRadius.circular(24),
@@ -105,12 +105,12 @@ class _CompactArcadeButton extends StatelessWidget {
             const Text(
               '아케이드',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
             GestureDetector(
               onTap: onPlayCurrent,
               child: Container(
@@ -153,7 +153,7 @@ class _CompactDailyButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.blockCream,
           borderRadius: BorderRadius.circular(24),
@@ -163,17 +163,16 @@ class _CompactDailyButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              '오늘의\n퍼즐',
+              '오늘의 퍼즐',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
-                height: 1.2,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.canvas,
                 borderRadius: BorderRadius.circular(9999),

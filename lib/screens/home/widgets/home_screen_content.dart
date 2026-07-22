@@ -57,74 +57,65 @@ class HomeScreenContent extends StatelessWidget {
     final mediaSize = MediaQuery.sizeOf(context);
     final isLandscape = mediaSize.width > mediaSize.height;
     final hPad = (mediaSize.width * 0.06).clamp(24.0, 40.0);
-    final topPad = isLandscape ? 20.0 : 24.0;
     
     final progress = Get.find<LevelProgressService>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(top: topPad, bottom: 64),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: hPad),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: isLandscape ? 820 : 480),
               child: Column(
                 children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: hPad),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: isLandscape ? 820 : 480),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _HomeHeader(
-                              authService: authService,
-                              onSettingsTap: onSettingsTap,
-                              onProfileTap: onProfileTap,
-                            ),
-                            const SizedBox(height: 24),
-                            // Top 3 Ranking Card
-                            _Top3RankingCard(
-                              onShowRanking: onRankingTap,
-                            ),
-                            const SizedBox(height: 24),
-                            // Arcade & Today's Puzzle row
-                            IntrinsicHeight(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Expanded(
-                                    child: Obx(() {
-                                      final current = progress.highestUnlockedLevel;
-                                      return _CompactArcadeButton(
-                                        currentLevel: current,
-                                        onOpenLevelList: () {
-                                          Get.to(() => ArcadeScreen(onStartGame: onStartGame));
-                                        },
-                                        onPlayCurrent: onStartGame,
-                                      );
-                                    }),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: _CompactDailyButton(
-                                      onTap: onStartDaily,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                  const SizedBox(height: 16),
+                  _HomeHeader(
+                    authService: authService,
+                    onSettingsTap: onSettingsTap,
+                    onProfileTap: onProfileTap,
+                  ),
+                  const SizedBox(height: 16),
+                  // Ranking card fills remaining space
+                  Expanded(
+                    child: _Top3RankingCard(
+                      onShowRanking: onRankingTap,
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  // Arcade & Today's Puzzle row — fixed height
+                  SizedBox(
+                    height: 120,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Obx(() {
+                            final current = progress.highestUnlockedLevel;
+                            return _CompactArcadeButton(
+                              currentLevel: current,
+                              onOpenLevelList: () {
+                                Get.to(() => ArcadeScreen(onStartGame: onStartGame));
+                              },
+                              onPlayCurrent: onStartGame,
+                            );
+                          }),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _CompactDailyButton(
+                            onTap: onStartDaily,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
