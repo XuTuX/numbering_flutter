@@ -34,10 +34,10 @@ class _Top3RankingCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '명예의 전당 (TOP 3)',
+                  '랭킹',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
                     color: AppColors.ink,
                   ),
                 ),

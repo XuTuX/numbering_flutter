@@ -83,14 +83,14 @@ class HomeScreenContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
-                          flex: 1,
+                          flex: 7,
                           child: _Top3RankingCard(
                             onShowRanking: onRankingTap,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          flex: 1,
+                          flex: 4,
                           child: Obx(() {
                             final current = progress.highestUnlockedLevel;
                             return Column(
