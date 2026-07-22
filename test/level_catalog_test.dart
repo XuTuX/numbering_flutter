@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';
 import 'package:numbering/game/numbering/level_catalog.dart';
 import 'package:numbering/game/numbering/level_models.dart';
+import 'package:numbering/screens/home/widgets/home_screen_content.dart';
 
 void main() {
   test('catalog contains 160 ordered, playable levels', () {
@@ -76,6 +77,14 @@ void main() {
     expect(evaluateLevelScore(level, level.targetScore).stars, 3);
     expect(evaluateLevelScore(level, level.targetScore).perfect, isFalse);
     expect(evaluateLevelScore(level, level.targetScore + 1).perfect, isTrue);
+  });
+
+  test('level map resolves to the pack containing the current level', () {
+    expect(levelPackFor(1).name, 'Seoul');
+    expect(levelPackFor(20).name, 'Seoul');
+    expect(levelPackFor(21).name, 'Tokyo');
+    expect(levelPackFor(80).name, 'New York');
+    expect(levelPackFor(160).name, 'Paris');
   });
 }
 

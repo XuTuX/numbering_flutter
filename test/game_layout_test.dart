@@ -78,6 +78,16 @@ void main() {
     );
     expect(tester.getCenter(inlineHint).dy,
         lessThan(tester.getCenter(plusOperator).dy));
+
+    await tester.tap(hintButton);
+    await tester.tap(hintButton);
+    await tester.pumpAndSettle();
+
+    final hints = LevelCatalog.byId(1).hints;
+    expect(find.text(hints.first), findsOneWidget);
+    expect(find.text(hints.second), findsOneWidget);
+    expect(find.text(hints.third), findsOneWidget);
+    expect(hints.third, startsWith('정답:'));
     expect(tester.takeException(), isNull);
   });
 

@@ -36,7 +36,6 @@ class _SocialSignInRow extends StatelessWidget {
                 ],
               ],
             ),
-            const SizedBox(height: 20),
           ],
         ),
         if (isLoading)

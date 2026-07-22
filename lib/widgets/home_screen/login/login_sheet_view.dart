@@ -30,13 +30,13 @@ class _LoginSheetView extends StatelessWidget {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: isLandscape ? Get.height * 0.9 : Get.height * 0.85,
+        maxHeight: isLandscape ? Get.height * 0.82 : Get.height * 0.85,
       ),
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: Color(0xFFFCFCFB),
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(28),
-          topRight: Radius.circular(28),
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
         ),
       ),
       child: SafeArea(
@@ -51,50 +51,47 @@ class _LoginSheetView extends StatelessWidget {
                   ),
                   child: isLandscape
                       ? Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          padding: const EdgeInsets.fromLTRB(28, 0, 28, 12),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              // 왼쪽: 헤더
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    _LoginSheetHeader(
-                                      title: title,
-                                      description: description,
+                              const _SheetHandle(),
+                              const SizedBox(height: 16),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        _LoginSheetHeader(
+                                          title: title,
+                                          description: description,
+                                          compactLandscape: true,
+                                        ),
+                                        _LoginStatusMessage(
+                                          errorMessage: errorMessage,
+                                          compactLandscape: true,
+                                        ),
+                                      ],
                                     ),
-                                    _LoginErrorBanner(
-                                        errorMessage: errorMessage),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 40),
+                                  _SocialSignInRow(
+                                    isLoading: isLoading,
+                                    showAppleButton: showAppleButton,
+                                    onGoogleTap: onGoogleTap,
+                                    onAppleTap: onAppleTap,
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 24),
-                              // 오른쪽: 버튼
-                              Expanded(
-                                flex: 2,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    _SocialSignInRow(
-                                      isLoading: isLoading,
-                                      showAppleButton: showAppleButton,
-                                      onGoogleTap: onGoogleTap,
-                                      onAppleTap: onAppleTap,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _LoginLegalLinks(
-                                      onOpenTerms: onOpenTerms,
-                                      onOpenPrivacy: onOpenPrivacy,
-                                    ),
-                                  ],
-                                ),
+                              const SizedBox(height: 16),
+                              _LoginLegalLinks(
+                                onOpenTerms: onOpenTerms,
+                                onOpenPrivacy: onOpenPrivacy,
+                                compactLandscape: true,
                               ),
                             ],
                           ),
@@ -109,7 +106,7 @@ class _LoginSheetView extends StatelessWidget {
                               title: title,
                               description: description,
                             ),
-                            _LoginErrorBanner(errorMessage: errorMessage),
+                            _LoginStatusMessage(errorMessage: errorMessage),
                             const SizedBox(height: 28),
                             _SocialSignInRow(
                               isLoading: isLoading,
@@ -117,6 +114,7 @@ class _LoginSheetView extends StatelessWidget {
                               onGoogleTap: onGoogleTap,
                               onAppleTap: onAppleTap,
                             ),
+                            const SizedBox(height: 20),
                             _LoginLegalLinks(
                               onOpenTerms: onOpenTerms,
                               onOpenPrivacy: onOpenPrivacy,
@@ -158,33 +156,49 @@ class _LoginSheetHeader extends StatelessWidget {
   const _LoginSheetHeader({
     required this.title,
     required this.description,
+    this.compactLandscape = false,
   });
 
   final String title;
   final String description;
+  final bool compactLandscape;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: EdgeInsets.symmetric(horizontal: compactLandscape ? 0 : 32),
       child: Column(
+        crossAxisAlignment: compactLandscape
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: AppTypography.title.copyWith(
-              fontSize: 24,
-              height: 1.2,
+          if (title.isNotEmpty) ...[
+            Text(
+              title,
+              textAlign: compactLandscape ? TextAlign.left : TextAlign.center,
+              style: AppTypography.body.copyWith(
+                fontSize: compactLandscape ? 22 : 24,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.3,
+                height: 1.2,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: AppTypography.bodySmall.copyWith(
-              fontSize: 14,
-              color: Colors.grey[500],
-              height: 1.5,
+            const SizedBox(height: 8),
+          ],
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment:
+                compactLandscape ? Alignment.centerLeft : Alignment.center,
+            child: Text(
+              description,
+              maxLines: 1,
+              softWrap: false,
+              textAlign: compactLandscape ? TextAlign.left : TextAlign.center,
+              style: AppTypography.bodySmall.copyWith(
+                fontSize: 14,
+                color: Colors.grey[500],
+                height: 1.5,
+              ),
             ),
           ),
         ],
@@ -193,10 +207,14 @@ class _LoginSheetHeader extends StatelessWidget {
   }
 }
 
-class _LoginErrorBanner extends StatelessWidget {
-  const _LoginErrorBanner({required this.errorMessage});
+class _LoginStatusMessage extends StatelessWidget {
+  const _LoginStatusMessage({
+    required this.errorMessage,
+    this.compactLandscape = false,
+  });
 
   final String? errorMessage;
+  final bool compactLandscape;
 
   @override
   Widget build(BuildContext context) {
@@ -205,30 +223,19 @@ class _LoginErrorBanner extends StatelessWidget {
       curve: Curves.easeOut,
       child: (errorMessage != null && errorMessage!.isNotEmpty)
           ? Padding(
-              padding: const EdgeInsets.only(left: 32, right: 32, top: 16),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error_outline_rounded,
-                        color: Color(0xFFEF4444), size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        errorMessage!.tr,
-                        style: GoogleFonts.notoSans(
-                          color: const Color(0xFFB91C1C),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
+              padding: EdgeInsets.only(
+                left: compactLandscape ? 0 : 32,
+                right: compactLandscape ? 0 : 32,
+                top: compactLandscape ? 10 : 12,
+              ),
+              child: Text(
+                errorMessage!.tr,
+                textAlign: compactLandscape ? TextAlign.left : TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  height: 1.4,
                 ),
               ),
             )

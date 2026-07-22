@@ -26,52 +26,43 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
   final _editorKey = GlobalKey<_FormulaEditorState>();
   int _usedHints = 0;
   _CompletedAttempt? _completed;
+  OverlayEntry? _resultOverlay;
+
+  @override
+  void dispose() {
+    _removeResultOverlay();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final isLandscape =
         MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
-    return Stack(
+    return Column(
       children: [
-        Column(
-          children: [
-            const SizedBox(height: AppSpacing.md),
-            _LevelHeader(
-              levelId: widget.level.id,
-              remainingHints: 3 - _usedHints,
-              accent: widget.accent,
-              onBack: widget.onShowLevels,
-              onHint: _showHint,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Expanded(
-              child: _FormulaEditor(
-                key: _editorKey,
-                level: widget.level,
-                accent: widget.accent,
-                isLandscape: isLandscape,
-                visibleHint: _usedHints == 0
-                    ? null
-                    : widget.level.hints.at(_usedHints - 1),
-                onValidSubmission: _handleSubmission,
-              ),
-            ),
-          ],
+        const SizedBox(height: AppSpacing.md),
+        _LevelHeader(
+          levelId: widget.level.id,
+          remainingHints: 3 - _usedHints,
+          accent: widget.accent,
+          onBack: widget.onShowLevels,
+          onHint: _showHint,
         ),
-        if (_completed case final completed?)
-          Positioned.fill(
-            child: _LevelResultOverlay(
-              level: widget.level,
-              attempt: completed,
-              usedHints: _usedHints,
-              accent: widget.accent,
-              onReplay: _replay,
-              onShowLevels: widget.onShowLevels,
-              onNext: widget.level.id < 160
-                  ? () => widget.onNext(widget.level.id + 1)
-                  : null,
+        const SizedBox(height: AppSpacing.lg),
+        Expanded(
+          child: _FormulaEditor(
+            key: _editorKey,
+            level: widget.level,
+            accent: widget.accent,
+            isLandscape: isLandscape,
+            visibleHints: List.generate(
+              _usedHints,
+              widget.level.hints.at,
+              growable: false,
             ),
+            onValidSubmission: _handleSubmission,
           ),
+        ),
       ],
     );
   }
@@ -98,9 +89,42 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
         evaluation: evaluation,
       );
     });
+    _showResultOverlay();
+  }
+
+  void _showResultOverlay() {
+    final completed = _completed;
+    if (completed == null || _resultOverlay != null) return;
+
+    _resultOverlay = OverlayEntry(
+      builder: (context) => _LevelResultOverlay(
+        level: widget.level,
+        attempt: completed,
+        usedHints: _usedHints,
+        accent: widget.accent,
+        onReplay: _replay,
+        onShowLevels: () {
+          _removeResultOverlay();
+          widget.onShowLevels();
+        },
+        onNext: widget.level.id < 160
+            ? () {
+                _removeResultOverlay();
+                widget.onNext(widget.level.id + 1);
+              }
+            : null,
+      ),
+    );
+    Overlay.of(context, rootOverlay: true).insert(_resultOverlay!);
+  }
+
+  void _removeResultOverlay() {
+    _resultOverlay?.remove();
+    _resultOverlay = null;
   }
 
   void _replay() {
+    _removeResultOverlay();
     setState(() {
       _usedHints = 0;
       _completed = null;
@@ -268,107 +292,115 @@ class _LevelResultOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final evaluation = attempt.evaluation;
-    return ColoredBox(
-      color: const Color(0xFF17191D).withValues(alpha: 0.55),
-      child: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 0.9, end: 1.0),
-            duration: const Duration(milliseconds: 200),
-            builder: (context, scale, child) {
-              return Transform.scale(
-                scale: scale,
-                child: Opacity(
-                  opacity: (scale - 0.9) / 0.1 + 0.0,
-                  child: child,
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: ModalBarrier(
+            dismissible: false,
+            color: const Color(0xFF17191D).withValues(alpha: 0.55),
+          ),
+        ),
+        Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0.9, end: 1.0),
+              duration: const Duration(milliseconds: 200),
+              builder: (context, scale, child) {
+                return Transform.scale(
+                  scale: scale,
+                  child: Opacity(
+                    opacity: (scale - 0.9) / 0.1 + 0.0,
+                    child: child,
+                  ),
+                );
+              },
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 260),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-              );
-            },
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 260),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(3, (index) {
-                      final isLit = index < evaluation.stars;
-                      final size = index == 1 ? 48.0 : 36.0;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2),
-                        child: Icon(
-                          isLit
-                              ? Icons.star_rounded
-                              : Icons.star_border_rounded,
-                          size: size,
-                          color: isLit
-                              ? const Color(0xFFFFB800)
-                              : AppColors.borderLight,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(3, (index) {
+                        final isLit = index < evaluation.stars;
+                        final size = index == 1 ? 48.0 : 36.0;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: Icon(
+                            isLit
+                                ? Icons.star_rounded
+                                : Icons.star_border_rounded,
+                            size: size,
+                            color: isLit
+                                ? const Color(0xFFFFB800)
+                                : AppColors.borderLight,
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 28),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: onReplay,
+                          icon: const Icon(
+                            Icons.replay_rounded,
+                            size: 22,
+                            color: AppColors.textPrimary,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: const Color(0xFFF3F4F6),
+                            padding: const EdgeInsets.all(12),
+                            shape: const CircleBorder(),
+                          ),
                         ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 28),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: onReplay,
-                        icon: const Icon(
-                          Icons.replay_rounded,
-                          size: 22,
-                          color: AppColors.textPrimary,
+                        const SizedBox(width: 12),
+                        IconButton(
+                          onPressed: onShowLevels,
+                          icon: const Icon(
+                            Icons.grid_view_rounded,
+                            size: 22,
+                            color: AppColors.textPrimary,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: const Color(0xFFF3F4F6),
+                            padding: const EdgeInsets.all(12),
+                            shape: const CircleBorder(),
+                          ),
                         ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: const Color(0xFFF3F4F6),
-                          padding: const EdgeInsets.all(12),
-                          shape: const CircleBorder(),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          onPressed: onNext,
+                          icon: Icon(
+                            onNext == null
+                                ? Icons.check_rounded
+                                : Icons.arrow_forward_rounded,
+                            size: 22,
+                            color: Colors.white,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: const Color(0xFF0095FF),
+                            padding: const EdgeInsets.all(12),
+                            shape: const CircleBorder(),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        onPressed: onShowLevels,
-                        icon: const Icon(
-                          Icons.grid_view_rounded,
-                          size: 22,
-                          color: AppColors.textPrimary,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: const Color(0xFFF3F4F6),
-                          padding: const EdgeInsets.all(12),
-                          shape: const CircleBorder(),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        onPressed: onNext,
-                        icon: Icon(
-                          onNext == null
-                              ? Icons.check_rounded
-                              : Icons.arrow_forward_rounded,
-                          size: 22,
-                          color: Colors.white,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: const Color(0xFF0095FF),
-                          padding: const EdgeInsets.all(12),
-                          shape: const CircleBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

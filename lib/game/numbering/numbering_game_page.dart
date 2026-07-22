@@ -55,6 +55,9 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     } else {
       _selectedLevelId = _progress.highestUnlockedLevel;
     }
+    if (!widget.session.isDailyMode) {
+      unawaited(_progress.rememberLevel(_selectedLevelId));
+    }
   }
 
   @override

@@ -23,6 +23,13 @@ const levelPacks = [
   LevelPack('Paris', 121, 160),
 ];
 
+LevelPack levelPackFor(int levelId) => levelPacks.firstWhere(
+      (pack) => levelId >= pack.startLevel && levelId <= pack.endLevel,
+      orElse: () => levelId < levelPacks.first.startLevel
+          ? levelPacks.first
+          : levelPacks.last,
+    );
+
 class HomeScreenContent extends StatelessWidget {
   const HomeScreenContent({
     super.key,
@@ -68,12 +75,7 @@ class HomeScreenContent extends StatelessWidget {
                           dateLabel: challengeDate,
                           onTap: onStartDaily,
                         );
-                        final currentPack = levelPacks.firstWhere(
-                          (pack) =>
-                              currentLevel >= pack.startLevel &&
-                              currentLevel <= pack.endLevel,
-                          orElse: () => levelPacks.first,
-                        );
+                        final currentPack = levelPackFor(currentLevel);
                         final arcade = _ArcadeCard(
                           roundLabel: currentPack.name.toUpperCase(),
                           onTap: () => _openArcade(onStartGame),

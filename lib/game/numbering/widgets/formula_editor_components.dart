@@ -11,7 +11,7 @@ class _DragDropEditor extends StatefulWidget {
     required this.onDigitTapped,
     required this.onOperatorChanged,
     required this.isLandscape,
-    required this.visibleHint,
+    required this.visibleHints,
   });
 
   final List<String> digits;
@@ -23,7 +23,7 @@ class _DragDropEditor extends StatefulWidget {
   final ValueChanged<int> onDigitTapped;
   final void Function(int index, InlineOperator? value) onOperatorChanged;
   final bool isLandscape;
-  final String? visibleHint;
+  final List<String> visibleHints;
 
   @override
   State<_DragDropEditor> createState() => _DragDropEditorState();
@@ -125,23 +125,64 @@ class _DragDropEditorState extends State<_DragDropEditor> {
             AnimatedSize(
               duration: const Duration(milliseconds: 160),
               curve: Curves.easeOutCubic,
-              child: widget.visibleHint == null
+              child: widget.visibleHints.isEmpty
                   ? const SizedBox.shrink()
                   : Padding(
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 520),
-                        child: Text(
-                          widget.visibleHint!,
+                        child: Column(
                           key: const ValueKey('inline-level-hint'),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            height: 1.4,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(
+                            widget.visibleHints.length,
+                            (index) => Padding(
+                              padding: EdgeInsets.only(
+                                top: index == 0 ? 0 : 4,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: 18,
+                                    height: 18,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: widget.accent.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      '${index + 1}',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        height: 1,
+                                        fontWeight: FontWeight.w800,
+                                        color: widget.accent,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 7),
+                                  Flexible(
+                                    child: Text(
+                                      widget.visibleHints[index],
+                                      key: ValueKey('inline-level-hint-$index'),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        height: 1.4,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),

@@ -4,15 +4,20 @@ class _LoginLegalLinks extends StatelessWidget {
   const _LoginLegalLinks({
     required this.onOpenTerms,
     required this.onOpenPrivacy,
+    this.compactLandscape = false,
   });
 
   final VoidCallback onOpenTerms;
   final VoidCallback onOpenPrivacy;
+  final bool compactLandscape;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24, top: 4),
+      padding: EdgeInsets.only(
+        bottom: compactLandscape ? 4 : 24,
+        top: compactLandscape ? 0 : 4,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

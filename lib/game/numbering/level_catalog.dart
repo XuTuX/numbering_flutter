@@ -68,7 +68,7 @@ LevelData _buildLevel(int id) {
       hints: LevelHints(
         first: operatorHint,
         second: '완성된 수식의 기준 값은 $target이에요.',
-        third: '정답 예시: $answer',
+        third: '정답: $answer',
       ),
       difficulty: difficulty,
     );
@@ -206,7 +206,7 @@ LevelData _special({
     hints: LevelHints(
       first: _operatorHint(allowed.difference({'='})),
       second: '완성된 수식의 기준 값은 $target이에요.',
-      third: '정답 예시: $answer',
+      third: '정답: $answer',
     ),
     difficulty: _difficultyFor(id),
   );

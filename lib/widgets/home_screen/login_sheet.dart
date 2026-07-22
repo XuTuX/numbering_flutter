@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:numbering/config/app_config.dart';
@@ -95,13 +94,19 @@ class _LoginSheetState extends State<LoginSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final loginRequiredMessage = '로그인이 필요합니다.'.tr;
+    final visibleErrorMessage =
+        _errorMessage == '로그인이 필요합니다.' || _errorMessage == loginRequiredMessage
+            ? null
+            : _errorMessage;
+
     return _LoginSheetView(
-      title: widget.isRankingAction ? '랭킹 참여'.tr : '로그인'.tr,
+      title: widget.isRankingAction ? '랭킹 참여'.tr : '',
       description: widget.isRankingAction
           ? '로그인하면 랭킹에 참여할 수 있어요'.tr
-          : '로그인하면 기록 저장과 랭킹에\n참여할 수 있어요'.tr,
+          : '로그인하고 랭킹 · 오늘의 도전에 참여하세요'.tr,
       isLoading: _isLoading,
-      errorMessage: _errorMessage,
+      errorMessage: visibleErrorMessage,
       showAppleButton: GetPlatform.isIOS,
       onGoogleTap: () => _handleSignIn(widget.onGoogleSignIn),
       onAppleTap: () => _handleSignIn(widget.onAppleSignIn),
