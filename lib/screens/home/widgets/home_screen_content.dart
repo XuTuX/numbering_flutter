@@ -90,12 +90,13 @@ class HomeScreenContent extends StatelessWidget {
                     return Row(
                       children: [
                         Expanded(
-                          child: _ArcadeCard(
-                            currentLevel: current,
+                          child: _InlineActionButton(
+                            label: '아케이드',
+                            sublabel: 'Lv.$current ▶',
+                            color: AppColors.blockLime,
                             onTap: () {
                               Get.to(() => ArcadeScreen(onStartGame: onStartGame));
                             },
-                            onPlay: onStartGame,
                           ),
                         ),
                         const SizedBox(width: 10),
