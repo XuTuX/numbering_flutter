@@ -30,12 +30,17 @@ class LevelProgressService extends GetxService {
   }
 
   int get highestUnlockedLevel {
+    // For simulator testing: temporarily unlock all 160 levels
+    return 160;
+    
+    /* Original logic:
     var highest = 1;
     for (var id = 1; id < 160; id++) {
       if (!(progress[id]?.cleared ?? false)) break;
       highest = id + 1;
     }
     return highest;
+    */
   }
 
   bool isUnlocked(int levelId) => levelId <= highestUnlockedLevel;

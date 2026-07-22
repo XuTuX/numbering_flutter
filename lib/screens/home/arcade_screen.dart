@@ -270,14 +270,35 @@ class _ContinueBar extends StatelessWidget {
   final int currentLevel;
   final VoidCallback onPressed;
 
+  String _getPackName(int level) {
+    for (var p in levelPacks) {
+      if (level >= p.startLevel && level <= p.endLevel) return p.name.toUpperCase();
+    }
+    return 'SEOUL';
+  }
+
+  Color _getPackColor(String name) {
+    switch (name.toLowerCase()) {
+      case 'seoul': return AppColors.blockLilac;
+      case 'tokyo': return AppColors.blockLime;
+      case 'new york': return AppColors.blockCream;
+      case 'london': return AppColors.blockMint;
+      case 'paris': return AppColors.blockPink;
+      default: return AppColors.blockLime;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final packName = _getPackName(currentLevel);
+    final packColor = _getPackColor(packName);
+
     return GestureDetector(
       onTap: onPressed,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          color: packColor,
           borderRadius: BorderRadius.circular(9999),
         ),
         child: Row(
@@ -286,11 +307,11 @@ class _ContinueBar extends StatelessWidget {
             Container(
               width: 32, height: 32,
               decoration: const BoxDecoration(
-                color: AppColors.onPrimary,
+                color: AppColors.ink,
                 shape: BoxShape.circle,
               ),
-              child: const Center(
-                child: Icon(Icons.play_arrow_rounded, color: AppColors.primary, size: 20),
+              child: Center(
+                child: Icon(Icons.play_arrow_rounded, color: packColor, size: 20),
               ),
             ),
             const SizedBox(width: 14),
@@ -298,17 +319,17 @@ class _ContinueBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('이어서 하기',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.onPrimary.withValues(alpha: 0.7), height: 1.0),
+                Text(packName,
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.ink.withValues(alpha: 0.6), height: 1.0, letterSpacing: 0.5),
                 ),
                 const SizedBox(height: 4),
                 Text('LEVEL $currentLevel',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.onPrimary, height: 1.0, letterSpacing: 0.5),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.ink, height: 1.0, letterSpacing: 0.5),
                 ),
               ],
             ),
             const SizedBox(width: 16),
-            Icon(Icons.chevron_right_rounded, color: AppColors.onPrimary.withValues(alpha: 0.7), size: 24),
+            Icon(Icons.chevron_right_rounded, color: AppColors.ink.withValues(alpha: 0.5), size: 24),
           ],
         ),
       ),
