@@ -84,32 +84,33 @@ class HomeScreenContent extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Arcade & Today's Puzzle row — fixed height
-                  SizedBox(
-                    height: 120,
-                    child: Row(
+                  // Arcade & Today's Puzzle — compact single row
+                  Obx(() {
+                    final current = progress.highestUnlockedLevel;
+                    return Row(
                       children: [
                         Expanded(
-                          child: Obx(() {
-                            final current = progress.highestUnlockedLevel;
-                            return _CompactArcadeButton(
-                              currentLevel: current,
-                              onOpenLevelList: () {
-                                Get.to(() => ArcadeScreen(onStartGame: onStartGame));
-                              },
-                              onPlayCurrent: onStartGame,
-                            );
-                          }),
+                          child: _InlineActionButton(
+                            label: '아케이드',
+                            sublabel: 'Lv.$current',
+                            color: AppColors.blockLime,
+                            onTap: () {
+                              Get.to(() => ArcadeScreen(onStartGame: onStartGame));
+                            },
+                          ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: _CompactDailyButton(
+                          child: _InlineActionButton(
+                            label: '오늘의 퍼즐',
+                            sublabel: '도전',
+                            color: AppColors.blockCream,
                             onTap: onStartDaily,
                           ),
                         ),
                       ],
-                    ),
-                  ),
+                    );
+                  }),
                   const SizedBox(height: 16),
                 ],
               ),

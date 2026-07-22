@@ -75,124 +75,58 @@ class _Top3RankingCard extends StatelessWidget {
     );
   }
 }
-
-
-class _CompactArcadeButton extends StatelessWidget {
-  const _CompactArcadeButton({
-    required this.currentLevel,
-    required this.onOpenLevelList,
-    required this.onPlayCurrent,
+class _InlineActionButton extends StatelessWidget {
+  const _InlineActionButton({
+    required this.label,
+    required this.sublabel,
+    required this.color,
+    required this.onTap,
   });
-  
-  final int currentLevel;
-  final VoidCallback onOpenLevelList;
-  final VoidCallback onPlayCurrent;
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onOpenLevelList,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.blockLime,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              '아케이드',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.ink,
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: onPlayCurrent,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(9999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Level $currentLevel',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.onPrimary,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.play_arrow_rounded, color: AppColors.onPrimary, size: 18),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CompactDailyButton extends StatelessWidget {
-  const _CompactDailyButton({required this.onTap});
-  
-  final Future<void> Function() onTap;
+  final String label;
+  final String sublabel;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.blockCream,
-          borderRadius: BorderRadius.circular(24),
+          color: color,
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Row(
           children: [
-            const Text(
-              '오늘의 퍼즐',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.ink,
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.ink,
+                ),
               ),
             ),
-            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: AppColors.canvas,
-                borderRadius: BorderRadius.circular(9999),
+                color: AppColors.ink.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(999),
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '시작하기',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ink,
-                    ),
-                  ),
-                  SizedBox(width: 4),
-                  Icon(Icons.play_arrow_rounded, color: AppColors.ink, size: 18),
-                ],
+              child: Text(
+                sublabel,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.ink,
+                ),
               ),
             ),
+            const SizedBox(width: 4),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.ink, size: 20),
           ],
         ),
       ),
