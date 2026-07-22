@@ -11,6 +11,7 @@ class _DragDropEditor extends StatefulWidget {
     required this.onDigitTapped,
     required this.onOperatorChanged,
     required this.isLandscape,
+    required this.visibleHint,
   });
 
   final List<String> digits;
@@ -22,6 +23,7 @@ class _DragDropEditor extends StatefulWidget {
   final ValueChanged<int> onDigitTapped;
   final void Function(int index, InlineOperator? value) onOperatorChanged;
   final bool isLandscape;
+  final String? visibleHint;
 
   @override
   State<_DragDropEditor> createState() => _DragDropEditorState();
@@ -120,9 +122,33 @@ class _DragDropEditorState extends State<_DragDropEditor> {
                 child: Row(mainAxisSize: MainAxisSize.min, children: items),
               ),
             ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOutCubic,
+              child: widget.visibleHint == null
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: Text(
+                          widget.visibleHint!,
+                          key: const ValueKey('inline-level-hint'),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            height: 1.4,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
             const Spacer(),
             _OperatorPalette(
-              accent: widget.accent,
               availableOperators: widget.availableOperators,
               compact: compact,
               onDragUpdate: _updateOperatorHover,
@@ -239,14 +265,12 @@ class _InlineOperatorTarget extends StatelessWidget {
 
 class _OperatorPalette extends StatefulWidget {
   const _OperatorPalette({
-    required this.accent,
     required this.availableOperators,
     required this.compact,
     required this.onDragUpdate,
     required this.onDragEnd,
   });
 
-  final Color accent;
   final Set<String> availableOperators;
   final bool compact;
   final ValueChanged<Offset> onDragUpdate;
@@ -313,7 +337,6 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
                 color: Colors.transparent,
                 child: _OperatorButton(
                   operator: operators[index],
-                  accent: widget.accent,
                   size: size,
                   active: true,
                 ),
@@ -322,14 +345,12 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
                 opacity: 0.3,
                 child: _OperatorButton(
                   operator: operators[index],
-                  accent: widget.accent,
                   size: size,
                   active: false,
                 ),
               ),
               child: _OperatorButton(
                 operator: operators[index],
-                accent: widget.accent,
                 size: size,
                 active: _dragging == operators[index],
               ),
@@ -346,13 +367,11 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
 class _OperatorButton extends StatelessWidget {
   const _OperatorButton({
     required this.operator,
-    required this.accent,
     required this.size,
     required this.active,
   });
 
   final InlineOperator operator;
-  final Color accent;
   final double size;
   final bool active;
 
@@ -363,14 +382,14 @@ class _OperatorButton extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: active ? accent : AppColors.surfaceSecondary,
+        color: active ? AppColors.blockCream : AppColors.surfaceSecondary,
         shape: BoxShape.circle,
       ),
       child: Text(
         operator.symbol,
         style: TextStyle(
           fontSize: size * 0.42,
-          color: active ? Colors.white : const Color(0xFF253044),
+          color: const Color(0xFF253044),
           fontWeight: FontWeight.w700,
         ),
       ),

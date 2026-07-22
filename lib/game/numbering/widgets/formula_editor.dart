@@ -8,12 +8,14 @@ class _FormulaEditor extends StatefulWidget {
     required this.level,
     required this.accent,
     required this.isLandscape,
+    required this.visibleHint,
     required this.onValidSubmission,
   });
 
   final LevelData level;
   final Color accent;
   final bool isLandscape;
+  final String? visibleHint;
   final void Function(String expression, int score) onValidSubmission;
 
   @override
@@ -62,6 +64,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                 accent: widget.accent,
                 selectedDigitIndex: _selectedDigitIndex,
                 isLandscape: widget.isLandscape,
+                visibleHint: widget.visibleHint,
                 onDigitTapped: _handleDigitTap,
                 onOperatorChanged: _changeOperator,
               ),

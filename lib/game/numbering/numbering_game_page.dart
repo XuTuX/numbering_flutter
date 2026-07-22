@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_radius.dart';
 import 'package:numbering/theme/app_spacing.dart';
-import 'package:numbering/theme/app_typography.dart';
 import 'package:numbering/widgets/common/soft_icon_button.dart';
 import 'package:numbering/game/game_module.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:numbering/game/game_module.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';
+import 'package:numbering/game/numbering/level_catalog.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/game/numbering/numbering_game_page.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
@@ -67,8 +68,16 @@ void main() {
     await tester.tap(hintButton);
     await tester.pumpAndSettle();
 
-    expect(find.text('힌트'), findsOneWidget);
-    expect(find.text('1 / 3'), findsOneWidget);
+    final inlineHint = find.byKey(const ValueKey('inline-level-hint'));
+    expect(inlineHint, findsOneWidget);
+    expect(find.text(LevelCatalog.byId(1).hints.first), findsOneWidget);
+    expect(
+      tester.getCenter(inlineHint).dy,
+      greaterThan(
+          tester.getCenter(find.byKey(const ValueKey('formula-digit-0'))).dy),
+    );
+    expect(tester.getCenter(inlineHint).dy,
+        lessThan(tester.getCenter(plusOperator).dy));
     expect(tester.takeException(), isNull);
   });
 

@@ -50,6 +50,9 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
                 level: widget.level,
                 accent: widget.accent,
                 isLandscape: isLandscape,
+                visibleHint: _usedHints == 0
+                    ? null
+                    : widget.level.hints.at(_usedHints - 1),
                 onValidSubmission: _handleSubmission,
               ),
             ),
@@ -75,81 +78,6 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
 
   void _showHint() {
     if (_usedHints < 3) setState(() => _usedHints++);
-    final visibleCount = _usedHints;
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: AppColors.ink.withValues(alpha: 0.16),
-      builder: (context) => SafeArea(
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: Container(
-              margin: const EdgeInsets.all(AppSpacing.md),
-              padding: const EdgeInsets.all(AppSpacing.xxl),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.card),
-                border: Border.all(color: AppColors.borderLight),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Text('힌트', style: AppTypography.subtitle),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceSoft,
-                          borderRadius: BorderRadius.circular(AppRadius.pill),
-                        ),
-                        child: Text(
-                          '$visibleCount / 3',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  for (var index = 0; index < visibleCount; index++) ...[
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceSoft,
-                        borderRadius: BorderRadius.circular(AppRadius.medium),
-                      ),
-                      child: Text(
-                        widget.level.hints.at(index),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          height: 1.45,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                    ),
-                    if (index + 1 < visibleCount)
-                      const SizedBox(height: AppSpacing.sm),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   void _handleSubmission(String expression, int score) {
