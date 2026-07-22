@@ -27,6 +27,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
   int _usedHints = 0;
   _CompletedAttempt? _completed;
   OverlayEntry? _resultOverlay;
+  bool _isCompleting = false;
 
   @override
   void dispose() {
@@ -71,25 +72,74 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
     if (_usedHints < 3) setState(() => _usedHints++);
   }
 
-  void _handleSubmission(String expression, int score) {
+  Future<void> _handleSubmission(String expression, int score) async {
+    if (_isCompleting) return;
+    _isCompleting = true;
     final evaluation =
         evaluateLevelScore(widget.level, score, usedHints: _usedHints);
-    unawaited(
-      widget.progress.recordResult(
-        level: widget.level,
-        score: score,
-        evaluation: evaluation,
-        usedHints: _usedHints,
-      ),
+    await widget.progress.recordResult(
+      level: widget.level,
+      score: score,
+      evaluation: evaluation,
+      usedHints: _usedHints,
     );
+    NumberingSubmissionResult? onlineResult;
+    String? onlineError;
+    final authService = Get.find<AuthService>();
+    if (evaluation.cleared && authService.user.value != null) {
+      try {
+        onlineResult =
+            await Get.find<NumberingScoreService>().submitNormalResult(
+          levelId: widget.level.id,
+          expression: expression,
+          usedHints: _usedHints,
+        );
+      } on NumberingServiceException catch (error) {
+        onlineError = error.userMessage;
+      }
+    }
+    if (!mounted) return;
     setState(() {
       _completed = _CompletedAttempt(
         expression: expression,
         score: score,
         evaluation: evaluation,
+        onlineResult: onlineResult,
+        onlineError: onlineError,
       );
+      _isCompleting = false;
     });
     _showResultOverlay();
+  }
+
+  Future<void> _retryOnlineSubmission() async {
+    final completed = _completed;
+    if (completed == null || _isCompleting) return;
+    _isCompleting = true;
+    try {
+      final result = await Get.find<NumberingScoreService>().submitNormalResult(
+        levelId: widget.level.id,
+        expression: completed.expression,
+        usedHints: _usedHints,
+      );
+      if (!mounted) return;
+      _removeResultOverlay();
+      setState(() {
+        _completed = completed.copyWith(
+          onlineResult: result,
+          clearOnlineError: true,
+        );
+      });
+      _showResultOverlay();
+    } on NumberingServiceException catch (error) {
+      if (!mounted) return;
+      _removeResultOverlay();
+      setState(() =>
+          _completed = completed.copyWith(onlineError: error.userMessage));
+      _showResultOverlay();
+    } finally {
+      _isCompleting = false;
+    }
   }
 
   void _showResultOverlay() {
@@ -103,6 +153,8 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
         usedHints: _usedHints,
         accent: widget.accent,
         onReplay: _replay,
+        onRetryOnline:
+            completed.onlineError == null ? null : _retryOnlineSubmission,
         onShowLevels: () {
           _removeResultOverlay();
           widget.onShowLevels();
@@ -261,11 +313,29 @@ class _CompletedAttempt {
     required this.expression,
     required this.score,
     required this.evaluation,
+    this.onlineResult,
+    this.onlineError,
   });
 
   final String expression;
   final int score;
   final LevelEvaluation evaluation;
+  final NumberingSubmissionResult? onlineResult;
+  final String? onlineError;
+
+  _CompletedAttempt copyWith({
+    NumberingSubmissionResult? onlineResult,
+    String? onlineError,
+    bool clearOnlineError = false,
+  }) {
+    return _CompletedAttempt(
+      expression: expression,
+      score: score,
+      evaluation: evaluation,
+      onlineResult: onlineResult ?? this.onlineResult,
+      onlineError: clearOnlineError ? null : onlineError ?? this.onlineError,
+    );
+  }
 }
 
 // ─── 레벨 결과 오버레이 ──────────────────────────────────────
@@ -277,6 +347,7 @@ class _LevelResultOverlay extends StatelessWidget {
     required this.usedHints,
     required this.accent,
     required this.onReplay,
+    required this.onRetryOnline,
     required this.onShowLevels,
     required this.onNext,
   });
@@ -286,6 +357,7 @@ class _LevelResultOverlay extends StatelessWidget {
   final int usedHints;
   final Color accent;
   final VoidCallback onReplay;
+  final VoidCallback? onRetryOnline;
   final VoidCallback onShowLevels;
   final VoidCallback? onNext;
 
@@ -346,6 +418,45 @@ class _LevelResultOverlay extends StatelessWidget {
                       }),
                     ),
                     const SizedBox(height: 28),
+                    Text(
+                      '${attempt.score}점',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (attempt.onlineResult != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        attempt.onlineResult!.isNewBest
+                            ? '새 최고 점수! · ${attempt.onlineResult!.rank ?? '-'}위'
+                            : '최고 ${attempt.onlineResult!.currentBest}점 · ${attempt.onlineResult!.rank ?? '-'}위',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: accent,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                    if (attempt.onlineError != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        attempt.onlineError!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.danger,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: onRetryOnline,
+                        icon: const Icon(Icons.refresh_rounded, size: 18),
+                        label: const Text('기록 제출 다시 시도'),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

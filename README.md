@@ -10,8 +10,8 @@ visual design.
 - Sequence Detective: infer the unique ordered starting pair
 - Number Vault: reorder and combine every number to reach a target
 - EASY / NORMAL / HARD progression across continuous rounds
-- Seeded daily challenge rotating through the three games
-- Ranking screens retained as offline template UI
+- Server-seeded official Numbering daily challenge
+- Supabase-verified all-time, weekly, and daily rankings
 - Responsive Flutter UI for iPhone and iPad
 - Korean, English, Japanese, Simplified Chinese, and Hindi localization
 
@@ -40,8 +40,9 @@ Optional authentication values:
 - `SUPABASE_ANON_KEY`
 
 If both values are omitted, the app starts in offline guest mode. Gameplay,
-local scores, settings, and daily practice remain available; social sign-in is
-disabled. Providing only one value is treated as a configuration error.
+local progress, settings, and daily practice remain available; social sign-in,
+official score submission, and official rankings are disabled. Providing only
+one value is treated as a configuration error.
 
 Example:
 
@@ -69,9 +70,12 @@ If signing values are missing, Gradle can still produce an unsigned release arti
 
 ## Supabase Scope
 
-Supabase is initialized only for authentication and session management. Database,
-RPC, ranking, score submission, profile-table, and daily-challenge connections are
-not included. Nicknames and scores are stored only on the local device.
+When Supabase configuration is supplied, Numbering uses Supabase Auth plus
+server-verified RPCs for normal best scores, the official daily challenge,
+all-time rankings, daily rankings, and weekly best scores. The client submits
+the completed expression rather than writing a trusted score directly. See
+[`docs/numbering_supabase.md`](docs/numbering_supabase.md) for the validation and
+retry rules.
 
 ## Verification
 

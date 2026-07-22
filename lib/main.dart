@@ -8,6 +8,7 @@ import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/l10n/app_translations.dart';
 import 'package:numbering/screens/home/home_screen.dart';
 import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/numbering_score_service.dart';
 import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/services/ad_service.dart';
 import 'package:numbering/services/audio_service.dart';
@@ -126,6 +127,7 @@ class AppBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(AuthService(supabase: authClient), permanent: true);
+    Get.put(NumberingScoreService(supabase: authClient), permanent: true);
     Get.put(ScoreController(), permanent: true);
     Get.put(DailyPuzzleController(), permanent: true);
     if (AppConfig.supportsAds) {

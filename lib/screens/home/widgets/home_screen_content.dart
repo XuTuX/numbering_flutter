@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:numbering/screens/home/arcade_screen.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/utils/kst_clock.dart';
+import 'package:numbering/services/numbering_score_service.dart';
 
 part 'home_screen_content_components.dart';
 
@@ -38,6 +39,11 @@ class HomeScreenContent extends StatelessWidget {
     required this.onStartDaily,
     required this.onRankingTap,
     this.currentLevel = 1,
+    this.dailyState = DailyChallengeUiState.loading,
+    this.dailyDateKey,
+    this.dailyScore,
+    this.allTimeRank,
+    this.allTimeBest,
   });
 
   final VoidCallback onSettingsTap;
@@ -45,13 +51,20 @@ class HomeScreenContent extends StatelessWidget {
   final Future<void> Function() onStartDaily;
   final VoidCallback onRankingTap;
   final int currentLevel;
+  final DailyChallengeUiState dailyState;
+  final String? dailyDateKey;
+  final int? dailyScore;
+  final int? allTimeRank;
+  final int? allTimeBest;
 
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
     final horizontalPadding = (mediaSize.width * 0.055).clamp(22.0, 48.0);
     final today = KstClock.nowInKst();
-    final challengeDate = _formatChallengeDate(today);
+    final challengeDate = dailyDateKey == null
+        ? _formatChallengeDate(today)
+        : KstClock.compactDateLabel(dailyDateKey!);
 
     return Scaffold(
       backgroundColor: _homeBackground,
@@ -74,13 +87,19 @@ class HomeScreenContent extends StatelessWidget {
                         final challenge = _ChallengeCard(
                           dateLabel: challengeDate,
                           onTap: onStartDaily,
+                          state: dailyState,
+                          score: dailyScore,
                         );
                         final currentPack = levelPackFor(currentLevel);
                         final arcade = _ArcadeCard(
                           roundLabel: currentPack.name.toUpperCase(),
                           onTap: () => _openArcade(onStartGame),
                         );
-                        final ranking = _RankingCard(onTap: onRankingTap);
+                        final ranking = _RankingCard(
+                          onTap: onRankingTap,
+                          rank: allTimeRank,
+                          bestScore: allTimeBest,
+                        );
 
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,

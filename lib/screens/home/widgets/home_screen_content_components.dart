@@ -11,10 +11,14 @@ class _ChallengeCard extends StatelessWidget {
   const _ChallengeCard({
     required this.dateLabel,
     required this.onTap,
+    required this.state,
+    this.score,
   });
 
   final String dateLabel;
   final Future<void> Function() onTap;
+  final DailyChallengeUiState state;
+  final int? score;
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +44,12 @@ class _ChallengeCard extends StatelessWidget {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.all(22),
+          Padding(
+            padding: const EdgeInsets.all(22),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Today's\nChallenge",
                   style: TextStyle(
                     color: _homeInk,
@@ -55,8 +59,25 @@ class _ChallengeCard extends StatelessWidget {
                     letterSpacing: -1.6,
                   ),
                 ),
-                Spacer(),
-                Align(
+                const Spacer(),
+                Text(
+                  switch (state) {
+                    DailyChallengeUiState.loading => '불러오는 중…',
+                    DailyChallengeUiState.available => '도전 가능',
+                    DailyChallengeUiState.alreadyPlayed =>
+                      '완료 · ${score ?? 0}점',
+                    DailyChallengeUiState.notAuthenticated => '로그인 후 도전',
+                    DailyChallengeUiState.networkError => '연결 오류 · 다시 시도',
+                    DailyChallengeUiState.submissionError => '제출 오류 · 다시 시도',
+                  },
+                  style: const TextStyle(
+                    color: Color(0x8F171716),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Align(
                   alignment: Alignment.bottomRight,
                   child: _ArrowCircle(),
                 ),
@@ -138,21 +159,27 @@ class _ArcadeCard extends StatelessWidget {
 }
 
 class _RankingCard extends StatelessWidget {
-  const _RankingCard({required this.onTap});
+  const _RankingCard({
+    required this.onTap,
+    required this.rank,
+    required this.bestScore,
+  });
 
   final VoidCallback onTap;
+  final int? rank;
+  final int? bestScore;
 
   @override
   Widget build(BuildContext context) {
     return _HomeCard(
       color: _rankingSurface,
       onTap: onTap,
-      child: const Padding(
-        padding: EdgeInsets.all(18),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'YOUR RANK',
               style: TextStyle(
                 color: Color(0x8F171716),
@@ -161,13 +188,13 @@ class _RankingCard extends StatelessWidget {
                 letterSpacing: 1.2,
               ),
             ),
-            SizedBox(height: 7),
+            const SizedBox(height: 7),
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                '#24',
-                style: TextStyle(
+                rank == null ? '#—' : '#$rank',
+                style: const TextStyle(
                   color: _homeInk,
                   fontSize: 29,
                   height: 1,
@@ -176,8 +203,17 @@ class _RankingCard extends StatelessWidget {
                 ),
               ),
             ),
-            Spacer(),
-            Align(
+            if (bestScore != null)
+              Text(
+                'BEST $bestScore',
+                style: const TextStyle(
+                  color: Color(0x8F171716),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            const Spacer(),
+            const Align(
               alignment: Alignment.bottomRight,
               child: _ArrowCircle(),
             ),

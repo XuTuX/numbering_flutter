@@ -1,41 +1,25 @@
 import 'package:flutter/material.dart';
 
 import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/services/numbering_score_service.dart';
 
 class RankListItem extends StatelessWidget {
   const RankListItem({
     super.key,
     required this.scoreData,
-    required this.index,
     required this.myId,
   });
 
-  final Map<String, dynamic> scoreData;
-  final int index;
+  final NumberingLeaderboardEntry scoreData;
   final String? myId;
 
   @override
   Widget build(BuildContext context) {
-    final profileData = scoreData['profiles'];
-    Map<String, dynamic> profiles = {};
-    if (profileData is Map<String, dynamic>) {
-      profiles = profileData;
-    } else if (profileData is List && profileData.isNotEmpty) {
-      profiles = profileData[0] as Map<String, dynamic>;
-    }
-
-    final nickname = profiles['nickname'] ?? 'Player';
-    final scoreVal = scoreData['score'];
-    final score = _parseScore(scoreVal);
-    final userId = scoreData['user_id'];
-    final isMe = userId != null && userId == myId;
-    final rankValue = scoreData['rank'];
-    final rank = switch (rankValue) {
-      int value => value,
-      num value => value.toInt(),
-      String value => int.tryParse(value) ?? (index + 1),
-      _ => index + 1,
-    };
+    final nickname = scoreData.nickname;
+    final score = scoreData.score;
+    final userId = scoreData.userId;
+    final isMe = userId == myId;
+    final rank = scoreData.rank;
 
     // Top 3 get pastel backgrounds matching the home screen design tokens
     final Color bgColor;
@@ -118,8 +102,7 @@ class RankListItem extends StatelessWidget {
     );
   }
 
-  String _formatScore(dynamic score) {
-    final value = _parseScore(score);
+  String _formatScore(int value) {
     if (value < 1000) return value.toString();
     final digits = value.toString();
     final buffer = StringBuffer();
@@ -129,10 +112,4 @@ class RankListItem extends StatelessWidget {
     }
     return buffer.toString();
   }
-
-  int _parseScore(dynamic score) {
-    return score is int ? score : int.tryParse(score.toString()) ?? 0;
-  }
 }
-
-

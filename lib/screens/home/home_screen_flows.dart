@@ -7,6 +7,7 @@ import 'package:numbering/screens/game_screen.dart';
 import 'package:numbering/screens/ranking/ranking_screen.dart';
 import 'package:numbering/screens/settings/settings_screen.dart';
 import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/numbering_score_service.dart';
 import 'package:numbering/utils/app_snackbar.dart';
 import 'package:numbering/utils/kst_clock.dart';
 import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
@@ -34,16 +35,32 @@ Future<void> openDailyChallenge(AuthService authService) async {
     return;
   }
 
-  final dateKey = KstClock.currentDateKey();
-  final seed = _localDailySeed(dateKey);
-  openGameScreen(
-    GameSessionConfig(
-      mode: GameMode.dailyOfficial,
-      gameId: _dailyGame(seed).id,
-      seed: seed,
-      dateKey: dateKey,
-    ),
-  );
+  final scoreService = Get.find<NumberingScoreService>();
+  try {
+    var challenge = await scoreService.getDailyChallenge();
+    if (challenge.myScore != null) {
+      showAppSnackBar(
+        title: '오늘의 게임 완료',
+        message: '오늘 점수는 ${challenge.myScore}점입니다.',
+      );
+      showDailyRankingSheet(dateKey: challenge.dateKey);
+      return;
+    }
+    if (!challenge.hasUsedEntry) {
+      challenge = await scoreService.claimDailyChallenge();
+    }
+    openGameScreen(
+      GameSessionConfig(
+        mode: GameMode.dailyOfficial,
+        gameId: NumberingGame.formulaWorkshop.id,
+        seed: challenge.seed,
+        dateKey: challenge.dateKey,
+        isOfficialScoreSubmission: true,
+      ),
+    );
+  } on NumberingServiceException catch (error) {
+    showAppSnackBar(title: '오늘의 게임', message: error.userMessage);
+  }
 }
 
 Future<void> openDailyChallengeTest() async {

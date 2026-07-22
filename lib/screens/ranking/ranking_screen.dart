@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/services/auth_service.dart';
-
-import 'package:numbering/controllers/daily_puzzle_controller.dart';
+import 'package:numbering/services/numbering_score_service.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
 import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/utils/mock_data.dart';
 
 import 'ranking_period.dart';
 import 'widgets/ranking_chrome.dart';
@@ -31,7 +28,10 @@ class RankingScreen extends StatefulWidget {
 class _RankingScreenState extends State<RankingScreen> {
   bool _isLoading = true;
   String? _error;
-  List<Map<String, dynamic>> _scores = [];
+  List<NumberingLeaderboardEntry> _scores = [];
+  int? _myScore;
+  int? _myRank;
+  String? _resolvedDailyDateKey;
   late RankingPeriod _period;
   late final Worker _authWorker;
 
@@ -65,29 +65,60 @@ class _RankingScreenState extends State<RankingScreen> {
       _error = null;
     });
 
-    final scoreController = Get.find<ScoreController>();
     final authService = Get.find<AuthService>();
-    await scoreController.waitForLoginSync();
-
-    if (!mounted) return;
-    final myId = authService.user.value?.id;
-    int? localScore;
-    if (_period == RankingPeriod.daily) {
-      final dailyController = Get.find<DailyPuzzleController>();
-      final dateKey = widget.dailyDateKey ?? '';
-      localScore = dailyController.getDailyTotalScore(dateKey);
-      if (localScore == 0) localScore = null;
-    } else {
-      localScore = scoreController.highscore.value;
+    final service = Get.find<NumberingScoreService>();
+    try {
+      List<NumberingLeaderboardEntry> scores;
+      int? myScore;
+      int? myRank;
+      if (_period == RankingPeriod.daily) {
+        var dateKey = widget.dailyDateKey;
+        if (dateKey == null || dateKey.isEmpty) {
+          dateKey = (await service.getDailyChallenge()).dateKey;
+        }
+        _resolvedDailyDateKey = dateKey;
+        scores = await service.getDailyLeaderboard(dateKey: dateKey);
+        if (authService.user.value != null) {
+          myScore = await service.getMyScore(
+            functionName: 'get_my_daily_best_score',
+            dateKey: dateKey,
+          );
+          myRank = await service.getMyScore(
+            functionName: 'get_my_daily_rank',
+            dateKey: dateKey,
+          );
+        }
+      } else if (_period == RankingPeriod.weekly) {
+        scores = await service.getWeeklyLeaderboard();
+        if (authService.user.value != null) {
+          myScore = await service.getMyScore(
+            functionName: 'get_my_weekly_best_score',
+          );
+          myRank = await service.getMyScore(
+            functionName: 'get_my_weekly_rank',
+          );
+        }
+      } else {
+        scores = await service.getAllTimeLeaderboard();
+        if (authService.user.value != null) {
+          myScore = await service.getMyScore(functionName: 'get_my_best_score');
+          myRank = await service.getMyScore(functionName: 'get_my_rank');
+        }
+      }
+      if (!mounted) return;
+      setState(() {
+        _scores = scores;
+        _myScore = myScore;
+        _myRank = myRank;
+        _isLoading = false;
+      });
+    } on NumberingServiceException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = error.userMessage;
+        _isLoading = false;
+      });
     }
-
-    final mockScores =
-        MockData.getScores(myId, authService.userNickname.value, localScore);
-
-    setState(() {
-      _scores = mockScores;
-      _isLoading = false;
-    });
   }
 
   void _handlePeriodChanged(RankingPeriod period) {
@@ -145,7 +176,7 @@ class _RankingScreenState extends State<RankingScreen> {
               period: _period,
               onPeriodChanged: _handlePeriodChanged,
               isDailyOnly: widget.isDailyOnly,
-              dailyDateKey: widget.dailyDateKey,
+              dailyDateKey: _resolvedDailyDateKey ?? widget.dailyDateKey,
             ),
             SizedBox(height: isLandscape ? 8 : 16),
             Expanded(
@@ -179,20 +210,50 @@ class _RankingScreenState extends State<RankingScreen> {
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-      itemCount: _scores.length + (myId == null ? 1 : 0),
+      itemCount: _scores.length + 1,
       itemBuilder: (context, index) {
-        // Show compact login bar at the top when not logged in
-        if (myId == null && index == 0) {
-          return _LoginPromptBar(onLoginTap: _showLoginSheet);
+        if (index == 0) {
+          if (myId == null) {
+            return _LoginPromptBar(onLoginTap: _showLoginSheet);
+          }
+          return _MyRankBar(rank: _myRank, score: _myScore);
         }
-
-        final scoreIndex = myId == null ? index - 1 : index;
+        final scoreIndex = index - 1;
         return RankListItem(
           scoreData: _scores[scoreIndex],
-          index: scoreIndex,
           myId: myId,
         );
       },
+    );
+  }
+}
+
+class _MyRankBar extends StatelessWidget {
+  const _MyRankBar({required this.rank, required this.score});
+
+  final int? rank;
+  final int? score;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.blockMint,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.hairline),
+      ),
+      child: Row(
+        children: [
+          const Text('내 기록', style: TextStyle(fontWeight: FontWeight.w900)),
+          const Spacer(),
+          Text(
+            rank == null ? '아직 기록 없음' : '$rank위 · ${score ?? 0}점',
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ],
+      ),
     );
   }
 }

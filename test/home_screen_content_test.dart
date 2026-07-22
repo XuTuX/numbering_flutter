@@ -50,7 +50,7 @@ void main() {
     expect(find.text('PLAY AT YOUR PACE'), findsNothing);
     expect(find.textContaining('JUL'), findsNothing);
     expect(find.textContaining('7-day streak'), findsNothing);
-    expect(find.text('#24'), findsOneWidget);
+    expect(find.text('#—'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_forward_rounded), findsNWidgets(3));
     expect(find.textContaining('+3 today'), findsNothing);
     expect(find.text('Statistics'), findsNothing);

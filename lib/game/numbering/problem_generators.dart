@@ -222,8 +222,3 @@ FormulaProblem generateFormulaProblem(Random random, int level) {
     knownSolution: '$lhsStr=$rhsStr',
   );
 }
-
-String generateDailyPuzzle8Digits(Random random) {
-  // Generate 8 random digits from 1 to 9
-  return List.generate(8, (_) => (1 + random.nextInt(9)).toString()).join('');
-}

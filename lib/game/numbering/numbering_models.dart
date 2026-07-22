@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 enum NumberingGame {
-  formulaWorkshop('formula_workshop', '수식 공방', '숫자 순서를 지켜 등식을 완성하세요.');
+  formulaWorkshop('numbering', 'Numbering', '숫자 순서를 지켜 등식을 완성하세요.');
 
   const NumberingGame(this.id, this.title, this.description);
 
