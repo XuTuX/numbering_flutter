@@ -54,6 +54,14 @@ class NicknameStickerCard extends StatelessWidget {
         final tierFs = isLandscape
             ? (sh * 0.015).clamp(9.0, 12.0)
             : (sw * 0.03).clamp(10.0, 13.0);
+        final normalizedNickname = nickname?.trim();
+        final nicknameButton =
+            normalizedNickname == null || normalizedNickname.isEmpty
+                ? null
+                : _NicknameButton(
+                    nickname: normalizedNickname,
+                    onTap: onTapNickname,
+                  );
         final hexRow = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -158,6 +166,10 @@ class NicknameStickerCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            if (nicknameButton != null) ...[
+                              nicknameButton,
+                              const SizedBox(height: 6),
+                            ],
                             Text(
                               '최고 기록'.tr,
                               style: GoogleFonts.notoSans(
@@ -182,6 +194,10 @@ class NicknameStickerCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        if (nicknameButton != null) ...[
+                          nicknameButton,
+                          SizedBox(height: cardPadV * 0.35),
+                        ],
                         Text(
                           '최고 기록'.tr,
                           style: GoogleFonts.notoSans(
@@ -221,6 +237,72 @@ class NicknameStickerCard extends StatelessWidget {
       buffer.write(digits[i]);
     }
     return buffer.toString();
+  }
+}
+
+class _NicknameButton extends StatelessWidget {
+  const _NicknameButton({
+    required this.nickname,
+    required this.onTap,
+  });
+
+  final String nickname;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = Container(
+      constraints: const BoxConstraints(maxWidth: 220),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceSecondary,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.person_rounded,
+            size: 15,
+            color: charcoalBlack,
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              nickname,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.notoSans(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: charcoalBlack,
+              ),
+            ),
+          ),
+          if (onTap != null) ...[
+            const SizedBox(width: 4),
+            Icon(
+              Icons.edit_rounded,
+              size: 13,
+              color: charcoalBlack.withValues(alpha: 0.45),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (onTap == null) return content;
+
+    return Semantics(
+      button: true,
+      label: '닉네임 변경'.tr,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: content,
+      ),
+    );
   }
 }
 

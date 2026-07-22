@@ -140,4 +140,45 @@ void main() {
     expect(find.text('+'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('daily puzzle uses the same inline game editor', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(667, 375));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: NumberingGamePage(
+                game: NumberingGame.formulaWorkshop,
+                session: const GameSessionConfig(
+                  mode: GameMode.dailyPractice,
+                  seed: 123456,
+                  dateKey: '2026-07-23',
+                ),
+                callbacks: GameCallbacks(
+                  onScoreChanged: (_) {},
+                  onFinished: (_) {},
+                  onExit: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('오늘의 퍼즐'), findsOneWidget);
+    expect(find.byTooltip('나가기'), findsOneWidget);
+    expect(find.byKey(const ValueKey('formula-digit-0')), findsOneWidget);
+    expect(find.byKey(const ValueKey('formula-digit-7')), findsOneWidget);
+    expect(find.byKey(const ValueKey('operator-drag-+')), findsOneWidget);
+    expect(find.byKey(const ValueKey('operator-drag-=')), findsNothing);
+    expect(find.text('수식을 입력하세요'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 }

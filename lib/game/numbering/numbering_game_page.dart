@@ -24,7 +24,6 @@ part 'views/level_play_view.dart';
 part 'views/daily_play_view.dart';
 part 'widgets/formula_editor.dart';
 part 'widgets/formula_editor_components.dart';
-part 'widgets/daily_formula_editor.dart';
 
 class NumberingGamePage extends StatefulWidget {
   const NumberingGamePage({

@@ -5,17 +5,23 @@ part of '../numbering_game_page.dart';
 class _FormulaEditor extends StatefulWidget {
   const _FormulaEditor({
     super.key,
-    required this.level,
+    required this.digits,
+    required this.availableOperators,
     required this.accent,
     required this.isLandscape,
     required this.visibleHints,
+    required this.requiresEquals,
+    required this.validateExpression,
     required this.onValidSubmission,
   });
 
-  final LevelData level;
+  final List<String> digits;
+  final Set<String> availableOperators;
   final Color accent;
   final bool isLandscape;
   final List<String> visibleHints;
+  final bool requiresEquals;
+  final ValidationResult Function(String expression) validateExpression;
   final void Function(String expression, int score) onValidSubmission;
 
   @override
@@ -36,7 +42,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   String? _message;
 
   String get _expression => assembleInlineExpression(
-        digits: widget.level.digits,
+        digits: widget.digits,
         operators: _operators,
         parentheses: _parentheses,
       );
@@ -44,7 +50,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   @override
   void initState() {
     super.initState();
-    _operators = List.filled(widget.level.digits.length - 1, null);
+    _operators = List.filled(widget.digits.length - 1, null);
   }
 
   @override
@@ -57,10 +63,10 @@ class _FormulaEditorState extends State<_FormulaEditor> {
             SizedBox(height: compact ? 18 : 32),
             Expanded(
               child: _DragDropEditor(
-                digits: widget.level.digits,
+                digits: widget.digits,
                 operators: _operators,
                 parentheses: _parentheses,
-                availableOperators: widget.level.availableOperators,
+                availableOperators: widget.availableOperators,
                 accent: widget.accent,
                 selectedDigitIndex: _selectedDigitIndex,
                 isLandscape: widget.isLandscape,
@@ -135,7 +141,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       return;
     }
     final validation = validateParenthesisRange(
-      digitCount: widget.level.digits.length,
+      digitCount: widget.digits.length,
       candidate: candidate,
       existing: _parentheses,
     );
@@ -155,20 +161,12 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   }
 
   void _previewValidation() {
-    if (!_operators.contains(InlineOperator.equals)) return;
-
-    // Only auto-submit if all operators are filled
-    if (_operators.contains(null)) {
-      // Still show preview message if they somehow filled an equals but not everything
-      // Wait, in this game, all operator slots must be filled.
+    if (_operators.contains(null)) return;
+    if (widget.requiresEquals && !_operators.contains(InlineOperator.equals)) {
       return;
     }
 
-    final result = validateLevelFormula(
-      digitString: widget.level.digitString,
-      expression: _expression,
-      availableOperators: widget.level.availableOperators,
-    );
+    final result = widget.validateExpression(_expression);
 
     if (!result.valid && mounted) {
       setState(() => _message = result.message);
@@ -185,7 +183,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
 
   void reset() {
     setState(() {
-      _operators = List.filled(widget.level.digits.length - 1, null);
+      _operators = List.filled(widget.digits.length - 1, null);
       _parentheses.clear();
       _history.clear();
       _selectedDigitIndex = null;

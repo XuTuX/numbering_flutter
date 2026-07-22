@@ -18,7 +18,7 @@ class _DailyPlayView extends StatefulWidget {
 
 class _DailyPlayViewState extends State<_DailyPlayView> {
   late final String _digits;
-  final _editorKey = GlobalKey<_DailyFormulaEditorState>();
+  final _editorKey = GlobalKey<_FormulaEditorState>();
   bool _isSubmitting = false;
   String? _submissionError;
   String? _pendingExpression;
@@ -143,33 +143,18 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
     return Column(
       children: [
-        // Header
-        Row(
-          children: [
-            SoftIconButton(
-              icon: Icons.arrow_back_rounded,
-              label: '나가기',
-              onPressed: widget.onShowLevels,
-              size: 40,
-              iconSize: 20,
-            ),
-            const Expanded(
-              child: Text(
-                '오늘의 퍼즐',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            const SizedBox(width: 40), // Balance back button
-          ],
+        const SizedBox(height: AppSpacing.md),
+        _GameHeader(
+          title: '오늘의 퍼즐',
+          backLabel: '나가기',
+          onBack: widget.onShowLevels,
+          trailing: const SizedBox.shrink(),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         if (_isSubmitting)
           const Padding(
             padding: EdgeInsets.only(bottom: 12),
@@ -204,13 +189,19 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
               ],
             ),
           ),
-
-        // Editor
         Expanded(
-          child: _DailyFormulaEditor(
+          child: _FormulaEditor(
             key: _editorKey,
             digits: _digits.split(''),
+            availableOperators: const {'+', '-', '×', '÷'},
             accent: widget.accent,
+            isLandscape: isLandscape,
+            visibleHints: const [],
+            requiresEquals: false,
+            validateExpression: (expression) => validateDailyPuzzleFormula(
+              digitString: _digits,
+              expression: expression,
+            ),
             onValidSubmission: _handleSubmission,
           ),
         ),

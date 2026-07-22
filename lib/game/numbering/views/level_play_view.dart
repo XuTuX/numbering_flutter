@@ -42,24 +42,34 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
     return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
-        _LevelHeader(
-          levelId: widget.level.id,
-          remainingHints: 3 - _usedHints,
-          accent: widget.accent,
+        _GameHeader(
+          title: 'LEVEL ${widget.level.id}',
+          backLabel: '레벨 목록',
           onBack: widget.onShowLevels,
-          onHint: _showHint,
+          trailing: _HintButton(
+            remainingHints: 3 - _usedHints,
+            accent: widget.accent,
+            onPressed: _showHint,
+          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Expanded(
           child: _FormulaEditor(
             key: _editorKey,
-            level: widget.level,
+            digits: widget.level.digits,
+            availableOperators: widget.level.availableOperators,
             accent: widget.accent,
             isLandscape: isLandscape,
             visibleHints: List.generate(
               _usedHints,
               widget.level.hints.at,
               growable: false,
+            ),
+            requiresEquals: true,
+            validateExpression: (expression) => validateLevelFormula(
+              digitString: widget.level.digitString,
+              expression: expression,
+              availableOperators: widget.level.availableOperators,
             ),
             onValidSubmission: _handleSubmission,
           ),
@@ -187,20 +197,18 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
 
 // ─── 레벨 헤더 ────────────────────────────────────────────
 
-class _LevelHeader extends StatelessWidget {
-  const _LevelHeader({
-    required this.levelId,
-    required this.remainingHints,
-    required this.accent,
+class _GameHeader extends StatelessWidget {
+  const _GameHeader({
+    required this.title,
+    required this.backLabel,
     required this.onBack,
-    required this.onHint,
+    required this.trailing,
   });
 
-  final int levelId;
-  final int remainingHints;
-  final Color accent;
+  final String title;
+  final String backLabel;
   final VoidCallback onBack;
-  final VoidCallback onHint;
+  final Widget trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -208,14 +216,14 @@ class _LevelHeader extends StatelessWidget {
       children: [
         SoftIconButton(
           icon: Icons.arrow_back_rounded,
-          label: '레벨 목록',
+          label: backLabel,
           onPressed: onBack,
           size: 44,
           iconSize: 20,
         ),
         Expanded(
           child: Text(
-            'LEVEL $levelId',
+            title,
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 18,
@@ -224,11 +232,7 @@ class _LevelHeader extends StatelessWidget {
             ),
           ),
         ),
-        _HintButton(
-          remainingHints: remainingHints,
-          accent: accent,
-          onPressed: onHint,
-        ),
+        SizedBox(width: 44, height: 44, child: trailing),
       ],
     );
   }
