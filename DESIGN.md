@@ -53,6 +53,15 @@ typography:
     fontWeight: 700-800
     textTransform: uppercase
     letterSpacing: 0.8-1.4px
+    default: omit
+    allowed: [date, puzzle-id, real-status, your-rank]
+
+microcopy:
+  default: omit
+  test: "Remove the copy when the card title remains unambiguous without it."
+  button-style: shortest-contextual-verb
+  button-examples: [Start, Continue, View]
+  exceptions: [date, puzzle-id, real-status, your-rank]
 
 layout:
   home:
@@ -66,6 +75,13 @@ layout:
     outer-padding: "clamp(22px, 5.5vw, 48px)"
     header-left: "NUMBERING only"
     header-right: [profile, settings]
+    challenge-card-content: [date, title, primary-action]
+    ranking-card-content: [your-rank, current-rank, view-action]
+    primary-action-style:
+      background: "#e0ded7"
+      foreground: ink
+      border: hairline
+      elevation: none
   max-content-width: 960px
   minimum-touch-target: 44px
 
@@ -93,7 +109,9 @@ rules:
     - "Use semantic tokens from lib/theme instead of screen-local color values."
     - "Keep one dominant tint per card and no more than three pastel card colors per screen."
     - "Keep the home screen entirely visible without scrolling."
-    - "Use labels and whitespace before adding icons or illustrations."
+    - "Use clear titles and whitespace before adding icons or illustrations."
+    - "Omit small labels and helper copy unless they communicate real metadata or state."
+    - "Use the shortest contextual verb for actions and do not repeat the card title noun."
     - "Preserve high-saturation colors for success, danger, time pressure, and puzzle blocks."
   forbidden:
     - gradients
@@ -104,7 +122,13 @@ rules:
     - decorative-glow
     - home-statistics-bar
     - home-leaderboard-list
+    - home-decorative-puzzle-number
+    - home-challenge-metrics-row
+    - unverified-ranking-trend
     - brand-tagline-under-logo
+    - decorative-eyebrow-copy
+    - motivational-helper-copy
+    - play-at-your-pace-copy
 
 validation:
   - flutter-analyze
@@ -112,6 +136,8 @@ validation:
   - no-overflow-at-844x390
   - no-overflow-at-667x375
   - no-home-scroll-view
+  - operators-in-lower-editor-region
+  - symmetric-44px-game-header-actions
 ---
 
 # NUMBERING UI Rules

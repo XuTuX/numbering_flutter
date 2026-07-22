@@ -31,9 +31,12 @@ class _DragDropEditor extends StatelessWidget {
         final isLandscape = viewport.width > viewport.height;
         final compact = constraints.maxWidth < 600 || viewport.height < 560;
         final digitFontSize = compact
-            ? (constraints.maxWidth / (digits.length * 1.12)).clamp(isLandscape ? 56.0 : 34.0, isLandscape ? 78.0 : 58.0)
+            ? (constraints.maxWidth / (digits.length * 1.12))
+                .clamp(isLandscape ? 56.0 : 34.0, isLandscape ? 78.0 : 58.0)
             : (constraints.maxWidth * 0.08).clamp(62.0, 96.0);
-        final digitPadding = compact ? (digits.length >= 8 ? 3.0 : (isLandscape ? 14.0 : 7.0)) : 13.0;
+        final digitPadding = compact
+            ? (digits.length >= 8 ? 3.0 : (isLandscape ? 14.0 : 7.0))
+            : 13.0;
         final operatorFontSize = (digitFontSize * 0.55).clamp(24.0, 48.0);
         final items = List<Widget>.generate(digits.length, (digitIndex) {
           final openingCount = parentheses
@@ -83,7 +86,7 @@ class _DragDropEditor extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Row(mainAxisSize: MainAxisSize.min, children: items),
             ),
-            SizedBox(height: compact ? 20 : 38),
+            const Spacer(),
             _OperatorPalette(
               accent: accent,
               availableOperators: availableOperators,
@@ -194,7 +197,8 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
         .where(
             (operator) => widget.availableOperators.contains(operator.symbol))
         .toList();
-    final isLandscape = MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+    final isLandscape =
+        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
     final size = widget.compact ? (isLandscape ? 52.0 : 44.0) : 58.0;
     return Container(
       padding: EdgeInsets.symmetric(
@@ -283,4 +287,3 @@ class _OperatorButton extends StatelessWidget {
     );
   }
 }
-

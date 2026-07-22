@@ -52,20 +52,18 @@ class _FormulaEditorState extends State<_FormulaEditor> {
         final compact = constraints.maxHeight < 470;
         return Column(
           children: [
-            SizedBox(height: compact ? 8 : 20),
+            SizedBox(height: compact ? 18 : 32),
             Expanded(
-              child: SingleChildScrollView(
-                child: _DragDropEditor(
-                  digits: widget.level.digits,
-                  operators: _operators,
-                  parentheses: _parentheses,
-                  availableOperators: widget.level.availableOperators,
-                  accent: widget.accent,
-                  selectedDigitIndex: _selectedDigitIndex,
-                  isLandscape: widget.isLandscape,
-                  onDigitTapped: _handleDigitTap,
-                  onOperatorChanged: _changeOperator,
-                ),
+              child: _DragDropEditor(
+                digits: widget.level.digits,
+                operators: _operators,
+                parentheses: _parentheses,
+                availableOperators: widget.level.availableOperators,
+                accent: widget.accent,
+                selectedDigitIndex: _selectedDigitIndex,
+                isLandscape: widget.isLandscape,
+                onDigitTapped: _handleDigitTap,
+                onOperatorChanged: _changeOperator,
               ),
             ),
             AnimatedSize(
@@ -85,7 +83,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                       ),
                     ),
             ),
-            SizedBox(height: compact ? 8 : 20),
+            SizedBox(height: compact ? 4 : 10),
           ],
         );
       },
@@ -155,20 +153,20 @@ class _FormulaEditorState extends State<_FormulaEditor> {
 
   void _previewValidation() {
     if (!_operators.contains(InlineOperator.equals)) return;
-    
+
     // Only auto-submit if all operators are filled
     if (_operators.contains(null)) {
       // Still show preview message if they somehow filled an equals but not everything
       // Wait, in this game, all operator slots must be filled.
-      return; 
+      return;
     }
-    
+
     final result = validateLevelFormula(
       digitString: widget.level.digitString,
       expression: _expression,
       availableOperators: widget.level.availableOperators,
     );
-    
+
     if (!result.valid && mounted) {
       setState(() => _message = result.message);
     } else if (result.valid) {
@@ -196,4 +194,3 @@ class _FormulaEditorState extends State<_FormulaEditor> {
 }
 
 // ─── 드래그 드롭 편집기 ──────────────────────────────────────
-

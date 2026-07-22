@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/screens/home/arcade_screen.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/utils/kst_clock.dart';
@@ -27,7 +26,6 @@ const levelPacks = [
 class HomeScreenContent extends StatelessWidget {
   const HomeScreenContent({
     super.key,
-    required this.scoreController,
     required this.onSettingsTap,
     required this.onProfileTap,
     required this.onStartGame,
@@ -35,7 +33,6 @@ class HomeScreenContent extends StatelessWidget {
     required this.onRankingTap,
   });
 
-  final ScoreController scoreController;
   final VoidCallback onSettingsTap;
   final VoidCallback onProfileTap;
   final VoidCallback onStartGame;
@@ -48,7 +45,6 @@ class HomeScreenContent extends StatelessWidget {
     final horizontalPadding = (mediaSize.width * 0.055).clamp(22.0, 48.0);
     final today = KstClock.nowInKst();
     final dateLabel = '${today.day} ${_monthLabel(today.month)}';
-    final puzzleNumber = _dayOfYear(today);
 
     return Scaffold(
       backgroundColor: _homeBackground,
@@ -67,39 +63,37 @@ class HomeScreenContent extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   Expanded(
-                    child: Obx(() {
-                      final recordedBest = scoreController.highscore.value;
-                      final bestScore = recordedBest > 0 ? recordedBest : 12500;
-                      final challenge = _ChallengeCard(
-                        dateLabel: dateLabel,
-                        puzzleNumber: puzzleNumber,
-                        bestScore: bestScore,
-                        onTap: onStartDaily,
-                      );
-                      final arcade = _ArcadeCard(
-                        onTap: () => _openArcade(onStartGame),
-                      );
-                      final ranking = _RankingCard(onTap: onRankingTap);
+                    child: Builder(
+                      builder: (context) {
+                        final challenge = _ChallengeCard(
+                          dateLabel: dateLabel,
+                          onTap: onStartDaily,
+                        );
+                        final arcade = _ArcadeCard(
+                          onTap: () => _openArcade(onStartGame),
+                        );
+                        final ranking = _RankingCard(onTap: onRankingTap);
 
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(flex: 7, child: challenge),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            flex: 3,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(child: arcade),
-                                const SizedBox(height: 14),
-                                Expanded(child: ranking),
-                              ],
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(flex: 7, child: challenge),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(child: arcade),
+                                  const SizedBox(height: 14),
+                                  Expanded(child: ranking),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    }),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: 14),
                 ],
@@ -135,9 +129,5 @@ class HomeScreenContent extends StatelessWidget {
       'Dec',
     ];
     return months[month - 1];
-  }
-
-  int _dayOfYear(DateTime date) {
-    return date.difference(DateTime(date.year, 1, 1)).inDays + 1;
   }
 }

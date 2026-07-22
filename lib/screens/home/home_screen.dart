@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/game/game_module.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/services/auth_service.dart';
@@ -94,11 +93,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final scoreController = Get.find<ScoreController>();
     final authService = Get.find<AuthService>();
 
     return HomeScreenContent(
-      scoreController: scoreController,
       onSettingsTap: () => showSettingsScreen(authService),
       onProfileTap: () => Get.to(() => const ProfileScreen()),
       onStartGame: () => openGameScreen(

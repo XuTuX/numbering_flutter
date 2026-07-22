@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/screens/home/widgets/home_screen_content.dart';
 
 void main() {
@@ -17,7 +16,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: HomeScreenContent(
-          scoreController: ScoreController(),
           onSettingsTap: () {},
           onProfileTap: () {},
           onStartGame: () {},
@@ -34,9 +32,13 @@ void main() {
 
     expect(find.text('NUMBERING'), findsOneWidget);
     expect(find.text("Today's\nChallenge"), findsOneWidget);
-    expect(find.text('Start Puzzle'), findsOneWidget);
+    expect(find.text('Start'), findsOneWidget);
     expect(find.text('Arcade'), findsOneWidget);
+    expect(find.text('PLAY AT YOUR PACE'), findsNothing);
+    expect(find.textContaining('PUZZLE #'), findsNothing);
+    expect(find.textContaining('7-day streak'), findsNothing);
     expect(find.text('#24'), findsOneWidget);
+    expect(find.textContaining('+3 today'), findsNothing);
     expect(find.text('Statistics'), findsNothing);
     expect(find.byType(SingleChildScrollView), findsNothing);
     expect(tester.takeException(), isNull);
