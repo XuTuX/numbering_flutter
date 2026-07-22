@@ -9,19 +9,23 @@ equality, and both integer-valued sides are equal. The score is that shared
 integer value. A result below the level's `minimumScore` is not submitted as a
 cleared stage. Hints affect the local star evaluation, not the numeric score.
 
-The official daily game has no level or difficulty selector. It always contains
-eight digits from 1 through 9. The player may reorder those eight digits and
-must use every occurrence exactly once in one integer-valued arithmetic
-expression. The expression's result is the daily score. There is no timer,
-move limit, wrong-answer count, or combo in the current Numbering code.
+The official daily game has no level or difficulty selector. It contains eight
+digits from 1 through 9. The player may reorder those digits by drag and drop,
+must use every occurrence exactly once, create exactly one equality, and make
+both integer-valued sides equal. The shared value is the daily score, so the
+goal is to find the valid equation with the largest possible shared value.
+There is no timer, move limit, wrong-answer count, or combo in the current
+Numbering code.
 
 ## Deterministic daily puzzle
 
 `generateDailyNumberingPuzzle(seed)` uses the Park-Miller PRNG. Its arithmetic
-stays in the exact integer range on native Dart and Flutter web. The SQL helper
-`_numbering_daily_digits(seed)` implements the same sequence. The daily seed and
-date come from `get_daily_challenge('numbering')`; client local time is not used
-for an official attempt.
+stays in the exact integer range on native Dart and Flutter web. All eight
+digits are generated independently from 1 through 9; no baseline equation is
+embedded in the puzzle. The SQL helper `_numbering_daily_digits(seed)`
+implements the same sequence. The daily seed and date come from
+`get_daily_challenge('numbering')`; client local time is not used for an
+official attempt.
 
 ## Submission policy
 

@@ -24,7 +24,7 @@ class NumberingPrng {
   }
 }
 
-/// The existing daily rules have one fixed difficulty: eight digits from 1–9.
+/// Builds eight deterministic random digits for the official daily puzzle.
 String generateDailyNumberingPuzzle(int seed) {
   final random = NumberingPrng(seed);
   return List<String>.generate(

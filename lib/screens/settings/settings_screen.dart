@@ -12,13 +12,24 @@ import 'package:numbering/theme/app_colors.dart';
 
 import 'widgets/settings_components.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     super.key,
     required this.authService,
   });
 
   final AuthService authService;
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final _profileSectionKey = GlobalKey();
+  final _generalSectionKey = GlobalKey();
+  final _accountSectionKey = GlobalKey();
+
+  SettingsSection _selectedSection = SettingsSection.profile;
 
   @override
   Widget build(BuildContext context) {
@@ -28,84 +39,100 @@ class SettingsScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // Removed GridPatternPainter for clean Figma aesthetic
           SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 600,
-                ),
-                child: Column(
-                  children: [
-                    const SettingsHeader(),
-                    Expanded(
-                      child: Obx(() {
-                        final user = authService.user.value;
-                        final savedNickname = authService.userNickname.value;
-                        // 언어 변경 감지를 위해 locale 참조
-                        settingsService.locale.value;
-                        final nickname = savedNickname ?? '닉네임 설정 필요'.tr;
-                        final email = user?.email ?? '';
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 860;
 
-                        return ListView(
-                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-                          children: [
-                            if (user != null) ...[
-                              SettingsProfileSection(
-                                email: email,
-                                nickname: nickname,
-                                onEditNickname: () {
-                                  _showEditNicknameDialog(
-                                    context,
-                                    savedNickname ?? '',
-                                    (newNickname) async {
-                                      return authService
-                                          .updateNickname(newNickname);
-                                    },
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 24),
-                            ],
-                            SettingsGeneralSection(
-                              settingsService: settingsService,
-                              onShowTutorial: () =>
-                                  _showTutorialDialog(context),
-                              onContact: _launchInstagram,
-                            ),
-                            const SizedBox(height: 24),
-                            SettingsAccountSection(
-                              isLoggedIn: user != null,
-                              onLogout: () {
-                                authService.signOut();
-                                Get.back();
-                              },
-                              onLogin: () {
-                                Get.bottomSheet(
-                                  LoginSheet(
-                                    onGoogleSignIn: () async {
-                                      return authService.signInWithGoogle();
-                                    },
-                                    onAppleSignIn: () async {
-                                      return authService.signInWithApple();
-                                    },
-                                    onLoginSuccess: Get.back,
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1240),
+                    child: Padding(
+                      padding: isWide
+                          ? const EdgeInsets.fromLTRB(36, 28, 36, 0)
+                          : EdgeInsets.zero,
+                      child: Obx(() {
+                        final user = widget.authService.user.value;
+                        final savedNickname =
+                            widget.authService.userNickname.value;
+                        // Rebuild translated labels as soon as locale changes.
+                        settingsService.locale.value;
+
+                        final sections = _buildSections(
+                          context: context,
+                          settingsService: settingsService,
+                          email: user?.email ?? '',
+                          nickname: savedNickname ?? '닉네임 설정 필요'.tr,
+                          savedNickname: savedNickname,
+                          isLoggedIn: user != null,
+                          isWide: isWide,
+                        );
+
+                        if (!isWide) {
+                          return Column(
+                            children: [
+                              const SettingsHeader(),
+                              Expanded(
+                                child: ListView(
+                                  key: const ValueKey('settings-content'),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    4,
+                                    20,
+                                    40,
                                   ),
-                                  isScrollControlled: true,
-                                );
-                              },
+                                  children: sections,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+
+                        final selectedSection = user == null &&
+                                _selectedSection == SettingsSection.profile
+                            ? SettingsSection.general
+                            : _selectedSection;
+
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SizedBox(
+                              width: 260,
+                              child: Column(
+                                children: [
+                                  const SettingsHeader(isWide: true),
+                                  SettingsSidebar(
+                                    selectedSection: selectedSection,
+                                    showProfile: user != null,
+                                    onSectionSelected: _selectSection,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const VerticalDivider(
+                              width: 64,
+                              thickness: 1,
+                              color: AppColors.borderLight,
+                            ),
+                            Expanded(
+                              child: ListView(
+                                key: const ValueKey('settings-content'),
+                                padding:
+                                    const EdgeInsets.fromLTRB(0, 38, 8, 48),
+                                children: sections,
+                              ),
                             ),
                           ],
                         );
                       }),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           ),
           Obx(() {
-            return authService.isLoading.value
+            return widget.authService.isLoading.value
                 ? Container(
                     color: AppColors.textPrimary.withValues(alpha: 0.26),
                     child: const Center(
@@ -116,6 +143,86 @@ class SettingsScreen extends StatelessWidget {
           }),
         ],
       ),
+    );
+  }
+
+  List<Widget> _buildSections({
+    required BuildContext context,
+    required SettingsService settingsService,
+    required String email,
+    required String nickname,
+    required String? savedNickname,
+    required bool isLoggedIn,
+    required bool isWide,
+  }) {
+    final sectionGap = isWide ? 32.0 : 24.0;
+
+    return [
+      if (isLoggedIn) ...[
+        KeyedSubtree(
+          key: _profileSectionKey,
+          child: SettingsProfileSection(
+            email: email,
+            nickname: nickname,
+            onEditNickname: () {
+              _showEditNicknameDialog(
+                context,
+                savedNickname ?? '',
+                widget.authService.updateNickname,
+              );
+            },
+          ),
+        ),
+        SizedBox(height: sectionGap),
+      ],
+      KeyedSubtree(
+        key: _generalSectionKey,
+        child: SettingsGeneralSection(
+          settingsService: settingsService,
+          onShowTutorial: () => _showTutorialDialog(context),
+          onContact: _launchInstagram,
+        ),
+      ),
+      SizedBox(height: sectionGap),
+      KeyedSubtree(
+        key: _accountSectionKey,
+        child: SettingsAccountSection(
+          isLoggedIn: isLoggedIn,
+          onLogout: () {
+            widget.authService.signOut();
+            Get.back();
+          },
+          onLogin: () {
+            Get.bottomSheet(
+              LoginSheet(
+                onGoogleSignIn: widget.authService.signInWithGoogle,
+                onAppleSignIn: widget.authService.signInWithApple,
+                onLoginSuccess: Get.back,
+              ),
+              isScrollControlled: true,
+            );
+          },
+        ),
+      ),
+    ];
+  }
+
+  void _selectSection(SettingsSection section) {
+    setState(() => _selectedSection = section);
+
+    final key = switch (section) {
+      SettingsSection.profile => _profileSectionKey,
+      SettingsSection.general => _generalSectionKey,
+      SettingsSection.account => _accountSectionKey,
+    };
+    final targetContext = key.currentContext;
+    if (targetContext == null) return;
+
+    Scrollable.ensureVisible(
+      targetContext,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+      alignment: 0,
     );
   }
 

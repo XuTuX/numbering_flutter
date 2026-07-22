@@ -9,6 +9,8 @@ void main() {
   Future<void> pumpHome(
     WidgetTester tester, {
     required Size surfaceSize,
+    String? nickname,
+    VoidCallback? onNicknameTap,
   }) async {
     await tester.binding.setSurfaceSize(surfaceSize);
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -20,6 +22,8 @@ void main() {
           onStartGame: () {},
           onStartDaily: () async {},
           onRankingTap: () {},
+          nickname: nickname,
+          onNicknameTap: onNicknameTap,
           currentLevel: 3,
         ),
       ),
@@ -56,6 +60,24 @@ void main() {
     expect(find.text('Statistics'), findsNothing);
     expect(find.byType(SingleChildScrollView), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('shows the signed-in nickname and makes it editable',
+      (tester) async {
+    var nicknameTapped = false;
+    await pumpHome(
+      tester,
+      surfaceSize: const Size(844, 390),
+      nickname: '퍼즐고래',
+      onNicknameTap: () => nicknameTapped = true,
+    );
+
+    expect(find.text('NUMBERING'), findsNothing);
+    expect(find.text('퍼즐고래'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-nickname')), findsOneWidget);
+
+    await tester.tap(find.text('퍼즐고래'));
+    expect(nicknameTapped, isTrue);
   });
 
   testWidgets('keeps the 7:3 layout on a compact landscape screen',

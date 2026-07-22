@@ -9,9 +9,11 @@ class _DragDropEditor extends StatefulWidget {
     required this.accent,
     required this.selectedDigitIndex,
     required this.onDigitTapped,
+    required this.onDigitReordered,
     required this.onOperatorChanged,
     required this.isLandscape,
     required this.visibleHints,
+    required this.allowDigitReordering,
   });
 
   final List<String> digits;
@@ -21,9 +23,11 @@ class _DragDropEditor extends StatefulWidget {
   final Color accent;
   final int? selectedDigitIndex;
   final ValueChanged<int> onDigitTapped;
+  final void Function(int fromIndex, int toIndex) onDigitReordered;
   final void Function(int index, InlineOperator? value) onOperatorChanged;
   final bool isLandscape;
   final List<String> visibleHints;
+  final bool allowDigitReordering;
 
   @override
   State<_DragDropEditor> createState() => _DragDropEditorState();
@@ -65,7 +69,7 @@ class _DragDropEditorState extends State<_DragDropEditor> {
                 .clamp(isLandscape ? 56.0 : 34.0, isLandscape ? 78.0 : 58.0)
             : (constraints.maxWidth * 0.08).clamp(62.0, 96.0);
         final digitPadding = compact
-            ? (widget.digits.length >= 8 ? 3.0 : (isLandscape ? 14.0 : 7.0))
+            ? (widget.digits.length >= 8 ? 4.0 : (isLandscape ? 14.0 : 7.0))
             : 13.0;
         final operatorFontSize = (digitFontSize * 0.55).clamp(24.0, 48.0);
         final items = List<Widget>.generate(widget.digits.length, (digitIndex) {
@@ -77,27 +81,76 @@ class _DragDropEditorState extends State<_DragDropEditor> {
               .where((range) => range.normalized().endDigitIndex == digitIndex)
               .length;
           final selected = widget.selectedDigitIndex == digitIndex;
-          final digit = GestureDetector(
-            key: ValueKey('formula-digit-$digitIndex'),
-            behavior: HitTestBehavior.opaque,
-            onTap: () => widget.onDigitTapped(digitIndex),
-            child: Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: digitPadding, vertical: 8),
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 150),
-                style: TextStyle(
-                  fontSize: digitFontSize,
-                  height: 1,
-                  fontWeight: FontWeight.w800,
-                  color: selected ? widget.accent : const Color(0xFF17191D),
+          Widget digitSurface({
+            Key? key,
+            bool feedback = false,
+            bool dropHighlighted = false,
+          }) {
+            return GestureDetector(
+              key: key,
+              behavior: HitTestBehavior.opaque,
+              onTap: feedback ? null : () => widget.onDigitTapped(digitIndex),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                padding: EdgeInsets.symmetric(
+                  horizontal: digitPadding,
+                  vertical: 8,
                 ),
-                child: Text(
-                  '${'(' * openingCount}${widget.digits[digitIndex]}${')' * closingCount}',
+                decoration: BoxDecoration(
+                  color: dropHighlighted
+                      ? widget.accent.withValues(alpha: 0.10)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 150),
+                  style: TextStyle(
+                    fontSize: digitFontSize,
+                    height: 1,
+                    fontWeight: FontWeight.w800,
+                    color: selected ? widget.accent : const Color(0xFF17191D),
+                  ),
+                  child: Text(
+                    '${'(' * openingCount}${widget.digits[digitIndex]}${')' * closingCount}',
+                    key: feedback
+                        ? null
+                        : ValueKey('formula-digit-text-$digitIndex'),
+                  ),
                 ),
               ),
-            ),
-          );
+            );
+          }
+
+          final Widget digit;
+          if (widget.allowDigitReordering) {
+            digit = DragTarget<int>(
+              key: ValueKey('formula-digit-$digitIndex'),
+              onWillAcceptWithDetails: (details) => details.data != digitIndex,
+              onAcceptWithDetails: (details) =>
+                  widget.onDigitReordered(details.data, digitIndex),
+              builder: (context, candidateData, rejectedData) {
+                final highlighted = candidateData.any(
+                  (sourceIndex) => sourceIndex != digitIndex,
+                );
+                final surface = digitSurface(dropHighlighted: highlighted);
+                return Draggable<int>(
+                  key: ValueKey('formula-digit-drag-$digitIndex'),
+                  data: digitIndex,
+                  feedback: Material(
+                    color: Colors.transparent,
+                    child: Transform.scale(
+                      scale: 1.04,
+                      child: digitSurface(feedback: true),
+                    ),
+                  ),
+                  childWhenDragging: Opacity(opacity: 0.24, child: surface),
+                  child: surface,
+                );
+              },
+            );
+          } else {
+            digit = digitSurface(key: ValueKey('formula-digit-$digitIndex'));
+          }
           if (digitIndex == 0) return digit;
           final slotIndex = digitIndex - 1;
           return _InlineOperatorTarget(

@@ -256,28 +256,36 @@ ValidationResult validateDailyPuzzleFormula({
   required String expression,
 }) {
   final preservedDigits = expression.replaceAll(RegExp(r'[^0-9]'), '');
-  
   if (preservedDigits.length != digitString.length) {
     return const ValidationResult.failure('주어진 8개의 숫자를 모두 한 번씩 사용해야 합니다.');
   }
-  
   final sortedPreserved = preservedDigits.split('')..sort();
   final sortedGiven = digitString.split('')..sort();
   if (sortedPreserved.join() != sortedGiven.join()) {
     return const ValidationResult.failure('주어진 8개의 숫자만 사용할 수 있습니다.');
   }
-  
+
   for (final match in RegExp(r'[+\-×÷=]').allMatches(expression)) {
     final symbol = match.group(0)!;
-    if (!const {'+', '-', '×', '÷'}.contains(symbol)) {
+    if (!const {'+', '-', '×', '÷', '='}.contains(symbol)) {
       return ValidationResult.failure('$symbol 기호는 사용할 수 없습니다.');
     }
   }
-  
-  if (expression.contains('=')) {
-    return const ValidationResult.failure('오늘의 퍼즐에서는 등호(=)를 사용할 수 없습니다.');
-  }
-  
-  return evaluateIntegerExpression(expression);
-}
 
+  final equalsCount = '='.allMatches(expression).length;
+  if (equalsCount != 1) {
+    return const ValidationResult.failure('등호를 정확히 하나 사용해야 합니다.');
+  }
+  final sides = expression.split('=');
+  if (sides.any((side) => side.trim().isEmpty)) {
+    return const ValidationResult.failure('등호 양쪽에 수식이 필요합니다.');
+  }
+  final left = evaluateIntegerExpression(sides[0]);
+  if (!left.valid) return left;
+  final right = evaluateIntegerExpression(sides[1]);
+  if (!right.valid) return right;
+  if (left.value != right.value) {
+    return const ValidationResult.failure('등호 양쪽의 값이 다릅니다.');
+  }
+  return ValidationResult.success(left.value!);
+}

@@ -17,9 +17,8 @@ class SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.surface.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(color: AppColors.borderLight),
         boxShadow: AppShadows.cardShadow,
@@ -39,12 +38,19 @@ class SettingsSectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.sizeOf(context).width >= 860;
+
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 12, top: 12),
+      padding: EdgeInsets.only(
+        left: 4,
+        bottom: isWide ? 14 : 10,
+      ),
       child: Text(
         label.tr,
         style: AppTypography.bodySmall.copyWith(
+          fontSize: isWide ? 16 : 14,
           fontWeight: FontWeight.w900,
+          letterSpacing: -0.2,
         ),
       ),
     );
@@ -59,8 +65,8 @@ class SettingsDivider extends StatelessWidget {
     return const Divider(
       height: 1,
       thickness: 1,
-      indent: 56,
-      endIndent: 16,
+      indent: 67,
+      endIndent: 24,
       color: AppColors.borderLight,
     );
   }

@@ -145,3 +145,17 @@ Future<void> showInitialNicknameDialog(AuthService authService) async {
     barrierDismissible: false,
   );
 }
+
+Future<void> showEditNicknameDialog(AuthService authService) async {
+  final nickname = authService.userNickname.value;
+  if (authService.user.value == null || nickname == null) {
+    return;
+  }
+
+  await Get.dialog(
+    EditNicknameDialog(
+      currentNickname: nickname,
+      onSave: authService.updateNickname,
+    ),
+  );
+}

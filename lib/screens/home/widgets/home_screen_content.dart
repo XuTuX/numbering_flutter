@@ -38,6 +38,8 @@ class HomeScreenContent extends StatelessWidget {
     required this.onStartGame,
     required this.onStartDaily,
     required this.onRankingTap,
+    this.nickname,
+    this.onNicknameTap,
     this.currentLevel = 1,
     this.dailyState = DailyChallengeUiState.loading,
     this.dailyDateKey,
@@ -50,6 +52,8 @@ class HomeScreenContent extends StatelessWidget {
   final VoidCallback onStartGame;
   final Future<void> Function() onStartDaily;
   final VoidCallback onRankingTap;
+  final String? nickname;
+  final VoidCallback? onNicknameTap;
   final int currentLevel;
   final DailyChallengeUiState dailyState;
   final String? dailyDateKey;
@@ -78,6 +82,8 @@ class HomeScreenContent extends StatelessWidget {
                 children: [
                   const SizedBox(height: 12),
                   _HomeHeader(
+                    nickname: nickname,
+                    onNicknameTap: onNicknameTap,
                     onSettingsTap: onSettingsTap,
                   ),
                   const SizedBox(height: 14),

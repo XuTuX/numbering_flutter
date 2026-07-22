@@ -166,7 +166,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return Obx(() {
       final currentLevel = levelProgress.highestUnlockedLevel;
+      final nickname = authService.user.value == null
+          ? null
+          : authService.userNickname.value;
       return HomeScreenContent(
+        nickname: nickname,
+        onNicknameTap:
+            nickname == null ? null : () => showEditNicknameDialog(authService),
         currentLevel: currentLevel,
         onSettingsTap: () => showSettingsScreen(authService),
         onStartGame: () => openGameScreen(

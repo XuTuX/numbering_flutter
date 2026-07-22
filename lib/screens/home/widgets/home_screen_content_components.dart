@@ -279,9 +279,13 @@ class _HomeCard extends StatelessWidget {
 
 class _HomeHeader extends StatelessWidget {
   const _HomeHeader({
+    required this.nickname,
+    required this.onNicknameTap,
     required this.onSettingsTap,
   });
 
+  final String? nickname;
+  final VoidCallback? onNicknameTap;
   final VoidCallback onSettingsTap;
 
   @override
@@ -291,18 +295,12 @@ class _HomeHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Expanded(
+          Expanded(
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'NUMBERING',
-                style: TextStyle(
-                  color: _homeInk,
-                  fontSize: 22,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
-                ),
+              child: _HomeIdentity(
+                nickname: nickname,
+                onNicknameTap: onNicknameTap,
               ),
             ),
           ),
@@ -312,6 +310,61 @@ class _HomeHeader extends StatelessWidget {
             onTap: onSettingsTap,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HomeIdentity extends StatelessWidget {
+  const _HomeIdentity({
+    required this.nickname,
+    required this.onNicknameTap,
+  });
+
+  final String? nickname;
+  final VoidCallback? onNicknameTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final displayName = nickname?.trim();
+    final hasNickname = displayName != null && displayName.isNotEmpty;
+    final label = hasNickname ? displayName : 'NUMBERING';
+
+    const textStyle = TextStyle(
+      color: _homeInk,
+      fontSize: 22,
+      height: 1,
+      fontWeight: FontWeight.w900,
+      letterSpacing: -0.5,
+    );
+
+    if (!hasNickname || onNicknameTap == null) {
+      return Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: textStyle,
+      );
+    }
+
+    return Tooltip(
+      message: '닉네임 변경'.tr,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const ValueKey('home-nickname'),
+          onTap: onNicknameTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: textStyle,
+            ),
+          ),
+        ),
       ),
     );
   }

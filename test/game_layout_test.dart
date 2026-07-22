@@ -63,6 +63,10 @@ void main() {
     final hintButton = find.byKey(const ValueKey('level-hint-button'));
     expect(hintButton, findsOneWidget);
     expect(tester.getSize(hintButton), const Size(44, 44));
+    expect(
+      find.byKey(const ValueKey('formula-digit-drag-0')),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
 
     await tester.tap(hintButton);
@@ -177,8 +181,33 @@ void main() {
     expect(find.byKey(const ValueKey('formula-digit-0')), findsOneWidget);
     expect(find.byKey(const ValueKey('formula-digit-7')), findsOneWidget);
     expect(find.byKey(const ValueKey('operator-drag-+')), findsOneWidget);
-    expect(find.byKey(const ValueKey('operator-drag-=')), findsNothing);
+    expect(find.byKey(const ValueKey('operator-drag-=')), findsOneWidget);
     expect(find.text('수식을 입력하세요'), findsNothing);
+
+    final firstDigitText = find.byKey(const ValueKey('formula-digit-text-0'));
+    final secondDigitText = find.byKey(const ValueKey('formula-digit-text-1'));
+    expect(
+      tester.getTopLeft(secondDigitText).dx -
+          tester.getTopRight(firstDigitText).dx,
+      greaterThanOrEqualTo(7),
+    );
+
+    final firstDigit = find.byKey(const ValueKey('formula-digit-0'));
+    final secondDigit = find.byKey(const ValueKey('formula-digit-1'));
+    await tester.drag(
+      firstDigit,
+      tester.getCenter(secondDigit) - tester.getCenter(firstDigit),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(of: firstDigit, matching: find.text('7')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: secondDigit, matching: find.text('2')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }

@@ -193,11 +193,12 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
           child: _FormulaEditor(
             key: _editorKey,
             digits: _digits.split(''),
-            availableOperators: const {'+', '-', '×', '÷'},
+            availableOperators: const {'+', '-', '×', '÷', '='},
             accent: widget.accent,
             isLandscape: isLandscape,
             visibleHints: const [],
-            requiresEquals: false,
+            requiresEquals: true,
+            allowDigitReordering: true,
             validateExpression: (expression) => validateDailyPuzzleFormula(
               digitString: _digits,
               expression: expression,

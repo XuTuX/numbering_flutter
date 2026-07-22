@@ -11,6 +11,7 @@ class _FormulaEditor extends StatefulWidget {
     required this.isLandscape,
     required this.visibleHints,
     required this.requiresEquals,
+    this.allowDigitReordering = false,
     required this.validateExpression,
     required this.onValidSubmission,
   });
@@ -21,6 +22,7 @@ class _FormulaEditor extends StatefulWidget {
   final bool isLandscape;
   final List<String> visibleHints;
   final bool requiresEquals;
+  final bool allowDigitReordering;
   final ValidationResult Function(String expression) validateExpression;
   final void Function(String expression, int score) onValidSubmission;
 
@@ -35,6 +37,7 @@ class _EditorSnapshot {
 }
 
 class _FormulaEditorState extends State<_FormulaEditor> {
+  late List<String> _digits;
   late List<InlineOperator?> _operators;
   final List<ParenthesisRange> _parentheses = [];
   final List<_EditorSnapshot> _history = [];
@@ -42,7 +45,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   String? _message;
 
   String get _expression => assembleInlineExpression(
-        digits: widget.digits,
+        digits: _digits,
         operators: _operators,
         parentheses: _parentheses,
       );
@@ -50,6 +53,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   @override
   void initState() {
     super.initState();
+    _digits = List.of(widget.digits);
     _operators = List.filled(widget.digits.length - 1, null);
   }
 
@@ -63,7 +67,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
             SizedBox(height: compact ? 18 : 32),
             Expanded(
               child: _DragDropEditor(
-                digits: widget.digits,
+                digits: _digits,
                 operators: _operators,
                 parentheses: _parentheses,
                 availableOperators: widget.availableOperators,
@@ -71,7 +75,9 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                 selectedDigitIndex: _selectedDigitIndex,
                 isLandscape: widget.isLandscape,
                 visibleHints: widget.visibleHints,
+                allowDigitReordering: widget.allowDigitReordering,
                 onDigitTapped: _handleDigitTap,
+                onDigitReordered: _reorderDigit,
                 onOperatorChanged: _changeOperator,
               ),
             ),
@@ -112,6 +118,17 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     _previewValidation();
   }
 
+  void _reorderDigit(int fromIndex, int toIndex) {
+    if (!widget.allowDigitReordering || fromIndex == toIndex) return;
+    setState(() {
+      final digit = _digits.removeAt(fromIndex);
+      _digits.insert(toIndex, digit);
+      _selectedDigitIndex = null;
+      _message = null;
+    });
+    _previewValidation();
+  }
+
   void _handleDigitTap(int index) {
     if (_selectedDigitIndex == null) {
       setState(() => _selectedDigitIndex = index);
@@ -141,7 +158,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       return;
     }
     final validation = validateParenthesisRange(
-      digitCount: widget.digits.length,
+      digitCount: _digits.length,
       candidate: candidate,
       existing: _parentheses,
     );
@@ -166,7 +183,8 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       return;
     }
 
-    final result = widget.validateExpression(_expression);
+    final expression = _expression;
+    final result = widget.validateExpression(expression);
 
     if (!result.valid && mounted) {
       setState(() => _message = result.message);
@@ -174,8 +192,8 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       // Show success briefly before completing
       setState(() => _message = '정답입니다! 🎉');
       Future.delayed(const Duration(milliseconds: 400), () {
-        if (mounted) {
-          widget.onValidSubmission(_expression, result.value!);
+        if (mounted && _expression == expression) {
+          widget.onValidSubmission(expression, result.value!);
         }
       });
     }
@@ -183,6 +201,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
 
   void reset() {
     setState(() {
+      _digits = List.of(widget.digits);
       _operators = List.filled(widget.digits.length - 1, null);
       _parentheses.clear();
       _history.clear();
