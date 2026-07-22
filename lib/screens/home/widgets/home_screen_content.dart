@@ -141,8 +141,8 @@ class HomeScreenContent extends StatelessWidget {
   void _openArcade(VoidCallback onStartGame) {
     Get.to(
       () => ArcadeScreen(onStartGame: onStartGame),
-      transition: Transition.fadeIn,
-      duration: const Duration(milliseconds: 220),
+      transition: Transition.rightToLeft,
+      duration: const Duration(milliseconds: 280),
     );
   }
 

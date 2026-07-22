@@ -92,12 +92,21 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
                               animation: _pageController,
                               builder: (context, child) {
                                 double value = 1.0;
-                                if (_pageController.position.haveDimensions) {
-                                  value = _pageController.page! - i;
-                                  value = (1 - (value.abs() * 0.15)).clamp(0.85, 1.0);
+                                if (_pageController.hasClients &&
+                                    _pageController.position.haveDimensions &&
+                                    _pageController.position.hasContentDimensions) {
+                                  try {
+                                    final page = _pageController.page ?? _selected.toDouble();
+                                    double pageOffset = page - i;
+                                    value = (1 - (pageOffset.abs() * 0.15)).clamp(0.85, 1.0);
+                                  } catch (_) {
+                                    value = isActive ? 1.0 : 0.85;
+                                  }
                                 } else {
                                   value = isActive ? 1.0 : 0.85;
                                 }
+
+                                final opacityValue = ((value - 0.85) / 0.15 * 0.5 + 0.5).clamp(0.0, 1.0);
 
                                 return Center(
                                   child: AspectRatio(
@@ -105,7 +114,7 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
                                     child: Transform.scale(
                                       scale: value,
                                       child: Opacity(
-                                        opacity: (value - 0.85) / 0.15 * 0.5 + 0.5,
+                                        opacity: opacityValue,
                                         child: child,
                                       ),
                                     ),

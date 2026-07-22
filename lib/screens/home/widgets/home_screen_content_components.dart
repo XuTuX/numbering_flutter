@@ -59,24 +59,25 @@ class _ChallengeCard extends StatelessWidget {
                     letterSpacing: -1.6,
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  switch (state) {
-                    DailyChallengeUiState.loading => '불러오는 중…',
-                    DailyChallengeUiState.available => '도전 가능',
-                    DailyChallengeUiState.alreadyPlayed =>
-                      '완료 · ${score ?? 0}점',
-                    DailyChallengeUiState.notAuthenticated => '로그인 후 도전',
-                    DailyChallengeUiState.networkError => '연결 오류 · 다시 시도',
-                    DailyChallengeUiState.submissionError => '제출 오류 · 다시 시도',
-                  },
-                  style: const TextStyle(
-                    color: Color(0x8F171716),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
+                if (state != DailyChallengeUiState.available) ...[
+                  Text(
+                    switch (state) {
+                      DailyChallengeUiState.loading => '불러오는 중…',
+                      DailyChallengeUiState.alreadyPlayed =>
+                        '완료 · ${score ?? 0}점',
+                      DailyChallengeUiState.notAuthenticated => '로그인 후 도전',
+                      DailyChallengeUiState.networkError => '연결 오류 · 다시 시도',
+                      DailyChallengeUiState.submissionError => '제출 오류 · 다시 시도',
+                      DailyChallengeUiState.available => '',
+                    },
+                    style: const TextStyle(
+                      color: Color(0x8F171716),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
+                  const SizedBox(height: 10),
+                ],
                 const Align(
                   alignment: Alignment.bottomRight,
                   child: _ArrowCircle(),
