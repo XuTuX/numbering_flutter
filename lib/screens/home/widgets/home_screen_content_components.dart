@@ -92,14 +92,12 @@ class _Top3RankingCard extends StatelessWidget {
 class _SquareActionButton extends StatelessWidget {
   const _SquareActionButton({
     required this.title,
-    this.subtitle,
     required this.actionLabel,
     required this.color,
     required this.onTap,
   });
 
   final String title;
-  final String? subtitle;
   final String actionLabel;
   final Color color;
   final VoidCallback onTap;
@@ -118,30 +116,14 @@ class _SquareActionButton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.ink,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle!,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ink.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ],
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: AppColors.ink,
+                letterSpacing: -0.5,
+              ),
             ),
             Align(
               alignment: Alignment.bottomRight,
