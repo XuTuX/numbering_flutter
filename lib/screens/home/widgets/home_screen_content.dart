@@ -44,7 +44,7 @@ class HomeScreenContent extends StatelessWidget {
     final mediaSize = MediaQuery.sizeOf(context);
     final horizontalPadding = (mediaSize.width * 0.055).clamp(22.0, 48.0);
     final today = KstClock.nowInKst();
-    final dateLabel = '${today.day} ${_monthLabel(today.month)}';
+    final puzzleNumber = _dayOfYear(today);
 
     return Scaffold(
       backgroundColor: _homeBackground,
@@ -66,7 +66,7 @@ class HomeScreenContent extends StatelessWidget {
                     child: Builder(
                       builder: (context) {
                         final challenge = _ChallengeCard(
-                          dateLabel: dateLabel,
+                          puzzleNumber: puzzleNumber,
                           onTap: onStartDaily,
                         );
                         final arcade = _ArcadeCard(
@@ -113,21 +113,7 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-  String _monthLabel(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
+  int _dayOfYear(DateTime date) {
+    return date.difference(DateTime(date.year, 1, 1)).inDays + 1;
   }
 }

@@ -35,6 +35,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
       children: [
         Column(
           children: [
+            const SizedBox(height: AppSpacing.md),
             _LevelHeader(
               levelId: widget.level.id,
               remainingHints: 3 - _usedHints,

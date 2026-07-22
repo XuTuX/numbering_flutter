@@ -60,7 +60,7 @@ microcopy:
   default: omit
   test: "Remove the copy when the card title remains unambiguous without it."
   button-style: shortest-contextual-verb
-  button-examples: [Start, Continue, View]
+  button-examples: [Play, Continue, View]
   exceptions: [date, puzzle-id, real-status, your-rank]
 
 layout:
@@ -75,7 +75,8 @@ layout:
     outer-padding: "clamp(22px, 5.5vw, 48px)"
     header-left: "NUMBERING only"
     header-right: [profile, settings]
-    challenge-card-content: [date, title, primary-action]
+    challenge-card-content: [subtle-puzzle-number, title, primary-action]
+    challenge-action-alignment: bottom-right
     ranking-card-content: [your-rank, current-rank, view-action]
     primary-action-style:
       background: "#e0ded7"
@@ -101,6 +102,7 @@ elevation:
 motion:
   transition-duration: 150-220ms
   press-duration: 100ms
+  operator-drop-response: 70-90ms
   press-scale: 0.96-0.98
   curve: easeOutCubic
 
@@ -122,7 +124,7 @@ rules:
     - decorative-glow
     - home-statistics-bar
     - home-leaderboard-list
-    - home-decorative-puzzle-number
+    - home-date-label
     - home-challenge-metrics-row
     - unverified-ranking-trend
     - brand-tagline-under-logo
@@ -138,6 +140,8 @@ validation:
   - no-home-scroll-view
   - operators-in-lower-editor-region
   - symmetric-44px-game-header-actions
+  - minimum-12px-game-header-top-space
+  - operator-drop-response-under-90ms
 ---
 
 # NUMBERING UI Rules

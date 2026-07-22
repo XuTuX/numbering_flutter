@@ -32,10 +32,12 @@ void main() {
 
     expect(find.text('NUMBERING'), findsOneWidget);
     expect(find.text("Today's\nChallenge"), findsOneWidget);
-    expect(find.text('Start'), findsOneWidget);
+    expect(find.text('Play'), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('challenge-puzzle-number')), findsOneWidget);
     expect(find.text('Arcade'), findsOneWidget);
     expect(find.text('PLAY AT YOUR PACE'), findsNothing);
-    expect(find.textContaining('PUZZLE #'), findsNothing);
+    expect(find.textContaining('JUL'), findsNothing);
     expect(find.textContaining('7-day streak'), findsNothing);
     expect(find.text('#24'), findsOneWidget);
     expect(find.textContaining('+3 today'), findsNothing);

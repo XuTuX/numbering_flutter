@@ -55,6 +55,9 @@ void main() {
     final plusOperator = find.text('+').last;
     expect(tester.getCenter(plusOperator).dy, greaterThan(250));
 
+    final backButton = find.byTooltip('레벨 목록');
+    expect(tester.getTopLeft(backButton).dy, greaterThanOrEqualTo(20));
+
     final hintButton = find.byKey(const ValueKey('level-hint-button'));
     expect(hintButton, findsOneWidget);
     expect(tester.getSize(hintButton), const Size(44, 44));

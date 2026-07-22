@@ -131,19 +131,22 @@ class _InlineOperatorTargetState extends State<_InlineOperatorTarget> {
   Widget build(BuildContext context) {
     return DragTarget<InlineOperator>(
       onWillAcceptWithDetails: (_) {
-        setState(() => _hovering = true);
+        if (!_hovering) setState(() => _hovering = true);
         return true;
       },
-      onLeave: (_) => setState(() => _hovering = false),
+      onLeave: (_) {
+        if (_hovering) setState(() => _hovering = false);
+      },
       onAcceptWithDetails: (details) {
-        setState(() => _hovering = false);
+        if (_hovering) setState(() => _hovering = false);
         widget.onAccept(details.data);
       },
       builder: (context, candidateData, rejectedData) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
+            duration: const Duration(milliseconds: 70),
+            curve: Curves.easeOutCubic,
             width: _hovering && widget.current == null
                 ? widget.operatorFontSize * 0.75
                 : 0,

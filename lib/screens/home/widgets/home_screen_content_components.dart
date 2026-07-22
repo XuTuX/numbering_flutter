@@ -9,11 +9,11 @@ const _homeBorder = AppColors.hairline;
 
 class _ChallengeCard extends StatelessWidget {
   const _ChallengeCard({
-    required this.dateLabel,
+    required this.puzzleNumber,
     required this.onTap,
   });
 
-  final String dateLabel;
+  final int puzzleNumber;
   final Future<void> Function() onTap;
 
   @override
@@ -21,42 +21,56 @@ class _ChallengeCard extends StatelessWidget {
     return _HomeCard(
       color: _challengeSurface,
       onTap: () async => onTap(),
-      child: Padding(
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              dateLabel.toUpperCase(),
-              style: const TextStyle(
-                color: Color(0x99171716),
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.4,
+      child: Stack(
+        children: [
+          Positioned(
+            right: -18,
+            top: -34,
+            child: ExcludeSemantics(
+              child: Text(
+                '$puzzleNumber',
+                key: const ValueKey('challenge-puzzle-number'),
+                style: const TextStyle(
+                  color: Color(0x0A171716),
+                  fontSize: 168,
+                  height: 1,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -12,
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              "Today's\nChallenge",
-              style: TextStyle(
-                color: _homeInk,
-                fontSize: 36,
-                height: 0.98,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -1.6,
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Today's\nChallenge",
+                  style: TextStyle(
+                    color: _homeInk,
+                    fontSize: 36,
+                    height: 0.98,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1.6,
+                  ),
+                ),
+                const Spacer(),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: _PlayButton(onPressed: onTap),
+                ),
+              ],
             ),
-            const Spacer(),
-            _StartButton(onPressed: onTap),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _StartButton extends StatelessWidget {
-  const _StartButton({required this.onPressed});
+class _PlayButton extends StatelessWidget {
+  const _PlayButton({required this.onPressed});
 
   final Future<void> Function() onPressed;
 
@@ -80,7 +94,7 @@ class _StartButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Start',
+              'Play',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
