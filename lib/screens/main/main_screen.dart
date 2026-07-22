@@ -37,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildBottomNav() {
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         border: Border(
           top: BorderSide(
             color: AppColors.borderLight,
@@ -65,7 +65,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _currentIndex == index;
-    final color = isSelected ? const Color(0xFF2563EB) : const Color(0xFF9CA3AF);
+    final color = isSelected ? AppColors.ink : AppColors.textSecondary;
 
     return GestureDetector(
       onTap: () {

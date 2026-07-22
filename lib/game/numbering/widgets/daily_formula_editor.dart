@@ -40,7 +40,7 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
 
   void _backspace() {
     if (_expression.isEmpty) return;
-    
+
     setState(() {
       _expression = _expression.substring(0, _expression.length - 1);
       _recalculateUsedDigits();
@@ -48,7 +48,7 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
     });
     _checkAutoSubmit();
   }
-  
+
   void _recalculateUsedDigits() {
     _usedDigits = List.filled(widget.digits.length, false);
     final exprDigits = _expression.replaceAll(RegExp(r'[^0-9]'), '').split('');
@@ -67,12 +67,12 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
       if (_message != null) setState(() => _message = null);
       return;
     }
-    
+
     final result = validateDailyPuzzleFormula(
       digitString: widget.digits.join(''),
       expression: _expression,
     );
-    
+
     if (result.valid) {
       setState(() => _message = '정답입니다! 🎉');
       Future.delayed(const Duration(milliseconds: 400), () {
@@ -82,7 +82,7 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
       if (_message != null) setState(() => _message = null);
     }
   }
-  
+
   void reset() {
     setState(() {
       _expression = '';
@@ -118,14 +118,15 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
             style: TextStyle(
               fontSize: _expression.isEmpty ? 20 : 32,
               fontWeight: FontWeight.bold,
-              color: _expression.isEmpty ? AppColors.textSecondary : widget.accent,
+              color:
+                  _expression.isEmpty ? AppColors.textSecondary : widget.accent,
             ),
             maxLines: 1,
           ),
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         // Validation Message
         AnimatedSize(
           duration: const Duration(milliseconds: 160),
@@ -144,7 +145,7 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
                   ),
                 ),
         ),
-        
+
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -161,7 +162,9 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
                     return _CalcButton(
                       label: widget.digits[i],
                       isUsed: isUsed,
-                      onTap: isUsed ? null : () => _append(widget.digits[i], digitIndex: i),
+                      onTap: isUsed
+                          ? null
+                          : () => _append(widget.digits[i], digitIndex: i),
                     );
                   }),
                 ),
@@ -183,7 +186,7 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
                     _CalcOpButton(label: '(', onTap: () => _append('(')),
                     _CalcOpButton(label: ')', onTap: () => _append(')')),
                     _CalcOpButton(
-                      label: '⌫', 
+                      label: '⌫',
                       onTap: _backspace,
                       color: AppColors.danger,
                     ),
@@ -201,7 +204,8 @@ class _DailyFormulaEditorState extends State<_DailyFormulaEditor> {
 }
 
 class _CalcButton extends StatelessWidget {
-  const _CalcButton({required this.label, required this.isUsed, required this.onTap});
+  const _CalcButton(
+      {required this.label, required this.isUsed, required this.onTap});
   final String label;
   final bool isUsed;
   final VoidCallback? onTap;
@@ -221,13 +225,15 @@ class _CalcButton extends StatelessWidget {
             color: isUsed ? Colors.transparent : AppColors.borderLight,
             width: 1.5,
           ),
-          boxShadow: isUsed ? [] : [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            )
-          ],
+          boxShadow: isUsed
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ],
         ),
         alignment: Alignment.center,
         child: Text(
@@ -235,7 +241,9 @@ class _CalcButton extends StatelessWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,
-            color: isUsed ? AppColors.textSecondary.withValues(alpha: 0.3) : AppColors.textPrimary,
+            color: isUsed
+                ? AppColors.textSecondary.withValues(alpha: 0.3)
+                : AppColors.textPrimary,
           ),
         ),
       ),
@@ -257,7 +265,7 @@ class _CalcOpButton extends StatelessWidget {
         width: 64,
         height: 64,
         decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
+          color: AppColors.surfaceSoft,
           shape: BoxShape.circle,
           border: Border.all(color: AppColors.borderLight, width: 1.5),
         ),

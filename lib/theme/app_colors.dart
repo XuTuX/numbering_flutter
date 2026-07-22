@@ -1,40 +1,40 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  // Figma Core Monochrome
-  static const primary = Color(0xFF000000);
+  // Quiet minimal core
+  static const primary = Color(0xFF171716);
   static const onPrimary = Color(0xFFFFFFFF);
-  static const ink = Color(0xFF000000);
+  static const ink = Color(0xFF171716);
   static const inverseInk = Color(0xFFFFFFFF);
-  
+
   // Surfaces
   static const canvas = Color(0xFFFFFFFF);
   static const inverseCanvas = Color(0xFF000000);
-  static const surfaceSoft = Color(0xFFF7F7F5);
-  static const hairline = Color(0xFFE6E6E6);
-  static const hairlineSoft = Color(0xFFF1F1F1);
-  
-  // Figma Pastel Color Blocks
-  static const blockLime = Color(0xFFDCEEB1);
-  static const blockLilac = Color(0xFFC5B0F4);
-  static const blockCream = Color(0xFFF4ECD6);
-  static const blockPink = Color(0xFFEFD4D4);
-  static const blockMint = Color(0xFFC8E6CD);
-  static const blockCoral = Color(0xFFF3C9B6);
+  static const background = Color(0xFFFAF9F6);
+  static const surfaceSoft = Color(0xFFF1F0EB);
+  static const hairline = Color(0x1A171716);
+  static const hairlineSoft = Color(0x0D171716);
+
+  // Low-saturation pastel blocks. Use one dominant tint per card.
+  static const blockLime = Color(0xFFEDF1E3);
+  static const blockLilac = Color(0xFFEDE9F5);
+  static const blockCream = Color(0xFFF2ECE2);
+  static const blockPink = Color(0xFFF3E9E7);
+  static const blockMint = Color(0xFFE8EFE8);
+  static const blockCoral = Color(0xFFF2E8E2);
   static const blockNavy = Color(0xFF1F1D3D);
   static const accentMagenta = Color(0xFFFF3D8B);
 
-  // Fallbacks for existing code
-  static const background = canvas;
+  // Semantic aliases
   static const surface = canvas;
   static const surfaceSecondary = surfaceSoft;
   static const textPrimary = ink;
-  static const textSecondary = Color(0xFF7A7A7A);
+  static const textSecondary = Color(0xFF777570);
   static const borderLight = hairline;
-  static const shadowLight = Color(0x1F000000);
-  static const shadowFaint = Color(0x0A000000);
-  
-  // Legacy
+  static const shadowLight = Color(0x12171716);
+  static const shadowFaint = Color(0x08171716);
+
+  // Functional gameplay colors. Do not use as decorative UI fills.
   static const scoreOrange = Color(0xFFFF6A00);
   static const timeBlue = Color(0xFF0066CC);
   static const green = Color(0xFF00D47C);

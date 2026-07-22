@@ -14,13 +14,14 @@ class ProfileScreen extends StatelessWidget {
     final progressService = Get.find<LevelProgressService>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
           'Profile',
-          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: AppColors.textPrimary, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -35,16 +36,9 @@ class ProfileScreen extends StatelessWidget {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE5E7EB),
+                  color: AppColors.surfaceSoft,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  border: Border.all(color: AppColors.borderLight),
                 ),
                 child: const Center(
                   child: Text(
@@ -69,9 +63,10 @@ class ProfileScreen extends StatelessWidget {
               Obx(() {
                 final currentLevel = progressService.highestUnlockedLevel;
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+                    color: AppColors.blockLilac,
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Text(
@@ -79,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2563EB),
+                      color: AppColors.ink,
                     ),
                   ),
                 );
@@ -99,12 +94,18 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 24),
-                      Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 24),
-                      Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 24),
-                      Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 24),
-                      Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 24),
-                      Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 24),
+                      Icon(Icons.star_rounded,
+                          color: Color(0xFFF59E0B), size: 24),
+                      Icon(Icons.star_rounded,
+                          color: Color(0xFFF59E0B), size: 24),
+                      Icon(Icons.star_rounded,
+                          color: Color(0xFFF59E0B), size: 24),
+                      Icon(Icons.star_rounded,
+                          color: Color(0xFFF59E0B), size: 24),
+                      Icon(Icons.star_rounded,
+                          color: Color(0xFFF59E0B), size: 24),
+                      Icon(Icons.star_rounded,
+                          color: Color(0xFFF59E0B), size: 24),
                     ],
                   ),
                 ],
@@ -137,7 +138,7 @@ class ProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
+                color: AppColors.surfaceSoft,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: AppColors.textPrimary, size: 20),
@@ -153,7 +154,8 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
           ],
         ),
       ),

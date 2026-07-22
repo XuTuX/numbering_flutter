@@ -13,19 +13,21 @@ class StatsScreen extends StatelessWidget {
     // You would integrate with a full StatsController/Service later.
     final scoreController = Get.find<ScoreController>();
     final progressService = Get.find<LevelProgressService>();
-    
+
     final highScore = scoreController.highscore.value;
     final highestUnlocked = progressService.highestUnlockedLevel;
-    final totalCleared = progressService.progress.values.where((e) => e.cleared).length;
+    final totalCleared =
+        progressService.progress.values.where((e) => e.cleared).length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
           'Statistics',
-          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: AppColors.textPrimary, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -68,8 +70,11 @@ class StatsScreen extends StatelessWidget {
                       width: 6,
                       height: height,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2563EB).withValues(alpha: index % 3 == 0 ? 0.3 : 1.0),
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                        color: AppColors.ink.withValues(
+                          alpha: index % 3 == 0 ? 0.18 : 0.72,
+                        ),
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(4)),
                       ),
                     );
                   }),

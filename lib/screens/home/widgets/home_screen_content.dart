@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:numbering/controllers/score_controller.dart';
-import 'package:numbering/game/numbering/level_progress_service.dart';
-
-import 'package:numbering/services/auth_service.dart';
-import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
-import 'package:numbering/widgets/home_screen/home_components.dart';
-import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/screens/home/arcade_screen.dart';
-import 'package:numbering/utils/mock_data.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/utils/kst_clock.dart';
 
 part 'home_screen_content_components.dart';
 
@@ -33,100 +28,80 @@ class HomeScreenContent extends StatelessWidget {
   const HomeScreenContent({
     super.key,
     required this.scoreController,
-    required this.authService,
     required this.onSettingsTap,
     required this.onProfileTap,
     required this.onStartGame,
-    required this.onOpenLevelList,
     required this.onStartDaily,
-    required this.onStartDailyTest,
     required this.onRankingTap,
   });
 
   final ScoreController scoreController;
-  final AuthService authService;
   final VoidCallback onSettingsTap;
   final VoidCallback onProfileTap;
   final VoidCallback onStartGame;
-  final VoidCallback onOpenLevelList;
   final Future<void> Function() onStartDaily;
-  final Future<void> Function() onStartDailyTest;
   final VoidCallback onRankingTap;
 
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
-    final isLandscape = mediaSize.width > mediaSize.height;
-    final hPad = (mediaSize.width * 0.06).clamp(24.0, 40.0);
-    
-    final progress = Get.find<LevelProgressService>();
+    final horizontalPadding = (mediaSize.width * 0.055).clamp(22.0, 48.0);
+    final today = KstClock.nowInKst();
+    final dateLabel = '${today.day} ${_monthLabel(today.month)}';
+    final puzzleNumber = _dayOfYear(today);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: _homeBackground,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: hPad),
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
           child: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: isLandscape ? 820 : 480),
+              constraints: const BoxConstraints(maxWidth: 960),
               child: Column(
                 children: [
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _HomeHeader(
-                    authService: authService,
                     onSettingsTap: onSettingsTap,
                     onProfileTap: onProfileTap,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          flex: 7,
-                          child: _Top3RankingCard(
-                            onShowRanking: onRankingTap,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 3,
-                          child: Obx(() {
-                            final current = progress.highestUnlockedLevel;
-                            return Column(
+                    child: Obx(() {
+                      final recordedBest = scoreController.highscore.value;
+                      final bestScore = recordedBest > 0 ? recordedBest : 12500;
+                      final challenge = _ChallengeCard(
+                        dateLabel: dateLabel,
+                        puzzleNumber: puzzleNumber,
+                        bestScore: bestScore,
+                        onTap: onStartDaily,
+                      );
+                      final arcade = _ArcadeCard(
+                        onTap: () => _openArcade(onStartGame),
+                      );
+                      final ranking = _RankingCard(onTap: onRankingTap);
+
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(flex: 7, child: challenge),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            flex: 3,
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(
-                                  child: _SquareActionButton(
-                                    title: '아케이드',
-                                    actionLabel: 'LV.$current 도전하기',
-                                    color: AppColors.blockLime,
-                                    onTap: () {
-                                      Get.to(
-                                        () => ArcadeScreen(onStartGame: onStartGame),
-                                        transition: Transition.zoom,
-                                        duration: const Duration(milliseconds: 250),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Expanded(
-                                  child: _SquareActionButton(
-                                    title: '오늘의 퍼즐',
-                                    actionLabel: '도전',
-                                    color: AppColors.blockCream,
-                                    onTap: onStartDaily,
-                                  ),
-                                ),
+                                Expanded(child: arcade),
+                                const SizedBox(height: 14),
+                                Expanded(child: ranking),
                               ],
-                            );
-                          }),
-                        ),
-                      ],
-                    ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                 ],
               ),
             ),
@@ -134,5 +109,35 @@ class HomeScreenContent extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _openArcade(VoidCallback onStartGame) {
+    Get.to(
+      () => ArcadeScreen(onStartGame: onStartGame),
+      transition: Transition.fadeIn,
+      duration: const Duration(milliseconds: 220),
+    );
+  }
+
+  String _monthLabel(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[month - 1];
+  }
+
+  int _dayOfYear(DateTime date) {
+    return date.difference(DateTime(date.year, 1, 1)).inDays + 1;
   }
 }

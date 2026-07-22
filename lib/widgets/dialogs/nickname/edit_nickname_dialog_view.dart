@@ -169,7 +169,7 @@ class _NicknameDialogActions extends StatelessWidget {
               child: TextButton(
                 onPressed: onCancel,
                 style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFF8F9FA),
+                  backgroundColor: AppColors.surfaceSoft,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                     side: const BorderSide(color: AppColors.borderLight),
@@ -190,7 +190,7 @@ class _NicknameDialogActions extends StatelessWidget {
             child: ElevatedButton(
               onPressed: isSaving ? null : onSave,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.blue,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(

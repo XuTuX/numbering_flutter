@@ -99,7 +99,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return HomeScreenContent(
       scoreController: scoreController,
-      authService: authService,
       onSettingsTap: () => showSettingsScreen(authService),
       onProfileTap: () => Get.to(() => const ProfileScreen()),
       onStartGame: () => openGameScreen(
@@ -108,14 +107,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           startLevelId: Get.find<LevelProgressService>().highestUnlockedLevel,
         ),
       ),
-      onOpenLevelList: () => openGameScreen(
-        const GameSessionConfig(
-          mode: GameMode.normal,
-          startLevelId: null,
-        ),
-      ),
       onStartDaily: () => openDailyChallenge(authService),
-      onStartDailyTest: openDailyChallengeTest,
       onRankingTap: handleRankingPress,
     );
   }

@@ -74,16 +74,16 @@ class _RankingScreenState extends State<RankingScreen> {
     int? localScore;
     if (_period == RankingPeriod.daily) {
       final dailyController = Get.find<DailyPuzzleController>();
-      final dateKey = widget.dailyDateKey ?? ''; 
+      final dateKey = widget.dailyDateKey ?? '';
       localScore = dailyController.getDailyTotalScore(dateKey);
       if (localScore == 0) localScore = null;
     } else {
       localScore = scoreController.highscore.value;
     }
-    
-    final mockScores = MockData.getScores(myId, authService.userNickname.value, localScore);
 
-    
+    final mockScores =
+        MockData.getScores(myId, authService.userNickname.value, localScore);
+
     setState(() {
       _scores = mockScores;
       _isLoading = false;
@@ -122,7 +122,7 @@ class _RankingScreenState extends State<RankingScreen> {
     final isLandscape = mediaSize.width > mediaSize.height;
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -214,7 +214,8 @@ class _LoginPromptBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.person_outline_rounded, size: 18, color: AppColors.ink.withValues(alpha: 0.35)),
+          Icon(Icons.person_outline_rounded,
+              size: 18, color: AppColors.ink.withValues(alpha: 0.35)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

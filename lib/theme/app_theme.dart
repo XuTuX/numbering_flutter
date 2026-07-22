@@ -7,15 +7,34 @@ import 'app_text_styles.dart';
 abstract final class AppTheme {
   static ThemeData get light {
     final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.blue,
+      seedColor: AppColors.ink,
       brightness: Brightness.light,
       surface: AppColors.surface,
+    ).copyWith(
+      primary: AppColors.primary,
+      onPrimary: AppColors.onPrimary,
+      outline: AppColors.hairline,
+      surfaceContainerHighest: AppColors.surfaceSoft,
     );
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: scheme,
       scaffoldBackgroundColor: AppColors.background,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppColors.ink,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: AppColors.ink,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.4,
+        ),
+      ),
       textTheme: const TextTheme(
         bodyMedium: AppTextStyles.dialogBody,
         labelLarge: AppTextStyles.buttonLabel,
@@ -27,6 +46,15 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.all(Radius.circular(AppRadius.card)),
         ),
       ),
+      cardTheme: const CardThemeData(
+        color: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.card)),
+          side: BorderSide(color: AppColors.borderLight),
+        ),
+      ),
       dividerTheme: const DividerThemeData(
         color: AppColors.borderLight,
         thickness: 1,
@@ -34,7 +62,7 @@ abstract final class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size(64, 48),
-          backgroundColor: AppColors.blue,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           textStyle: AppTextStyles.buttonLabel,
           shape: RoundedRectangleBorder(
@@ -52,6 +80,22 @@ abstract final class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.button),
           ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceSoft,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          borderSide: const BorderSide(color: AppColors.borderLight),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          borderSide: const BorderSide(color: AppColors.borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          borderSide: const BorderSide(color: AppColors.ink),
         ),
       ),
       splashColor: AppColors.surfaceSecondary,

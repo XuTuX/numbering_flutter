@@ -262,13 +262,6 @@ class CleanRankRow extends StatelessWidget {
         decoration: BoxDecoration(
           color: frameStyle.borderColor,
           borderRadius: BorderRadius.circular(11),
-          boxShadow: [
-            BoxShadow(
-              color: frameStyle.glowColor.withValues(alpha: 0.18),
-              blurRadius: 8,
-              spreadRadius: 0,
-            ),
-          ],
         ),
         child: rowContent,
       );
@@ -308,7 +301,6 @@ class _PreviewFrameStyle {
     required this.rankColor,
     required this.scoreColor,
     required this.iconColor,
-    required this.glowColor,
   });
 
   final Color borderColor;
@@ -316,7 +308,6 @@ class _PreviewFrameStyle {
   final Color rankColor;
   final Color scoreColor;
   final Color iconColor;
-  final Color glowColor;
 
   static _PreviewFrameStyle? forTier(SeasonTier tier) {
     return switch (tier) {
@@ -326,7 +317,6 @@ class _PreviewFrameStyle {
           rankColor: Color(0xFF4F46E5),
           scoreColor: Color(0xFF1A1A1A),
           iconColor: Color(0xFF4F46E5),
-          glowColor: Color(0xFFC4A3FF),
         ),
       SeasonTier.challenger => const _PreviewFrameStyle(
           borderColor: Color(0xFFA855F7),
@@ -334,7 +324,6 @@ class _PreviewFrameStyle {
           rankColor: Color(0xFFA855F7),
           scoreColor: Color(0xFF7C2D12),
           iconColor: Color(0xFFF59E0B),
-          glowColor: Color(0xFFF59E0B),
         ),
       SeasonTier.master => const _PreviewFrameStyle(
           borderColor: Color(0xFFDC2626),
@@ -342,7 +331,6 @@ class _PreviewFrameStyle {
           rankColor: Color(0xFFDC2626),
           scoreColor: Color(0xFF7F1D1D),
           iconColor: Color(0xFFF97316),
-          glowColor: Color(0xFFEF4444),
         ),
       SeasonTier.diamond => const _PreviewFrameStyle(
           borderColor: Color(0xFF0284C7),
@@ -350,7 +338,6 @@ class _PreviewFrameStyle {
           rankColor: Color(0xFF0284C7),
           scoreColor: Color(0xFF075985),
           iconColor: Color(0xFF38BDF8),
-          glowColor: Color(0xFF38BDF8),
         ),
       _ => null,
     };

@@ -17,12 +17,18 @@ class LevelListScreen extends StatelessWidget {
 
   Color _getPackColor(String name) {
     switch (name.toLowerCase()) {
-      case 'seoul': return AppColors.blockLilac;
-      case 'tokyo': return AppColors.blockLime;
-      case 'new york': return AppColors.blockCream;
-      case 'london': return AppColors.blockMint;
-      case 'paris': return AppColors.blockPink;
-      default: return AppColors.blockLime;
+      case 'seoul':
+        return AppColors.blockLilac;
+      case 'tokyo':
+        return AppColors.blockLime;
+      case 'new york':
+        return AppColors.blockCream;
+      case 'london':
+        return AppColors.blockMint;
+      case 'paris':
+        return AppColors.blockPink;
+      default:
+        return AppColors.blockLime;
     }
   }
 
@@ -35,7 +41,7 @@ class LevelListScreen extends StatelessWidget {
     final packColor = _getPackColor(pack.name);
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.only(top: topPad),
@@ -46,7 +52,8 @@ class LevelListScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_rounded, color: AppColors.ink),
+                      icon: const Icon(Icons.arrow_back_rounded,
+                          color: AppColors.ink),
                       onPressed: () => Get.back(),
                       splashRadius: 24,
                     ),
@@ -70,7 +77,8 @@ class LevelListScreen extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: hPad),
                   child: Obx(() {
                     final current = progress.highestUnlockedLevel;
-                    final records = Map<int, LevelProgress>.of(progress.progress);
+                    final records =
+                        Map<int, LevelProgress>.of(progress.progress);
                     return LevelGrid(
                       pack: pack,
                       currentLevel: current,
@@ -195,7 +203,8 @@ class LevelTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (!unlocked)
-              Icon(Icons.lock_rounded, size: 18, color: AppColors.ink.withValues(alpha: 0.15))
+              Icon(Icons.lock_rounded,
+                  size: 18, color: AppColors.ink.withValues(alpha: 0.15))
             else ...[
               Text(
                 '$levelId',
@@ -216,7 +225,9 @@ class LevelTile extends StatelessWidget {
                     return Icon(
                       lit ? Icons.star_rounded : Icons.star_border_rounded,
                       size: 10,
-                      color: lit ? AppColors.ink : AppColors.ink.withValues(alpha: 0.15),
+                      color: lit
+                          ? AppColors.ink
+                          : AppColors.ink.withValues(alpha: 0.15),
                     );
                   }),
                 ),

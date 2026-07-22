@@ -126,13 +126,13 @@ class _TodayPuzzleCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: AppColors.blockLilac,
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(color: AppColors.borderLight),
                 ),
                 child: const Icon(
                   Icons.auto_awesome_rounded,
-                  color: Color(0xFF2563EB),
+                  color: AppColors.ink,
                   size: 21,
                 ),
               ),
@@ -215,7 +215,7 @@ class _TodayPuzzleCard extends StatelessWidget {
               fontWeight: FontWeight.w800,
               color: challenge?.myScore == null
                   ? const Color(0xFFDC2626)
-                  : const Color(0xFF2563EB),
+                  : AppColors.ink,
             ),
           ),
         ],

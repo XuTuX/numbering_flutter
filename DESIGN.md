@@ -1,277 +1,119 @@
 ---
-version: alpha
-name: Figma-design-analysis
-description: "A minimalistic and highly contrasted design system characterized by a strict black-and-white foundation, accented with large, pastel-colored blocks (lime, lilac, cream). UI elements favor soft, pill-shaped borders to provide a friendly, accessible experience while maintaining a clean, structured layout."
+version: 1.0
+name: Numbering-quiet-minimal
+status: canonical
+description: "A quiet, premium puzzle UI built from off-white space, near-black type, low-saturation pastel cards, thin hairlines, and a fixed 7:3 landscape Bento layout. The puzzle and its primary action are always the visual focus."
+
+principles:
+  - purpose-first
+  - one-primary-action-per-screen
+  - content-over-decoration
+  - border-over-elevation
+  - low-saturation-surfaces
+  - functional-color-only
 
 colors:
-  primary: "#000000"
+  primary: "#171716"
   on-primary: "#ffffff"
-  ink: "#000000"
-  canvas: "#ffffff"
-  inverse-canvas: "#000000"
-  inverse-ink: "#ffffff"
-  on-inverse-soft: "#ffffff"
-  hairline: "#e6e6e6"
-  hairline-soft: "#f1f1f1"
-  surface-soft: "#f7f7f5"
-  block-lime: "#dceeb1"
-  block-lilac: "#c5b0f4"
-  block-cream: "#f4ecd6"
-  block-pink: "#efd4d4"
-  block-mint: "#c8e6cd"
-  block-coral: "#f3c9b6"
-  block-navy: "#1f1d3d"
-  accent-magenta: "#ff3d8b"
-  semantic-success: "#1ea64a"
-  overlay-scrim: "#000000"
+  ink: "#171716"
+  text-secondary: "#777570"
+  app-background: "#faf9f6"
+  surface: "#ffffff"
+  surface-soft: "#f1f0eb"
+  hairline: "rgba(23, 23, 22, 0.10)"
+  hairline-soft: "rgba(23, 23, 22, 0.05)"
+  block-lime: "#edf1e3"
+  block-lilac: "#ede9f5"
+  block-cream: "#f2ece2"
+  block-pink: "#f3e9e7"
+  block-mint: "#e8efe8"
+  block-coral: "#f2e8e2"
 
 typography:
-  display-xl:
-    fontFamily: figmaSans
-    fontSize: 86px
-    fontWeight: 340
-    lineHeight: 1.00
-    letterSpacing: -1.72px
-    fontFeature: kern
-  display-lg:
-    fontFamily: figmaSans
-    fontSize: 64px
-    fontWeight: 340
-    lineHeight: 1.10
-    letterSpacing: -0.96px
-    fontFeature: kern
-  headline:
-    fontFamily: figmaSans
-    fontSize: 26px
-    fontWeight: 540
-    lineHeight: 1.35
-    letterSpacing: -0.26px
-    fontFeature: kern
-  subhead:
-    fontFamily: figmaSans
-    fontSize: 26px
-    fontWeight: 340
-    lineHeight: 1.35
-    letterSpacing: -0.26px
-    fontFeature: kern
+  family: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+  hero:
+    fontSize: 32-40px
+    fontWeight: 800
+    lineHeight: 0.98-1.05
+    letterSpacing: -1.6px
+  screen-title:
+    fontSize: 20-24px
+    fontWeight: 800
+    letterSpacing: -0.4px
   card-title:
-    fontFamily: figmaSans
-    fontSize: 24px
-    fontWeight: 700
-    lineHeight: 1.45
-    letterSpacing: 0
-    fontFeature: kern
-  body-lg:
-    fontFamily: figmaSans
-    fontSize: 20px
-    fontWeight: 330
-    lineHeight: 1.40
-    letterSpacing: -0.14px
-    fontFeature: kern
+    fontSize: 20-28px
+    fontWeight: 800
+    maxLines: 2
   body:
-    fontFamily: figmaSans
-    fontSize: 18px
-    fontWeight: 320
+    fontSize: 14-16px
+    fontWeight: 500-600
     lineHeight: 1.45
-    letterSpacing: -0.26px
-    fontFeature: kern
-  body-sm:
-    fontFamily: figmaSans
-    fontSize: 16px
-    fontWeight: 330
-    lineHeight: 1.45
-    letterSpacing: -0.14px
-    fontFeature: kern
-  link:
-    fontFamily: figmaSans
-    fontSize: 20px
-    fontWeight: 480
-    lineHeight: 1.40
-    letterSpacing: -0.10px
-    fontFeature: kern
-  button:
-    fontFamily: figmaSans
-    fontSize: 20px
-    fontWeight: 480
-    lineHeight: 1.40
-    letterSpacing: -0.10px
-    fontFeature: kern
-  eyebrow:
-    fontFamily: figmaMono
-    fontSize: 18px
-    fontWeight: 400
-    lineHeight: 1.30
-    letterSpacing: 0.54px
-    fontFeature: kern
-  caption:
-    fontFamily: figmaMono
-    fontSize: 12px
-    fontWeight: 400
-    lineHeight: 1.00
-    letterSpacing: 0.60px
-    fontFeature: kern
+  label:
+    fontSize: 10-12px
+    fontWeight: 700-800
+    textTransform: uppercase
+    letterSpacing: 0.8-1.4px
 
-rounded:
-  xs: 2px
-  sm: 6px
-  md: 8px
-  lg: 24px
-  xl: 32px
-  pill: 50px
-  full: 9999px
+layout:
+  home:
+    orientation: landscape
+    scrolling: forbidden
+    composition: "7:3 Bento"
+    primary-column: 70%
+    secondary-column: 30%
+    secondary-stack-count: 2
+    gap: 14px
+    outer-padding: "clamp(22px, 5.5vw, 48px)"
+    header-left: "NUMBERING only"
+    header-right: [profile, settings]
+  max-content-width: 960px
+  minimum-touch-target: 44px
 
-spacing:
-  hair: 1px
-  xxs: 4px
-  xs: 8px
-  sm: 12px
-  md: 16px
-  lg: 24px
-  xl: 32px
-  xxl: 48px
-  section: 96px
+shape:
+  card-radius: 24px
+  control-radius: 14-16px
+  pill-radius: 999px
+  border-width: 1px
+  border-color: hairline
 
-components:
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-    padding: 10px 20px
-  button-primary-pressed:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-  button-secondary:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-    padding: 8px 18px 10px
-  button-tertiary-text:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.link}"
-    rounded: "{rounded.full}"
-    padding: 8px 12px
-  button-icon-circular:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.full}"
-    size: 40px
-  button-icon-circular-inverse:
-    backgroundColor: "{colors.on-inverse-soft}"
-    textColor: "{colors.inverse-ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.full}"
-    size: 40px
-  button-magenta-promo:
-    backgroundColor: "{colors.accent-magenta}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-    padding: 10px 18px
-  pricing-tab-default:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-    padding: 8px 18px
-  pricing-tab-selected:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-    padding: 8px 18px
-  text-input:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.md}"
-    padding: 12px 14px
-  text-input-focused:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.md}"
-    padding: 12px 14px
-  pricing-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  pricing-card-feature-row:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.xs}"
-  color-block-section:
-    backgroundColor: "{colors.block-lime}"
-    textColor: "{colors.ink}"
-    typography: "{typography.subhead}"
-    rounded: "{rounded.lg}"
-    padding: 48px
-  color-block-section-lilac:
-    backgroundColor: "{colors.block-lilac}"
-    textColor: "{colors.ink}"
-    typography: "{typography.subhead}"
-    rounded: "{rounded.lg}"
-    padding: 48px
-  color-block-section-navy:
-    backgroundColor: "{colors.block-navy}"
-    textColor: "{colors.inverse-ink}"
-    typography: "{typography.subhead}"
-    rounded: "{rounded.lg}"
-    padding: 48px
-  promo-banner-lilac:
-    backgroundColor: "{colors.block-lilac}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.md}"
-    padding: 16px 24px
-  template-card:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.md}"
-    padding: 16px
-  feature-illustration-tile:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.ink}"
-    typography: "{typography.eyebrow}"
-    rounded: "{rounded.md}"
-    padding: 24px
-  top-nav:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.xs}"
-    height: 56px
-  marquee-strip:
-    backgroundColor: "{colors.inverse-canvas}"
-    textColor: "{colors.inverse-ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.xs}"
-    height: 36px
-  comparison-checkmark:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.semantic-success}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.full}"
-    size: 16px
-  footer:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.xs}"
-    padding: 64px 32px
+elevation:
+  cards: none
+  buttons: none
+  dialogs: none
+  exception: "Light depth is allowed only on actively manipulated gameplay pieces."
 
-transitions:
-  modal:
-    type: "zoom"
-    duration: 250ms
-    description: "All sub-screens (Arcade, Game, Ranking, Settings) accessed from the home screen should use a zoom transition to feel like they are expanding from the card they were tapped on, rather than sliding in from the side."
+motion:
+  transition-duration: 150-220ms
+  press-duration: 100ms
+  press-scale: 0.96-0.98
+  curve: easeOutCubic
+
+rules:
+  required:
+    - "Use semantic tokens from lib/theme instead of screen-local color values."
+    - "Keep one dominant tint per card and no more than three pastel card colors per screen."
+    - "Keep the home screen entirely visible without scrolling."
+    - "Use labels and whitespace before adding icons or illustrations."
+    - "Preserve high-saturation colors for success, danger, time pressure, and puzzle blocks."
+  forbidden:
+    - gradients
+    - glassmorphism
+    - decorative-3d-art
+    - background-grids
+    - hard-shadows
+    - decorative-glow
+    - home-statistics-bar
+    - home-leaderboard-list
+    - brand-tagline-under-logo
+
+validation:
+  - flutter-analyze
+  - flutter-test
+  - no-overflow-at-844x390
+  - no-overflow-at-667x375
+  - no-home-scroll-view
 ---
+
+# NUMBERING UI Rules
+
+This file is the machine-readable canonical design contract. Human-readable rationale and examples live in [`docs/design_system.md`](docs/design_system.md). Game-specific exceptions live in [`docs/game_design_system.md`](docs/game_design_system.md).

@@ -228,16 +228,8 @@ class _MonthlyCalendar extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: charcoalBlack.withValues(alpha: 0.12),
-          width: 1.5,
+          color: AppColors.borderLight,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: charcoalBlack.withValues(alpha: 0.06),
-            offset: const Offset(0, 2),
-            blurRadius: 8,
-          ),
-        ],
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -330,18 +322,9 @@ class _DateChip extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? charcoalBlack : Colors.transparent,
-            width: isSelected ? 2 : 1,
+            color: isSelected ? charcoalBlack : AppColors.borderLight,
+            width: 1,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: charcoalBlack.withValues(alpha: 0.15),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ]
-              : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
