@@ -8,6 +8,7 @@ import 'package:numbering/theme/app_shadows.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/theme/app_typography.dart';
 import 'package:numbering/utils/kst_clock.dart';
+import 'package:numbering/utils/mock_data.dart';
 import 'package:numbering/widgets/home_screen/components/weekly_ranking_preview.dart';
 
 part 'daily_ranking_calendar_components.dart';
@@ -107,8 +108,16 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
       return;
     }
 
+    final dates = KstClock.recentDateKeys(days: 30);
+    final mockRanks = <String, int>{};
+    for (int i = 0; i < dates.length; i++) {
+      if (i % 3 == 0) {
+        mockRanks[dates[i]] = (i % 9) ~/ 3 + 1; // 1, 2, 3
+      }
+    }
+
     setState(() {
-      _myDailyRanks = {};
+      _myDailyRanks = mockRanks;
       _isRankLoading = false;
     });
   }
@@ -118,10 +127,13 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
       return;
     }
 
+    final myId = widget.authService.user.value?.id;
+    final myNickname = widget.authService.userNickname.value;
+    
     setState(() {
       _isSelectedRankingLoading = false;
       _selectedRankingError = null;
-      _selectedScores = [];
+      _selectedScores = MockData.getScores(myId, myNickname, 4800);
     });
   }
 

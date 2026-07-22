@@ -87,6 +87,7 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
                               if (records[lv]?.cleared ?? false) cleared++;
                             }
 
+                            final isLandscape = MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
                             return AnimatedBuilder(
                               animation: _pageController,
                               builder: (context, child) {
@@ -100,7 +101,7 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
 
                                 return Center(
                                   child: AspectRatio(
-                                    aspectRatio: 0.72,
+                                    aspectRatio: isLandscape ? 1.05 : 0.72,
                                     child: Transform.scale(
                                       scale: value,
                                       child: Opacity(
@@ -204,15 +205,18 @@ class _PackCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Spacer(flex: 2),
-                  Text(
-                    pack.name.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
-                      color: isColorBlock ? AppColors.ink : (unlocked ? AppColors.ink : AppColors.textSecondary),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      pack.name.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
+                        color: isColorBlock ? AppColors.ink : (unlocked ? AppColors.ink : AppColors.textSecondary),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                   const Spacer(flex: 3),
                   if (unlocked) ...[

@@ -7,6 +7,7 @@ import 'package:numbering/services/database_models.dart';
 import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
 import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/utils/mock_data.dart';
 
 import 'ranking_period.dart';
 import 'widgets/my_rank_card.dart';
@@ -73,7 +74,7 @@ class _RankingScreenState extends State<RankingScreen> {
     await scoreController.waitForLoginSync();
 
     if (!mounted) return;
-    final isLoggedIn = authService.user.value != null;
+    final myId = authService.user.value?.id;
     int? localScore;
     if (_period == RankingPeriod.daily) {
       final dailyController = Get.find<DailyPuzzleController>();
@@ -84,10 +85,19 @@ class _RankingScreenState extends State<RankingScreen> {
       localScore = scoreController.highscore.value;
     }
     
+    final mockScores = MockData.getScores(myId, authService.userNickname.value, localScore);
+    int? calculatedRank;
+    if (myId != null && localScore != null) {
+      final myIndex = mockScores.indexWhere((item) => item['user_id'] == myId);
+      if (myIndex >= 0) {
+        calculatedRank = myIndex + 1;
+      }
+    }
+    
     setState(() {
-      _myRank = null;
-      _myScore = isLoggedIn ? localScore : localScore;
-      _scores = [];
+      _myRank = calculatedRank;
+      _myScore = localScore;
+      _scores = mockScores;
       _weeklySeasonSummary = null;
       _isLoading = false;
     });

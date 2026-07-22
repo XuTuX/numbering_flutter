@@ -9,6 +9,7 @@ import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
 import 'package:numbering/widgets/home_screen/home_components.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/screens/home/arcade_screen.dart';
+import 'package:numbering/utils/mock_data.dart';
 
 part 'home_screen_content_components.dart';
 

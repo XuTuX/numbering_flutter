@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
-import '../../theme/app_shadows.dart';
 
 class SoftIconButton extends StatefulWidget {
   const SoftIconButton({
@@ -52,17 +50,14 @@ class _SoftIconButtonState extends State<SoftIconButton> {
               width: widget.size.clamp(44, 64),
               height: widget.size.clamp(44, 64),
               decoration: BoxDecoration(
-                color:
-                    _pressed ? AppColors.surfaceSecondary : AppColors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.button),
-                border: Border.all(color: AppColors.borderLight),
-                boxShadow:
-                    _pressed ? AppShadows.smallShadow : AppShadows.buttonShadow,
+                color: _pressed ? AppColors.hairlineSoft : AppColors.surfaceSoft,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.hairline),
               ),
               alignment: Alignment.center,
               child: Icon(
                 widget.icon,
-                color: AppColors.textPrimary,
+                color: AppColors.ink,
                 size: widget.iconSize,
               ),
             ),

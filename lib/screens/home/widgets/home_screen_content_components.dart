@@ -6,6 +6,18 @@ class _Top3RankingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mockScores = MockData.getScores(null, null, null);
+    final top1 = mockScores.isNotEmpty ? mockScores[0] : null;
+    final top2 = mockScores.length > 1 ? mockScores[1] : null;
+    final top3 = mockScores.length > 2 ? mockScores[2] : null;
+
+    final name1 = top1 != null ? top1['profiles']['nickname'] ?? '-' : '-';
+    final score1 = top1 != null ? '${top1['score']}' : '-';
+    final name2 = top2 != null ? top2['profiles']['nickname'] ?? '-' : '-';
+    final score2 = top2 != null ? '${top2['score']}' : '-';
+    final name3 = top3 != null ? top3['profiles']['nickname'] ?? '-' : '-';
+    final score3 = top3 != null ? '${top3['score']}' : '-';
+
     return GestureDetector(
       onTap: onShowRanking,
       child: Container(
@@ -33,11 +45,11 @@ class _Top3RankingCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildRankRow(1, '-', '-'),
+            _buildRankRow(1, name1, score1),
             const SizedBox(height: 8),
-            _buildRankRow(2, '-', '-'),
+            _buildRankRow(2, name2, score2),
             const SizedBox(height: 8),
-            _buildRankRow(3, '-', '-'),
+            _buildRankRow(3, name3, score3),
           ],
         ),
       ),

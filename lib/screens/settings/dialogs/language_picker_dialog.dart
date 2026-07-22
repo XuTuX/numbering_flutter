@@ -17,10 +17,14 @@ class LanguagePickerDialog extends StatelessWidget {
 
     return Center(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 32),
-        padding: const EdgeInsets.all(28),
+        margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        padding: const EdgeInsets.all(24),
+        constraints: const BoxConstraints(
+          maxWidth: 440,
+          maxHeight: 340, // Constrain height in landscape to prevent overflow
+        ),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.canvas,
           borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(color: AppColors.borderLight),
           boxShadow: AppShadows.cardShadow,
@@ -36,79 +40,93 @@ class LanguagePickerDialog extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
+                  color: AppColors.ink,
                   letterSpacing: -0.3,
                 ),
               ),
-              const SizedBox(height: 20),
-              ...SettingsService.supportedLocales.map((locale) {
-                final localeKey =
-                    '${locale.languageCode}_${locale.countryCode}';
-                final isSelected = locale == currentLocale;
-                final localeName =
-                    SettingsService.localeNames[localeKey] ?? localeKey;
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: SettingsService.supportedLocales.map((locale) {
+                      final localeKey =
+                          '${locale.languageCode}_${locale.countryCode}';
+                      final isSelected = locale == currentLocale;
+                      final localeName =
+                          SettingsService.localeNames[localeKey] ?? localeKey;
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: InkWell(
-                    onTap: () {
-                      settingsService.setLocale(locale);
-                      Get.back();
-                    },
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.blueAccentSoft.withValues(alpha: 0.55)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              localeName,
-                              style: AppTypography.body.copyWith(
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: InkWell(
+                          onTap: () {
+                            settingsService.setLocale(locale);
+                            Get.back();
+                          },
+                          borderRadius: BorderRadius.circular(14),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.surfaceSoft
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
                                 color: isSelected
-                                    ? AppColors.textPrimary
-                                    : AppColors.textSecondary,
+                                    ? AppColors.hairline
+                                    : Colors.transparent,
+                                width: 1.0,
                               ),
                             ),
-                          ),
-                          if (isSelected)
-                            const Icon(
-                              Icons.check_rounded,
-                              size: 20,
-                              color: AppColors.timeBlue,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    localeName,
+                                    style: AppTypography.body.copyWith(
+                                      fontWeight: isSelected
+                                          ? FontWeight.w800
+                                          : FontWeight.w600,
+                                      color: isSelected
+                                          ? AppColors.ink
+                                          : AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(
+                                    Icons.check_rounded,
+                                    size: 20,
+                                    color: AppColors.ink,
+                                  ),
+                              ],
                             ),
-                        ],
-                      ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: OutlinedButton(
+                  onPressed: Get.back,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.ink,
+                    side: const BorderSide(color: AppColors.hairline),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                );
-              }),
-              const SizedBox(height: 8),
-              Center(
-                child: SizedBox(
-                  height: 48,
-                  child: TextButton(
-                    onPressed: Get.back,
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.grey[100],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: Text(
-                      '취소'.tr,
-                      style: AppTypography.button.copyWith(fontSize: 15),
-                    ),
+                  child: Text(
+                    '취소'.tr,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
