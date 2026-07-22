@@ -78,44 +78,56 @@ class HomeScreenContent extends StatelessWidget {
                     onProfileTap: onProfileTap,
                   ),
                   const SizedBox(height: 16),
-                  // Ranking card fills remaining space
                   Expanded(
-                    child: _Top3RankingCard(
-                      onShowRanking: onRankingTap,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Arcade & Today's Puzzle — compact single row
-                  Obx(() {
-                    final current = progress.highestUnlockedLevel;
-                    return Row(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
-                          child: _InlineActionButton(
-                            label: '아케이드',
-                            sublabel: 'Lv.$current ▶',
-                            color: AppColors.blockLime,
-                            onTap: () {
-                              Get.to(
-                                () => ArcadeScreen(onStartGame: onStartGame),
-                                transition: Transition.zoom,
-                                duration: const Duration(milliseconds: 250),
-                              );
-                            },
+                          flex: 1,
+                          child: _Top3RankingCard(
+                            onShowRanking: onRankingTap,
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 12),
                         Expanded(
-                          child: _InlineActionButton(
-                            label: '오늘의 퍼즐',
-                            sublabel: '도전',
-                            color: AppColors.blockCream,
-                            onTap: onStartDaily,
-                          ),
+                          flex: 1,
+                          child: Obx(() {
+                            final current = progress.highestUnlockedLevel;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(
+                                  child: _SquareActionButton(
+                                    title: '아케이드',
+                                    subtitle: 'LV.$current',
+                                    actionLabel: '도전하기',
+                                    color: AppColors.blockLime,
+                                    onTap: () {
+                                      Get.to(
+                                        () => ArcadeScreen(onStartGame: onStartGame),
+                                        transition: Transition.zoom,
+                                        duration: const Duration(milliseconds: 250),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Expanded(
+                                  child: _SquareActionButton(
+                                    title: '오늘의 퍼즐',
+                                    subtitle: '일일 미션',
+                                    actionLabel: '도전',
+                                    color: AppColors.blockCream,
+                                    onTap: onStartDaily,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
                         ),
                       ],
-                    );
-                  }),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                 ],
               ),
