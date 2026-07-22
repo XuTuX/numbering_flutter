@@ -28,7 +28,7 @@ class _Top3RankingCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -151,20 +151,23 @@ class _SquareActionButton extends StatelessWidget {
                   color: AppColors.ink.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      actionLabel,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.ink,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        actionLabel,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 2),
-                    const Icon(Icons.chevron_right_rounded, color: AppColors.ink, size: 16),
-                  ],
+                      const SizedBox(width: 2),
+                      const Icon(Icons.chevron_right_rounded, color: AppColors.ink, size: 16),
+                    ],
+                  ),
                 ),
               ),
             ),

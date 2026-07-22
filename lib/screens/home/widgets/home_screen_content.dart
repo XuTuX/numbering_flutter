@@ -83,14 +83,14 @@ class HomeScreenContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
-                          flex: 7,
+                          flex: 8,
                           child: _Top3RankingCard(
                             onShowRanking: onRankingTap,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          flex: 4,
+                          flex: 2,
                           child: Obx(() {
                             final current = progress.highestUnlockedLevel;
                             return Column(
@@ -99,8 +99,7 @@ class HomeScreenContent extends StatelessWidget {
                                 Expanded(
                                   child: _SquareActionButton(
                                     title: '아케이드',
-                                    subtitle: 'LV.$current',
-                                    actionLabel: '도전하기',
+                                    actionLabel: 'LV.$current 도전하기',
                                     color: AppColors.blockLime,
                                     onTap: () {
                                       Get.to(
@@ -115,7 +114,6 @@ class HomeScreenContent extends StatelessWidget {
                                 Expanded(
                                   child: _SquareActionButton(
                                     title: '오늘의 퍼즐',
-                                    subtitle: '일일 미션',
                                     actionLabel: '도전',
                                     color: AppColors.blockCream,
                                     onTap: onStartDaily,
