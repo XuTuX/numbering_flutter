@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:numbering/screens/home/home_screen.dart';
 import 'package:numbering/screens/ranking/ranking_screen.dart';
 import 'package:numbering/screens/stats/stats_screen.dart';
-import 'package:numbering/screens/profile/profile_screen.dart';
 import 'package:numbering/theme/app_colors.dart';
 
 class MainScreen extends StatefulWidget {
@@ -19,7 +18,6 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     RankingScreen(),
     StatsScreen(),
-    ProfileScreen(),
   ];
 
   @override
@@ -55,7 +53,6 @@ class _MainScreenState extends State<MainScreen> {
               _buildNavItem(0, Icons.home_rounded, 'Home'),
               _buildNavItem(1, Icons.emoji_events_rounded, 'Ranking'),
               _buildNavItem(2, Icons.bar_chart_rounded, 'Stats'),
-              _buildNavItem(3, Icons.person_rounded, 'Profile'),
             ],
           ),
         ),

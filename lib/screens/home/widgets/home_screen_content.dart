@@ -27,7 +27,6 @@ class HomeScreenContent extends StatelessWidget {
   const HomeScreenContent({
     super.key,
     required this.onSettingsTap,
-    required this.onProfileTap,
     required this.onStartGame,
     required this.onStartDaily,
     required this.onRankingTap,
@@ -35,7 +34,6 @@ class HomeScreenContent extends StatelessWidget {
   });
 
   final VoidCallback onSettingsTap;
-  final VoidCallback onProfileTap;
   final VoidCallback onStartGame;
   final Future<void> Function() onStartDaily;
   final VoidCallback onRankingTap;
@@ -61,7 +59,6 @@ class HomeScreenContent extends StatelessWidget {
                   const SizedBox(height: 12),
                   _HomeHeader(
                     onSettingsTap: onSettingsTap,
-                    onProfileTap: onProfileTap,
                   ),
                   const SizedBox(height: 14),
                   Expanded(

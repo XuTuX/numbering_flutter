@@ -40,12 +40,12 @@ class _ChallengeCard extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(22),
+          const Padding(
+            padding: EdgeInsets.all(22),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Today's\nChallenge",
                   style: TextStyle(
                     color: _homeInk,
@@ -55,8 +55,8 @@ class _ChallengeCard extends StatelessWidget {
                     letterSpacing: -1.6,
                   ),
                 ),
-                const Spacer(),
-                const Align(
+                Spacer(),
+                Align(
                   alignment: Alignment.bottomRight,
                   child: _ArrowCircle(),
                 ),
@@ -244,11 +244,9 @@ class _HomeCard extends StatelessWidget {
 class _HomeHeader extends StatelessWidget {
   const _HomeHeader({
     required this.onSettingsTap,
-    required this.onProfileTap,
   });
 
   final VoidCallback onSettingsTap;
-  final VoidCallback onProfileTap;
 
   @override
   Widget build(BuildContext context) {
@@ -272,12 +270,6 @@ class _HomeHeader extends StatelessWidget {
               ),
             ),
           ),
-          _HeaderIconButton(
-            tooltip: 'Profile',
-            icon: Icons.person_outline_rounded,
-            onTap: onProfileTap,
-          ),
-          const SizedBox(width: 10),
           _HeaderIconButton(
             tooltip: 'Settings',
             icon: Icons.tune_rounded,

@@ -17,7 +17,6 @@ void main() {
       MaterialApp(
         home: HomeScreenContent(
           onSettingsTap: () {},
-          onProfileTap: () {},
           onStartGame: () {},
           onStartDaily: () async {},
           onRankingTap: () {},
@@ -32,6 +31,8 @@ void main() {
     await pumpHome(tester, surfaceSize: const Size(844, 390));
 
     expect(find.text('NUMBERING'), findsOneWidget);
+    expect(find.byTooltip('Profile'), findsNothing);
+    expect(find.byTooltip('Settings'), findsOneWidget);
     expect(find.text("Today's\nChallenge"), findsOneWidget);
     expect(find.text('Play'), findsNothing);
     final challengeDate = find.byKey(const ValueKey('challenge-date'));

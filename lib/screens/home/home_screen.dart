@@ -8,7 +8,6 @@ import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/audio_service.dart';
 
-import 'package:numbering/screens/profile/profile_screen.dart';
 import 'home_screen_flows.dart';
 import 'widgets/home_screen_content.dart';
 
@@ -101,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return HomeScreenContent(
         currentLevel: currentLevel,
         onSettingsTap: () => showSettingsScreen(authService),
-        onProfileTap: () => Get.to(() => const ProfileScreen()),
         onStartGame: () => openGameScreen(
           GameSessionConfig(
             mode: GameMode.normal,
