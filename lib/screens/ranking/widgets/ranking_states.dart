@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:numbering/constant.dart';
 import 'package:numbering/theme/app_colors.dart';
 import '../ranking_period.dart';
 
@@ -27,7 +26,7 @@ class RankingLoadingState extends StatelessWidget {
           Text(
             'LOADING'.tr,
             style: GoogleFonts.blackHanSans(
-              color: charcoalBlack.withValues(alpha: 0.2),
+              color: AppColors.ink.withValues(alpha: 0.2),
               fontSize: 16,
               letterSpacing: 1.5,
             ),
@@ -55,13 +54,13 @@ class EmptyRankingState extends StatelessWidget {
           Icon(
             Icons.leaderboard_outlined,
             size: 48,
-            color: charcoalBlack.withValues(alpha: 0.08),
+            color: AppColors.ink.withValues(alpha: 0.08),
           ),
           const SizedBox(height: 14),
           Text(
             period.emptyMessage,
             style: GoogleFonts.blackHanSans(
-              color: charcoalBlack.withValues(alpha: 0.12),
+              color: AppColors.ink.withValues(alpha: 0.12),
               fontSize: 15,
               letterSpacing: 1.0,
             ),
@@ -90,14 +89,14 @@ class RankingErrorState extends StatelessWidget {
           children: [
             Icon(
               Icons.error_outline,
-              color: charcoalBlack.withValues(alpha: 0.25),
+              color: AppColors.ink.withValues(alpha: 0.25),
               size: 36,
             ),
             const SizedBox(height: 16),
             Text(
               'FAILED TO LOAD'.tr,
               style: GoogleFonts.blackHanSans(
-                color: charcoalBlack.withValues(alpha: 0.6),
+                color: AppColors.ink.withValues(alpha: 0.6),
                 fontSize: 16,
               ),
             ),
@@ -108,10 +107,10 @@ class RankingErrorState extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.canvas,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: charcoalBlack.withValues(alpha: 0.15),
+                    color: AppColors.ink.withValues(alpha: 0.15),
                     width: 1.5,
                   ),
                 ),
@@ -120,7 +119,7 @@ class RankingErrorState extends StatelessWidget {
                   style: GoogleFonts.notoSans(
                     fontWeight: FontWeight.w900,
                     fontSize: 13,
-                    color: charcoalBlack,
+                    color: AppColors.ink,
                   ),
                 ),
               ),

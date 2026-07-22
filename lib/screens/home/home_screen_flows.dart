@@ -18,7 +18,11 @@ void handleRankingPress() {
 
 void openGameScreen(
     [GameSessionConfig sessionConfig = const GameSessionConfig.normal()]) {
-  Get.off(() => GameScreen(sessionConfig: sessionConfig));
+  Get.off(
+    () => GameScreen(sessionConfig: sessionConfig),
+    transition: Transition.zoom,
+    duration: const Duration(milliseconds: 250),
+  );
 }
 
 Future<void> openDailyChallenge(AuthService authService) async {

@@ -268,4 +268,10 @@ components:
     typography: "{typography.caption}"
     rounded: "{rounded.xs}"
     padding: 64px 32px
+
+transitions:
+  modal:
+    type: "zoom"
+    duration: 250ms
+    description: "All sub-screens (Arcade, Game, Ranking, Settings) accessed from the home screen should use a zoom transition to feel like they are expanding from the card they were tapped on, rather than sliding in from the side."
 ---

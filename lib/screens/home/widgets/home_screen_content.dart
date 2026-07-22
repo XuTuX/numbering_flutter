@@ -96,7 +96,11 @@ class HomeScreenContent extends StatelessWidget {
                             sublabel: 'Lv.$current ▶',
                             color: AppColors.blockLime,
                             onTap: () {
-                              Get.to(() => ArcadeScreen(onStartGame: onStartGame));
+                              Get.to(
+                                () => ArcadeScreen(onStartGame: onStartGame),
+                                transition: Transition.zoom,
+                                duration: const Duration(milliseconds: 250),
+                              );
                             },
                           ),
                         ),

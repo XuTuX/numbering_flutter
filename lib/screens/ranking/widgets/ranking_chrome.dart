@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:numbering/constant.dart';
-import 'package:numbering/theme/app_typography.dart';
 import 'package:numbering/theme/app_colors.dart';
 
 import '../ranking_period.dart';
@@ -18,7 +16,7 @@ class RankingSheetHandle extends StatelessWidget {
           width: 48,
           height: 6,
           decoration: BoxDecoration(
-            color: charcoalBlack.withValues(alpha: 0.1),
+            color: AppColors.ink.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(3),
           ),
         ),
@@ -124,18 +122,18 @@ class TopPlayersLabel extends StatelessWidget {
       children: [
         Text(
           period.topPlayersLabel,
-          style: AppTypography.label.copyWith(
+          style: TextStyle(
             fontSize: 11,
             letterSpacing: 1.0,
             fontWeight: FontWeight.w900,
-            color: charcoalBlack.withValues(alpha: 0.35),
+            color: AppColors.ink.withValues(alpha: 0.35),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Container(
             height: 1,
-            color: charcoalBlack.withValues(alpha: 0.06),
+            color: AppColors.ink.withValues(alpha: 0.06),
           ),
         ),
       ],
