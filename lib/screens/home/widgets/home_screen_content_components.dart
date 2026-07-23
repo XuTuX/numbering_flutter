@@ -305,12 +305,67 @@ class _HomeHeader extends StatelessWidget {
               ),
             ),
           ),
+          const _HomeHeaderHintBadge(),
+          const SizedBox(width: 10),
           _HeaderIconButton(
             tooltip: 'Settings',
             icon: Icons.tune_rounded,
             onTap: onSettingsTap,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HomeHeaderHintBadge extends StatelessWidget {
+  const _HomeHeaderHintBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Get.isRegistered<HintService>()) {
+      return const _HintBadge(hints: 20);
+    }
+    final hintService = Get.find<HintService>();
+    return Obx(() => _HintBadge(hints: hintService.hints.value));
+  }
+}
+
+class _HintBadge extends StatelessWidget {
+  const _HintBadge({required this.hints});
+  final int hints;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: '보유 힌트 (매일 출석 시 +3개)',
+      child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: _challengeSurface,
+          borderRadius: BorderRadius.circular(19),
+          border: Border.all(color: _homeBorder),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.lightbulb_rounded,
+              size: 18,
+              color: Color(0xFFFFB800),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '$hints',
+              style: const TextStyle(
+                color: _homeInk,
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

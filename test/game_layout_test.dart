@@ -9,6 +9,7 @@ import 'package:numbering/game/numbering/level_catalog.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/game/numbering/numbering_game_page.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
+import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/theme/app_theme.dart';
 
 void main() {
@@ -19,6 +20,8 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final progress = await LevelProgressService().init();
     Get.put<LevelProgressService>(progress);
+    final hintService = await HintService().init();
+    Get.put<HintService>(hintService);
   });
 
   tearDown(Get.reset);

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:numbering/screens/home/arcade_screen.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/utils/kst_clock.dart';
+import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/numbering_score_service.dart';
 
 part 'home_screen_content_components.dart';

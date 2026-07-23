@@ -46,11 +46,16 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
           title: 'LEVEL ${widget.level.id}',
           backLabel: '레벨 목록',
           onBack: widget.onShowLevels,
-          trailing: _HintButton(
-            remainingHints: 3 - _usedHints,
-            accent: widget.accent,
-            onPressed: _showHint,
-          ),
+          trailing: Obx(() {
+            final remaining = Get.isRegistered<HintService>()
+                ? Get.find<HintService>().hints.value
+                : (3 - _usedHints);
+            return _HintButton(
+              remainingHints: remaining,
+              accent: widget.accent,
+              onPressed: _showHint,
+            );
+          }),
         ),
         const SizedBox(height: AppSpacing.lg),
         Expanded(
@@ -78,8 +83,36 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
     );
   }
 
-  void _showHint() {
-    if (_usedHints < 3) setState(() => _usedHints++);
+  Future<void> _showHint() async {
+    if (_usedHints >= 3) {
+      if (mounted) {
+        showAppSnackBar(
+          title: '힌트 사용',
+          message: '이 문제의 힌트를 모두 사용했습니다.',
+          icon: Icons.lightbulb_outline_rounded,
+        );
+      }
+      return;
+    }
+    if (Get.isRegistered<HintService>()) {
+      final hintService = Get.find<HintService>();
+      if (!hintService.hasHints) {
+        if (mounted) {
+          showAppSnackBar(
+            title: '힌트 부족',
+            message: '보유한 힌트가 없습니다. 매일 출석 시 힌트 3개가 지급됩니다!',
+            icon: Icons.lightbulb_outline_rounded,
+          );
+        }
+        return;
+      }
+      final used = await hintService.useHint();
+      if (used && mounted) {
+        setState(() => _usedHints++);
+      }
+    } else {
+      if (_usedHints < 3) setState(() => _usedHints++);
+    }
   }
 
   Future<void> _handleSubmission(String expression, int score) async {

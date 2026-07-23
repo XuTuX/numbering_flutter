@@ -10,6 +10,9 @@ import 'package:numbering/services/audio_service.dart';
 import 'package:numbering/services/database_models.dart';
 import 'package:numbering/services/numbering_score_service.dart';
 
+import 'package:numbering/services/hint_service.dart';
+import 'package:numbering/utils/app_snackbar.dart';
+
 import 'home_screen_flows.dart';
 import 'widgets/home_screen_content.dart';
 
@@ -52,6 +55,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       unawaited(_loadDailyChallenge());
       unawaited(_loadRankingSummary());
       unawaited(AudioService().startHomeBGM());
+
+      if (Get.isRegistered<HintService>()) {
+        final hintService = Get.find<HintService>();
+        if (hintService.justReceivedAttendanceBonus.value) {
+          hintService.justReceivedAttendanceBonus.value = false;
+          showAppSnackBar(
+            title: '출석 보상',
+            message: '오늘의 출석 보상! 힌트 +3개가 추가되었습니다. 💡',
+            icon: Icons.lightbulb_rounded,
+          );
+        }
+      }
     });
   }
 
@@ -70,6 +85,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         unawaited(AudioService().resumeBGMIfNeeded());
+        if (Get.isRegistered<HintService>()) {
+          final hintService = Get.find<HintService>();
+          hintService.checkDailyAttendance().then((_) {
+            if (hintService.justReceivedAttendanceBonus.value && mounted) {
+              hintService.justReceivedAttendanceBonus.value = false;
+              showAppSnackBar(
+                title: '출석 보상',
+                message: '오늘의 출석 보상! 힌트 +3개가 추가되었습니다. 💡',
+                icon: Icons.lightbulb_rounded,
+              );
+            }
+          });
+        }
         break;
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:

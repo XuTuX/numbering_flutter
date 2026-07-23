@@ -9,6 +9,7 @@ import 'package:numbering/l10n/app_translations.dart';
 import 'package:numbering/screens/home/home_screen.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/numbering_score_service.dart';
+import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/services/ad_service.dart';
 import 'package:numbering/services/audio_service.dart';
@@ -36,6 +37,7 @@ void main() async {
   ]);
   final settingsService = await SettingsService().init();
   final levelProgressService = await LevelProgressService().init();
+  final hintService = await HintService().init();
   await AudioService().initialize(
     isBgmEnabled: settingsService.isBgmOn.value,
     isSfxEnabled: settingsService.isSfxOn.value,
@@ -75,6 +77,7 @@ void main() async {
       NumberingApp(
         settingsService: settingsService,
         levelProgressService: levelProgressService,
+        hintService: hintService,
         authClient: authClient,
       ),
     );
@@ -116,11 +119,13 @@ void _installGlobalErrorHandlers() {
 class AppBinding extends Bindings {
   final SettingsService settingsService;
   final LevelProgressService levelProgressService;
+  final HintService hintService;
   final SupabaseClient? authClient;
 
   AppBinding({
     required this.settingsService,
     required this.levelProgressService,
+    required this.hintService,
     required this.authClient,
   });
 
@@ -135,18 +140,21 @@ class AppBinding extends Bindings {
     }
     Get.put<SettingsService>(settingsService, permanent: true);
     Get.put<LevelProgressService>(levelProgressService, permanent: true);
+    Get.put<HintService>(hintService, permanent: true);
   }
 }
 
 class NumberingApp extends StatelessWidget {
   final SettingsService settingsService;
   final LevelProgressService levelProgressService;
+  final HintService hintService;
   final SupabaseClient? authClient;
 
   const NumberingApp({
     super.key,
     required this.settingsService,
     required this.levelProgressService,
+    required this.hintService,
     required this.authClient,
   });
 
@@ -159,6 +167,7 @@ class NumberingApp extends StatelessWidget {
       initialBinding: AppBinding(
         settingsService: settingsService,
         levelProgressService: levelProgressService,
+        hintService: hintService,
         authClient: authClient,
       ),
       navigatorKey: Get.key, // GetX 글로벌 키 설정
