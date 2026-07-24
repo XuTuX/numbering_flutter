@@ -23,15 +23,25 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
   final _editorKey = GlobalKey<_FormulaEditorState>();
   Timer? _timer;
   int _secondsRemaining = _initialTimeSeconds;
+  int _solvesCount = 0;
   int _highestNumber = 0;
   int _totalScore = 0;
   DateTime? _highestNumberAchievedAt;
   bool _isFinished = false;
 
+  int _getDigitCountForSolves(int solves) {
+    if (solves < 2) return 4;
+    if (solves < 4) return 5;
+    return 6;
+  }
+
   @override
   void initState() {
     super.initState();
-    _digits = generateDailyNumberingPuzzle(DateTime.now().microsecondsSinceEpoch);
+    _digits = generateTimeAttackPuzzle(
+      DateTime.now().microsecondsSinceEpoch,
+      _getDigitCountForSolves(0),
+    );
     _startTimer();
   }
 
@@ -53,8 +63,9 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
 
   void _nextPuzzle() {
     setState(() {
-      _digits = generateDailyNumberingPuzzle(
+      _digits = generateTimeAttackPuzzle(
         DateTime.now().microsecondsSinceEpoch + _secondsRemaining,
+        _getDigitCountForSolves(_solvesCount),
       );
     });
     _editorKey.currentState?.reset();
@@ -69,6 +80,7 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
         _highestNumber = score;
         _highestNumberAchievedAt = DateTime.now();
       }
+      _solvesCount++;
     });
 
     _nextPuzzle();
@@ -168,18 +180,13 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
           title: 'Time Attack · ${_formatTimer(_secondsRemaining)}',
           backLabel: '나가기',
           onBack: () => widget.onShowLevels(),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'BEST $_highestNumber  TOTAL $_totalScore',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
+          trailing: Text(
+            'BEST $_highestNumber  TOTAL $_totalScore',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textSecondary,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),

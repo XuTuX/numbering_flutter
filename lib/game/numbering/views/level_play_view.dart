@@ -215,7 +215,10 @@ class _GameHeader extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 44, height: 44, child: trailing),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: Center(child: trailing),
+        ),
       ],
     );
   }
