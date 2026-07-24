@@ -37,8 +37,8 @@ String generateDailyNumberingPuzzle(int seed) {
 }
 
 /// Builds solvable N-digit (4, 5, 6) puzzles for Time Attack mode.
-String generateTimeAttackPuzzle(int seed, int digitCount) {
-  final random = Random(seed);
+String generateTimeAttackPuzzle(int digitCount, [int? seed]) {
+  final random = seed != null ? Random(seed) : Random();
   final allowed = const {'+', '-', '×', '÷', '='};
 
   for (var attempt = 0; attempt < 500; attempt++) {

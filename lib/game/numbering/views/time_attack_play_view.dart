@@ -38,10 +38,7 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
   @override
   void initState() {
     super.initState();
-    _digits = generateTimeAttackPuzzle(
-      DateTime.now().microsecondsSinceEpoch,
-      _getDigitCountForSolves(0),
-    );
+    _digits = generateTimeAttackPuzzle(_getDigitCountForSolves(0));
     _startTimer();
   }
 
@@ -70,10 +67,7 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
       _totalScore = 0;
       _highestNumberAchievedAt = null;
       _isFinished = false;
-      _digits = generateTimeAttackPuzzle(
-        DateTime.now().microsecondsSinceEpoch,
-        _getDigitCountForSolves(0),
-      );
+      _digits = generateTimeAttackPuzzle(_getDigitCountForSolves(0));
     });
     _editorKey.currentState?.reset();
     _startTimer();
@@ -81,10 +75,7 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
 
   void _nextPuzzle() {
     setState(() {
-      _digits = generateTimeAttackPuzzle(
-        DateTime.now().microsecondsSinceEpoch + _secondsRemaining,
-        _getDigitCountForSolves(_solvesCount),
-      );
+      _digits = generateTimeAttackPuzzle(_getDigitCountForSolves(_solvesCount));
     });
     _editorKey.currentState?.reset();
   }
