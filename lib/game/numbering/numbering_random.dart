@@ -36,7 +36,7 @@ String generateDailyNumberingPuzzle(int seed) {
   ).join();
 }
 
-/// Builds solvable N-digit (4, 5, 6) puzzles for Time Attack mode.
+/// Builds guaranteed solvable N-digit (4, 5, 6) puzzles for Time Attack mode.
 String generateTimeAttackPuzzle(int digitCount, [int? seed]) {
   final random = seed != null ? Random(seed) : Random();
   final allowed = const {'+', '-', '×', '÷', '='};
@@ -66,13 +66,98 @@ String generateTimeAttackPuzzle(int digitCount, [int? seed]) {
 
     final equation = '$left=$right';
     final digits = equation.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.length == digitCount) {
+    if (digits.length == digitCount && isSolvableTimeAttackPuzzle(digits)) {
       final list = digits.split('')..shuffle(random);
       return list.join();
     }
   }
-  // Fallback
-  return List.generate(digitCount, (_) => '${1 + random.nextInt(9)}').join();
+
+  // Guaranteed solver verification loop: keep trying random digits until a 100% solvable set is found
+  while (true) {
+    final candidate =
+        List.generate(digitCount, (_) => '${1 + random.nextInt(9)}').join();
+    if (isSolvableTimeAttackPuzzle(candidate)) {
+      return candidate;
+    }
+  }
+}
+
+/// Checks if a string of digits can form at least one valid equality equation using +, -, ×, ÷.
+bool isSolvableTimeAttackPuzzle(String digitString) {
+  final digits = digitString.split('');
+  final n = digits.length;
+  final perms = _getUniquePermutations(digits);
+
+  for (final perm in perms) {
+    for (var split = 1; split < n; split++) {
+      final leftDigits = perm.sublist(0, split);
+      final rightDigits = perm.sublist(split);
+
+      final leftValues = _evaluateAllPossibleValues(leftDigits);
+      if (leftValues.isEmpty) continue;
+
+      final rightValues = _evaluateAllPossibleValues(rightDigits);
+      if (rightValues.isEmpty) continue;
+
+      for (final val in leftValues) {
+        if (rightValues.contains(val)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+Set<int> _evaluateAllPossibleValues(List<String> digits) {
+  final results = <int>{};
+  final n = digits.length;
+  if (n == 1) {
+    results.add(int.parse(digits[0]));
+    return results;
+  }
+
+  for (var i = 1; i < n; i++) {
+    final leftVals = _evaluateAllPossibleValues(digits.sublist(0, i));
+    final rightVals = _evaluateAllPossibleValues(digits.sublist(i));
+
+    for (final l in leftVals) {
+      for (final r in rightVals) {
+        results.add(l + r);
+        if (l - r >= 0) results.add(l - r);
+        results.add(l * r);
+        if (r != 0 && l % r == 0) results.add(l ~/ r);
+      }
+    }
+  }
+  return results;
+}
+
+Set<List<String>> _getUniquePermutations(List<String> list) {
+  final results = <List<String>>{};
+  _permuteHelper(list, 0, results);
+  return results;
+}
+
+void _permuteHelper(List<String> list, int index, Set<List<String>> results) {
+  if (index == list.length - 1) {
+    results.add(List.from(list));
+    return;
+  }
+  final seen = <String>{};
+  for (var i = index; i < list.length; i++) {
+    if (seen.contains(list[i])) continue;
+    seen.add(list[i]);
+    _swap(list, index, i);
+    _permuteHelper(list, index + 1, results);
+    _swap(list, index, i);
+  }
+}
+
+void _swap(List<String> list, int i, int j) {
+  final temp = list[i];
+  list[i] = list[j];
+  list[j] = temp;
 }
 
 String? _composeTimeAttackExpr({

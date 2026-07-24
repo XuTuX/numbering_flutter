@@ -75,4 +75,17 @@ void main() {
       expect(result.message, '주어진 8개의 숫자만 사용할 수 있습니다.');
     });
   });
+
+  group('Time Attack puzzle generation', () {
+    test('always generates 100% solvable 4, 5, and 6 digit puzzles', () {
+      for (final digitCount in [4, 5, 6]) {
+        for (var i = 0; i < 20; i++) {
+          final puzzle = generateTimeAttackPuzzle(digitCount);
+          expect(puzzle, hasLength(digitCount));
+          expect(isSolvableTimeAttackPuzzle(puzzle), isTrue,
+              reason: 'Generated $digitCount-digit puzzle $puzzle must be solvable');
+        }
+      }
+    });
+  });
 }
