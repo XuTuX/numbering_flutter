@@ -485,18 +485,6 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
         children: [
           for (var index = 0; index < operators.length; index++) ...[
             if (index > 0) const SizedBox(width: 8),
-            if (operators[index] == InlineOperator.equals) ...[
-              GestureDetector(
-                key: const ValueKey('parenthesis-mode-button'),
-                behavior: HitTestBehavior.opaque,
-                onTap: widget.onParenthesisModeToggled,
-                child: _ParenthesisButton(
-                  size: size,
-                  active: widget.parenthesisMode,
-                ),
-              ),
-              const SizedBox(width: 8),
-            ],
             Draggable<InlineOperator>(
               key: ValueKey('operator-drag-${operators[index].symbol}'),
               data: operators[index],
@@ -545,39 +533,6 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _ParenthesisButton extends StatelessWidget {
-  const _ParenthesisButton({required this.size, required this.active});
-
-  final double size;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 120),
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: active ? AppColors.blockCream : AppColors.surfaceSecondary,
-        shape: BoxShape.circle,
-        border: active
-            ? Border.all(color: AppColors.textPrimary, width: 1.5)
-            : null,
-      ),
-      child: Text(
-        '()',
-        style: TextStyle(
-          fontSize: size * 0.34,
-          height: 1,
-          fontWeight: FontWeight.w800,
-          color: const Color(0xFF253044),
-        ),
       ),
     );
   }

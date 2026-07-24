@@ -183,27 +183,30 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
 class _GameHeader extends StatelessWidget {
   const _GameHeader({
     required this.title,
-    required this.backLabel,
-    required this.onBack,
+    this.backLabel = '',
+    this.onBack,
     required this.trailing,
+    this.leading,
   });
 
   final String title;
   final String backLabel;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
   final Widget trailing;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SoftIconButton(
-          icon: Icons.arrow_back_rounded,
-          label: backLabel,
-          onPressed: onBack,
-          size: 44,
-          iconSize: 20,
-        ),
+        leading ??
+            SoftIconButton(
+              icon: Icons.arrow_back_rounded,
+              label: backLabel,
+              onPressed: onBack ?? () {},
+              size: 44,
+              iconSize: 20,
+            ),
         const SizedBox(width: 8),
         Expanded(
           child: FittedBox(

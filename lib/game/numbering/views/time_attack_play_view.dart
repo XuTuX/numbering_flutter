@@ -61,6 +61,24 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
     });
   }
 
+  void _restartGame() {
+    _timer?.cancel();
+    setState(() {
+      _secondsRemaining = _initialTimeSeconds;
+      _solvesCount = 0;
+      _highestNumber = 0;
+      _totalScore = 0;
+      _highestNumberAchievedAt = null;
+      _isFinished = false;
+      _digits = generateTimeAttackPuzzle(
+        DateTime.now().microsecondsSinceEpoch,
+        _getDigitCountForSolves(0),
+      );
+    });
+    _editorKey.currentState?.reset();
+    _startTimer();
+  }
+
   void _nextPuzzle() {
     setState(() {
       _digits = generateTimeAttackPuzzle(
@@ -140,13 +158,20 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
             FilledButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                _restartGame();
+              },
+              style: FilledButton.styleFrom(backgroundColor: widget.accent),
+              child: const Text('다시하기'),
+            ),
+            OutlinedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
                 Get.to(
                   () => const RankingScreen(),
                   transition: Transition.zoom,
                   duration: const Duration(milliseconds: 250),
                 );
               },
-              style: FilledButton.styleFrom(backgroundColor: widget.accent),
               child: const Text('순위 보기'),
             ),
             TextButton(
@@ -178,8 +203,21 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
         const SizedBox(height: AppSpacing.md),
         _GameHeader(
           title: 'Time Attack · ${_formatTimer(_secondsRemaining)}',
-          backLabel: '나가기',
-          onBack: () => widget.onShowLevels(),
+          leading: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.close_rounded),
+                tooltip: '나가기',
+                onPressed: () => widget.onShowLevels(),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh_rounded),
+                tooltip: '다시하기',
+                onPressed: _restartGame,
+              ),
+            ],
+          ),
           trailing: Text(
             'BEST $_highestNumber  TOTAL $_totalScore',
             style: const TextStyle(
