@@ -77,6 +77,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
         ),
       );
       _liftedIndices.addAll(restored.liftedIndices);
+      _clearExponentTransitionOperators();
     }
     _message = null;
   }
@@ -132,8 +133,8 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   }
 
   void _saveSnapshot() {
-    _history.add(
-        _EditorSnapshot(List.of(_operators), List.of(_parentheses), Set.of(_liftedIndices)));
+    _history.add(_EditorSnapshot(
+        List.of(_operators), List.of(_parentheses), Set.of(_liftedIndices)));
   }
 
   void _toggleLiftDigit(int index) {
@@ -148,6 +149,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       } else {
         _liftedIndices.add(index);
       }
+      _clearExponentTransitionOperators();
       _selectedDigitIndex = null;
       _message = null;
     });
@@ -158,7 +160,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   void _changeOperator(int index, InlineOperator? value) {
     _saveSnapshot();
     setState(() {
-      _operators[index] = value;
+      _operators[index] = _isExponentTransition(index) ? null : value;
       _message = null;
     });
     _notifyProgressChanged();
@@ -193,6 +195,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       _liftedIndices
         ..clear()
         ..addAll(newLifted);
+      _clearExponentTransitionOperators();
 
       _selectedDigitIndex = null;
       _message = null;
@@ -332,6 +335,17 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       if (operator.symbol == symbol) return operator;
     }
     return null;
+  }
+
+  bool _isExponentTransition(int operatorIndex) {
+    return !_liftedIndices.contains(operatorIndex) &&
+        _liftedIndices.contains(operatorIndex + 1);
+  }
+
+  void _clearExponentTransitionOperators() {
+    for (var index = 0; index < _operators.length; index++) {
+      if (_isExponentTransition(index)) _operators[index] = null;
+    }
   }
 
   void _notifyProgressChanged() {

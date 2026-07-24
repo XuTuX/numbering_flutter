@@ -38,10 +38,13 @@ class _DragDropEditor extends StatefulWidget {
 }
 
 class _DragDropEditorState extends State<_DragDropEditor> {
+  static const double _exponentLiftFactor = 0.48;
+
   final GlobalKey _formulaRowKey = GlobalKey();
   late List<GlobalKey> _slotKeys;
   int? _hoveredSlotIndex;
   int? _draggingDigitIndex;
+  int? _previewLiftedDigitIndex;
 
   @override
   void initState() {
@@ -57,6 +60,7 @@ class _DragDropEditorState extends State<_DragDropEditor> {
       _slotKeys = _createSlotKeys();
       _hoveredSlotIndex = null;
       _draggingDigitIndex = null;
+      _previewLiftedDigitIndex = null;
     }
   }
 
@@ -83,9 +87,11 @@ class _DragDropEditorState extends State<_DragDropEditor> {
         final exponentTargetHeight =
             exponentAvailable ? (digitFontSize * 0.58).clamp(32.0, 48.0) : 0.0;
         final exponentFontSize = (digitFontSize * 0.52).clamp(18.0, 42.0);
+        final exponentHorizontalPadding = (digitPadding * 0.18).clamp(1.5, 2.0);
 
         final items = List<Widget>.generate(widget.digits.length, (digitIndex) {
           final isLifted = widget.liftedIndices.contains(digitIndex);
+          final isLiftPreview = _previewLiftedDigitIndex == digitIndex;
           final openingCount = widget.parentheses
               .where(
                   (range) => range.normalized().startDigitIndex == digitIndex)
@@ -94,6 +100,41 @@ class _DragDropEditorState extends State<_DragDropEditor> {
               .where((range) => range.normalized().endDigitIndex == digitIndex)
               .length;
           final selected = widget.selectedDigitIndex == digitIndex;
+          final textContent =
+              '${'(' * openingCount}${widget.digits[digitIndex]}${')' * closingCount}';
+          final normalTextStyle = TextStyle(
+            fontSize: digitFontSize,
+            height: 1,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF17191D),
+          );
+          final normalTextPainter = TextPainter(
+            text: TextSpan(text: textContent, style: normalTextStyle),
+            textDirection: Directionality.of(context),
+            textScaler: MediaQuery.textScalerOf(context),
+            maxLines: 1,
+          )..layout();
+          final reservedSize = Size(
+            normalTextPainter.width + digitPadding * 2,
+            normalTextPainter.height + 16,
+          );
+          normalTextPainter.dispose();
+          final exponentTextPainter = TextPainter(
+            text: TextSpan(
+              text: textContent,
+              style: TextStyle(
+                fontSize: exponentFontSize,
+                height: 1,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            textDirection: Directionality.of(context),
+            textScaler: MediaQuery.textScalerOf(context),
+            maxLines: 1,
+          )..layout();
+          final exponentReservedWidth =
+              exponentTextPainter.width + exponentHorizontalPadding * 2;
+          exponentTextPainter.dispose();
 
           Widget digitSurface({
             Key? key,
@@ -103,65 +144,83 @@ class _DragDropEditorState extends State<_DragDropEditor> {
             bool isFeedback = false,
           }) {
             final effectiveIsLifted = isGhost || isLifted;
-            final textContent =
-                '${'(' * openingCount}${widget.digits[digitIndex]}${')' * closingCount}';
 
-            return GestureDetector(
-              key: key,
-              behavior: HitTestBehavior.opaque,
-              onTap: feedback || isGhost
-                  ? null
-                  : () {
-                      if (isLifted) {
-                        widget.onDigitLiftToggled(digitIndex);
-                      } else {
-                        widget.onDigitTapped(digitIndex);
-                      }
-                    },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 100),
-                padding: EdgeInsets.symmetric(
-                  horizontal: effectiveIsLifted
-                      ? digitPadding * 0.35
-                      : digitPadding,
-                  vertical: effectiveIsLifted ? 4 : 8,
-                ),
-                decoration: BoxDecoration(
-                  color: dropHighlighted
-                      ? widget.accent.withValues(alpha: 0.10)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Transform.translate(
-                  offset: Offset(
-                    0,
-                    effectiveIsLifted ? -digitFontSize * 0.38 : 0,
-                  ),
-                  child: Opacity(
-                    opacity: isGhost ? 0.45 : 1.0,
-                    child: AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 150),
-                      style: TextStyle(
-                        fontSize: isFeedback
-                            ? digitFontSize * 0.7
-                            : (effectiveIsLifted
-                                ? exponentFontSize
-                                : digitFontSize),
-                        height: 1,
-                        fontWeight: FontWeight.w800,
-                        color: isGhost
-                            ? widget.accent
-                            : (selected ? widget.accent : const Color(0xFF17191D)),
-                      ),
-                      child: Text(
-                        textContent,
-                        key: feedback || isGhost
-                            ? null
-                            : ValueKey('formula-digit-text-$digitIndex'),
+            return SizedBox(
+              width: effectiveIsLifted
+                  ? exponentReservedWidth
+                  : reservedSize.width,
+              height: reservedSize.height,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Transform.translate(
+                    offset: Offset(
+                      0,
+                      effectiveIsLifted
+                          ? -digitFontSize * _exponentLiftFactor
+                          : 0,
+                    ),
+                    child: GestureDetector(
+                      key: key,
+                      behavior: HitTestBehavior.opaque,
+                      onTap: feedback || isGhost
+                          ? null
+                          : () {
+                              if (isLifted) {
+                                widget.onDigitLiftToggled(digitIndex);
+                              } else {
+                                widget.onDigitTapped(digitIndex);
+                              }
+                            },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 100),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: effectiveIsLifted
+                              ? exponentHorizontalPadding
+                              : digitPadding,
+                          vertical: effectiveIsLifted ? 4 : 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: dropHighlighted
+                              ? widget.accent.withValues(alpha: 0.10)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Opacity(
+                          opacity: isGhost ? 0.45 : 1.0,
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 150),
+                            style: TextStyle(
+                              fontSize: isFeedback
+                                  ? digitFontSize * 0.7
+                                  : (effectiveIsLifted
+                                      ? exponentFontSize
+                                      : digitFontSize),
+                              height: 1,
+                              fontWeight: FontWeight.w800,
+                              color: isGhost
+                                  ? widget.accent
+                                  : (selected
+                                      ? widget.accent
+                                      : const Color(0xFF17191D)),
+                            ),
+                            child: Text(
+                              textContent,
+                              key: isGhost
+                                  ? ValueKey(
+                                      'formula-digit-preview-$digitIndex')
+                                  : (feedback
+                                      ? null
+                                      : ValueKey(
+                                          'formula-digit-text-$digitIndex')),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
             );
           }
@@ -176,9 +235,11 @@ class _DragDropEditorState extends State<_DragDropEditor> {
                 onDragStarted: () {
                   setState(() {
                     _draggingDigitIndex = digitIndex;
+                    _previewLiftedDigitIndex = null;
                   });
                 },
-                onDragEnd: (_) => _finishDigitDrag(),
+                onDragCompleted: _finishDigitDrag,
+                onDraggableCanceled: (_, __) => _finishDigitDrag(),
                 feedback: Material(
                   color: Colors.transparent,
                   child: Transform.scale(
@@ -186,7 +247,9 @@ class _DragDropEditorState extends State<_DragDropEditor> {
                     child: digitSurface(feedback: true, isFeedback: true),
                   ),
                 ),
-                childWhenDragging: Opacity(opacity: 0.24, child: surface),
+                childWhenDragging: isLiftPreview
+                    ? digitSurface(isGhost: true)
+                    : Opacity(opacity: 0.24, child: surface),
                 child: surface,
               );
 
@@ -234,21 +297,20 @@ class _DragDropEditorState extends State<_DragDropEditor> {
                     right: 0,
                     height: exponentTargetHeight,
                     child: DragTarget<int>(
-                      onWillAcceptWithDetails: (details) =>
-                          details.data == digitIndex,
-                      onAcceptWithDetails: (_) =>
-                          widget.onDigitLiftToggled(digitIndex),
-                      builder: (context, candidateData, rejectedData) {
-                        final hoveringTop = candidateData.contains(digitIndex);
-                        if (hoveringTop) {
-                          // Show ghost preview at exponent position!
-                          return Align(
-                            alignment: Alignment.topCenter,
-                            child: digitSurface(isGhost: true),
-                          );
-                        }
-                        return const SizedBox.expand();
+                      key: const ValueKey('exponent-lift-target'),
+                      onWillAcceptWithDetails: (details) {
+                        final accepts = details.data == digitIndex;
+                        if (accepts) _showLiftPreview(digitIndex);
+                        return accepts;
                       },
+                      onLeave: (data) {
+                        if (data == digitIndex) _hideLiftPreview(digitIndex);
+                      },
+                      onAcceptWithDetails: (_) {
+                        _hideLiftPreview(digitIndex);
+                        widget.onDigitLiftToggled(digitIndex);
+                      },
+                      builder: (_, __, ___) => const SizedBox.expand(),
                     ),
                   ),
               ],
@@ -266,7 +328,8 @@ class _DragDropEditorState extends State<_DragDropEditor> {
 
           final slotIndex = digitIndex - 1;
           final isLeftLifted = widget.liftedIndices.contains(slotIndex);
-          final isRightLifted = widget.liftedIndices.contains(digitIndex);
+          final isRightLifted = widget.liftedIndices.contains(digitIndex) ||
+              _previewLiftedDigitIndex == digitIndex;
 
           return _InlineOperatorTarget(
             key: _slotKeys[slotIndex],
@@ -274,6 +337,7 @@ class _DragDropEditorState extends State<_DragDropEditor> {
             digit: digitWithTopLiftTarget,
             accent: widget.accent,
             digitFontSize: digitFontSize,
+            exponentFontSize: exponentFontSize,
             operatorFontSize: operatorFontSize,
             horizontalPadding: digitPadding * 0.65,
             hovering: _hoveredSlotIndex == slotIndex,
@@ -386,7 +450,21 @@ class _DragDropEditorState extends State<_DragDropEditor> {
 
   void _finishDigitDrag() {
     if (!mounted) return;
-    setState(() => _draggingDigitIndex = null);
+    if (_draggingDigitIndex == null && _previewLiftedDigitIndex == null) return;
+    setState(() {
+      _draggingDigitIndex = null;
+      _previewLiftedDigitIndex = null;
+    });
+  }
+
+  void _showLiftPreview(int digitIndex) {
+    if (!mounted || _previewLiftedDigitIndex == digitIndex) return;
+    setState(() => _previewLiftedDigitIndex = digitIndex);
+  }
+
+  void _hideLiftPreview(int digitIndex) {
+    if (!mounted || _previewLiftedDigitIndex != digitIndex) return;
+    setState(() => _previewLiftedDigitIndex = null);
   }
 
   void _placeOperator(InlineOperator operator, Offset feedbackCenter) {
@@ -437,6 +515,7 @@ class _InlineOperatorTarget extends StatelessWidget {
     required this.digit,
     required this.accent,
     required this.digitFontSize,
+    required this.exponentFontSize,
     required this.operatorFontSize,
     required this.horizontalPadding,
     required this.hovering,
@@ -451,6 +530,7 @@ class _InlineOperatorTarget extends StatelessWidget {
   final Widget digit;
   final Color accent;
   final double digitFontSize;
+  final double exponentFontSize;
   final double operatorFontSize;
   final double horizontalPadding;
   final bool hovering;
@@ -490,7 +570,11 @@ class _InlineOperatorTarget extends StatelessWidget {
                     child: Transform.translate(
                       offset: Offset(
                         0,
-                        isExponentZone ? -digitFontSize * 0.38 : 0,
+                        isExponentZone
+                            ? -digitFontSize *
+                                    _DragDropEditorState._exponentLiftFactor +
+                                (digitFontSize - exponentFontSize + 8) / 2
+                            : 0,
                       ),
                       child: Text(
                         current.symbol,
@@ -498,6 +582,7 @@ class _InlineOperatorTarget extends StatelessWidget {
                           fontSize: isExponentZone
                               ? operatorFontSize * 0.6
                               : operatorFontSize,
+                          height: 1,
                           fontWeight: FontWeight.w700,
                           color: hovering ? accent : const Color(0xFF253044),
                         ),

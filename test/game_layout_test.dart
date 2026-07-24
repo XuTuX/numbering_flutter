@@ -254,28 +254,115 @@ void main() {
     expect(find.text('^'), findsNothing);
 
     final rightDigit = find.byKey(const ValueKey('formula-digit-drag-1'));
+    final plusOperator = find.byKey(const ValueKey('operator-drag-+'));
+    final operatorGesture =
+        await tester.startGesture(tester.getCenter(plusOperator));
+    await operatorGesture
+        .moveTo(tester.getCenter(rightDigit) + const Offset(0, 44.2));
+    await tester.pump(const Duration(milliseconds: 100));
+    await operatorGesture.up();
+    await tester.pumpAndSettle();
+    expect(find.text('+'), findsNWidgets(2));
+
+    final exponentPreview =
+        find.byKey(const ValueKey('formula-digit-preview-1'));
+    final canceledWithOperatorGesture =
+        await tester.startGesture(tester.getCenter(rightDigit));
+    await canceledWithOperatorGesture.moveBy(const Offset(0, -28));
+    await tester.pump();
+    final liftTarget = find.byKey(const ValueKey('exponent-lift-target'));
+    await canceledWithOperatorGesture.moveTo(tester.getCenter(liftTarget));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(exponentPreview, findsOneWidget);
+    expect(find.text('+'), findsOneWidget);
+    await canceledWithOperatorGesture.cancel();
+    await tester.pumpAndSettle();
+    expect(exponentPreview, findsNothing);
+    expect(find.text('+'), findsNWidgets(2));
+
     final gesture = await tester.startGesture(tester.getCenter(rightDigit));
     await gesture.moveBy(const Offset(0, -28));
     await tester.pump();
-    final liftTarget = find.byKey(const ValueKey('exponent-lift-target'));
     expect(liftTarget, findsOneWidget);
     await gesture.moveTo(tester.getCenter(liftTarget));
     await tester.pump(const Duration(milliseconds: 100));
+    expect(exponentPreview, findsOneWidget);
+    expect(find.text('+'), findsOneWidget);
+    final previewCenter = tester.getCenter(exponentPreview);
     await gesture.up();
     await tester.pumpAndSettle();
 
     final baseText = find.byKey(const ValueKey('formula-digit-text-0'));
     final exponentText = find.byKey(const ValueKey('formula-digit-text-1'));
-    expect(tester.getCenter(exponentText).dy,
-        lessThan(tester.getCenter(baseText).dy));
+    final liftedCenter = tester.getCenter(exponentText);
+    expect(liftedCenter.dy, closeTo(previewCenter.dy, 0.1));
+    expect(
+      tester.getCenter(baseText).dy - liftedCenter.dy,
+      greaterThan(8),
+    );
     expect(find.text('^'), findsNothing);
+    expect(find.text('+'), findsOneWidget);
 
     await tester.tap(exponentText);
     await tester.pumpAndSettle();
+    final baseLine = tester.getCenter(baseText).dy;
     expect(
       tester.getCenter(exponentText).dy,
-      closeTo(tester.getCenter(baseText).dy, 2),
+      closeTo(baseLine, 2),
     );
+    expect(find.text('+'), findsOneWidget);
+
+    Future<void> liftDigit(int index) async {
+      final digit = find.byKey(ValueKey('formula-digit-drag-$index'));
+      final liftGesture = await tester.startGesture(tester.getCenter(digit));
+      await liftGesture.moveBy(const Offset(0, -28));
+      await tester.pump();
+      await liftGesture.moveTo(tester.getCenter(liftTarget));
+      await tester.pump(const Duration(milliseconds: 100));
+      await liftGesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    await liftDigit(1);
+    await liftDigit(2);
+
+    final firstExponentText =
+        find.byKey(const ValueKey('formula-digit-text-1'));
+    final secondExponentText =
+        find.byKey(const ValueKey('formula-digit-text-2'));
+    final gapWithoutOperator = tester.getTopLeft(secondExponentText).dx -
+        tester.getTopRight(firstExponentText).dx;
+    expect(gapWithoutOperator, lessThan(6));
+
+    final thirdDigit = find.byKey(const ValueKey('formula-digit-drag-2'));
+    final exponentPlusGesture =
+        await tester.startGesture(tester.getCenter(plusOperator));
+    await exponentPlusGesture
+        .moveTo(tester.getCenter(thirdDigit) + const Offset(0, 44.2));
+    await tester.pump(const Duration(milliseconds: 100));
+    await exponentPlusGesture.up();
+    await tester.pumpAndSettle();
+
+    final gapWithOperator = tester.getTopLeft(secondExponentText).dx -
+        tester.getTopRight(firstExponentText).dx;
+    expect(gapWithOperator, greaterThan(gapWithoutOperator + 10));
+    final exponentCenterY = (tester.getCenter(firstExponentText).dy +
+            tester.getCenter(secondExponentText).dy) /
+        2;
+    expect(
+        tester.getCenter(find.text('+').first).dy, closeTo(exponentCenterY, 2));
+
+    final multiplyOperator = find.byKey(const ValueKey('operator-drag-×'));
+    final exponentMultiplyGesture =
+        await tester.startGesture(tester.getCenter(multiplyOperator));
+    await exponentMultiplyGesture
+        .moveTo(tester.getCenter(thirdDigit) + const Offset(0, 44.2));
+    await tester.pump(const Duration(milliseconds: 100));
+    await exponentMultiplyGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+        tester.getCenter(find.text('×').first).dy, closeTo(exponentCenterY, 2));
     expect(tester.takeException(), isNull);
   });
 }
