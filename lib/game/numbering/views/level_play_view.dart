@@ -204,20 +204,32 @@ class _GameHeader extends StatelessWidget {
           size: 44,
           iconSize: 20,
         ),
+        const SizedBox(width: 8),
         Expanded(
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
         ),
+        const SizedBox(width: 8),
         ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 44),
-          child: Center(child: trailing),
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: trailing,
+            ),
+          ),
         ),
       ],
     );

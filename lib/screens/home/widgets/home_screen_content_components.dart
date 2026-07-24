@@ -96,38 +96,41 @@ class _TimeAttackCard extends StatelessWidget {
       color: _challengeSurface,
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Time Attack',
-                    style: TextStyle(
-                      color: _homeInk,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.8,
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Time Attack',
+                      style: TextStyle(
+                        color: _homeInk,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.8,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  '3 MIN',
-                  style: TextStyle(
-                    color: Color(0x8F171716),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.0,
+                  SizedBox(height: 2),
+                  Text(
+                    '3 MIN',
+                    style: TextStyle(
+                      color: Color(0x8F171716),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const Align(
               alignment: Alignment.bottomRight,
@@ -163,54 +166,57 @@ class _RankingCard extends StatelessWidget {
       color: _rankingSurface,
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'YOUR RANK',
-                  style: TextStyle(
-                    color: Color(0x8F171716),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    rank == null ? '#—' : '#$rank',
-                    style: const TextStyle(
-                      color: _homeInk,
-                      fontSize: 26,
-                      height: 1,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'YOUR RANK',
+                    style: TextStyle(
+                      color: Color(0x8F171716),
+                      fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -1.2,
+                      letterSpacing: 1.2,
                     ),
                   ),
-                ),
-                if (subLabel.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      subLabel,
+                      rank == null ? '#—' : '#$rank',
                       style: const TextStyle(
-                        color: Color(0x8F171716),
-                        fontSize: 10,
+                        color: _homeInk,
+                        fontSize: 24,
+                        height: 1,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: -1.2,
                       ),
                     ),
                   ),
+                  if (subLabel.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        subLabel,
+                        style: const TextStyle(
+                          color: Color(0x8F171716),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
             const Align(
               alignment: Alignment.bottomRight,
