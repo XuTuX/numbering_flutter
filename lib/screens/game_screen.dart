@@ -101,7 +101,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   }
 
   void _exitGame() {
-    if (widget.sessionConfig.isDailyMode) {
+    if (widget.sessionConfig.isDailyMode ||
+        widget.sessionConfig.isTimeAttackMode) {
       _goHome();
       return;
     }
