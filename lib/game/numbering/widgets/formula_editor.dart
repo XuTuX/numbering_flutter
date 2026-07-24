@@ -48,6 +48,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   final Set<int> _liftedIndices = {};
   final List<_EditorSnapshot> _history = [];
   int? _selectedDigitIndex;
+  bool _parenthesisMode = false;
   String? _message;
 
   String get _expression => assembleInlineExpression(
@@ -99,11 +100,13 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                 availableOperators: widget.availableOperators,
                 accent: widget.accent,
                 selectedDigitIndex: _selectedDigitIndex,
+                parenthesisMode: _parenthesisMode,
                 isLandscape: widget.isLandscape,
                 visibleHints: widget.visibleHints,
                 allowDigitReordering: widget.allowDigitReordering,
                 onDigitTapped: _handleDigitTap,
                 onDigitLiftToggled: _toggleLiftDigit,
+                onParenthesisModeToggled: _toggleParenthesisMode,
                 onDigitReordered: _reorderDigit,
                 onOperatorChanged: _changeOperator,
               ),
@@ -151,6 +154,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       }
       _clearExponentTransitionOperators();
       _selectedDigitIndex = null;
+      _parenthesisMode = false;
       _message = null;
     });
     _notifyProgressChanged();
@@ -161,6 +165,8 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     _saveSnapshot();
     setState(() {
       _operators[index] = _isExponentTransition(index) ? null : value;
+      _parenthesisMode = false;
+      _selectedDigitIndex = null;
       _message = null;
     });
     _notifyProgressChanged();
@@ -198,6 +204,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       _clearExponentTransitionOperators();
 
       _selectedDigitIndex = null;
+      _parenthesisMode = false;
       _message = null;
     });
     _notifyProgressChanged();
@@ -205,11 +212,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   }
 
   void _handleDigitTap(int index) {
-    if (_liftedIndices.contains(index)) {
-      // Tapping a lifted digit unlifts it (brings it down)
-      _toggleLiftDigit(index);
-      return;
-    }
+    if (!_parenthesisMode) return;
 
     if (_selectedDigitIndex == null) {
       setState(() => _selectedDigitIndex = index);
@@ -234,6 +237,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       setState(() {
         _parentheses.removeAt(existingIndex);
         _selectedDigitIndex = null;
+        _parenthesisMode = false;
         _message = null;
       });
       _notifyProgressChanged();
@@ -255,6 +259,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     setState(() {
       _parentheses.add(candidate);
       _selectedDigitIndex = null;
+      _parenthesisMode = false;
       _message = null;
     });
     _notifyProgressChanged();
@@ -290,12 +295,21 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       _liftedIndices.clear();
       _history.clear();
       _selectedDigitIndex = null;
+      _parenthesisMode = false;
       _message = null;
     });
     _notifyProgressChanged();
   }
 
   void showMessage(String message) => setState(() => _message = message);
+
+  void _toggleParenthesisMode() {
+    setState(() {
+      _parenthesisMode = !_parenthesisMode;
+      _selectedDigitIndex = null;
+      _message = null;
+    });
+  }
 
   DailyPuzzleProgress? _validatedProgress(DailyPuzzleProgress? progress) {
     if (progress == null || !widget.allowDigitReordering) return null;

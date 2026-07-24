@@ -6,7 +6,6 @@ enum InlineOperator {
   add('+'),
   subtract('-'),
   multiply('×'),
-  divide('÷'),
   exponent('^'),
   equals('=');
 
@@ -144,12 +143,6 @@ ValidationResult evaluateIntegerExpression(String source) {
         values.add(left - right);
       case '×':
         values.add(left * right);
-      case '÷':
-        if (right == 0) return fail('0으로 나눌 수 없습니다.');
-        if (left % right != 0) {
-          return fail('나눗셈의 중간 결과는 정수여야 합니다.');
-        }
-        values.add(left ~/ right);
       case '^':
         final exponentiation = _integerPower(left, right);
         if (!exponentiation.valid) return exponentiation;
@@ -162,7 +155,7 @@ ValidationResult evaluateIntegerExpression(String source) {
 
   int precedence(String operator) => switch (operator) {
         '^' => 3,
-        '×' || '÷' => 2,
+        '×' => 2,
         _ => 1,
       };
 
@@ -208,7 +201,6 @@ ValidationResult evaluateIntegerExpression(String source) {
     if (character == '+' ||
         character == '-' ||
         character == '×' ||
-        character == '÷' ||
         character == '^') {
       if (expectsOperand) return fail('단항 연산자는 허용하지 않습니다.');
       while (operators.isNotEmpty &&
@@ -275,7 +267,7 @@ ValidationResult validateFormulaWorkshop({
   return validateLevelFormula(
     digitString: digitString,
     expression: expression,
-    availableOperators: const {'+', '-', '×', '÷', '^', '='},
+    availableOperators: const {'+', '-', '×', '^', '='},
   );
 }
 
@@ -288,7 +280,7 @@ ValidationResult validateLevelFormula({
   if (preservedDigits != digitString) {
     return const ValidationResult.failure('주어진 숫자를 순서대로 모두 사용해야 합니다.');
   }
-  for (final match in RegExp(r'[+\-×÷^=]').allMatches(expression)) {
+  for (final match in RegExp(r'[+\-×^=]').allMatches(expression)) {
     final symbol = match.group(0)!;
     if (!availableOperators.contains(symbol)) {
       return ValidationResult.failure('$symbol 기호는 이 레벨에서 사용할 수 없습니다.');
@@ -326,9 +318,9 @@ ValidationResult validateDailyPuzzleFormula({
     return const ValidationResult.failure('주어진 8개의 숫자만 사용할 수 있습니다.');
   }
 
-  for (final match in RegExp(r'[+\-×÷^=]').allMatches(expression)) {
+  for (final match in RegExp(r'[+\-×^=]').allMatches(expression)) {
     final symbol = match.group(0)!;
-    if (!const {'+', '-', '×', '÷', '^', '='}.contains(symbol)) {
+    if (!const {'+', '-', '×', '^', '='}.contains(symbol)) {
       return ValidationResult.failure('$symbol 기호는 사용할 수 없습니다.');
     }
   }

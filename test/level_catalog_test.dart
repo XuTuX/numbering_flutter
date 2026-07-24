@@ -27,6 +27,8 @@ void main() {
       }
       expect(level.minimumScore, lessThanOrEqualTo(level.targetScore));
       expect(level.availableOperators, contains('='));
+      expect(level.availableOperators, isNot(contains('÷')));
+      expect(level.officialAnswer, isNot(contains('÷')));
       if (level.id >= 81) {
         expect(level.availableOperators, contains('^'));
       } else {
@@ -90,7 +92,7 @@ void main() {
         .map((level) => level.officialAnswer)
         .join();
 
-    for (final operator in const ['^', '+', '-', '×', '÷']) {
+    for (final operator in const ['^', '+', '-', '×']) {
       expect(answers, contains(operator));
     }
   });

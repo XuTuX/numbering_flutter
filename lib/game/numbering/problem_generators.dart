@@ -43,8 +43,6 @@ class _BinaryOpNode extends _ExprNode {
         return left.evaluate() - right.evaluate();
       case '×':
         return left.evaluate() * right.evaluate();
-      case '÷':
-        return left.evaluate() ~/ right.evaluate();
       default:
         throw StateError('Unknown op: $op');
     }
@@ -59,11 +57,11 @@ class _BinaryOpNode extends _ExprNode {
     final leftOp = left is _BinaryOpNode ? (left as _BinaryOpNode).op : null;
     final rightOp = right is _BinaryOpNode ? (right as _BinaryOpNode).op : null;
     bool lNeedsParens = leftOp != null && _precedence(op) > _precedence(leftOp);
-    // For right side, we need parens if precedence is lower OR if it's same precedence but a non-associative operator like - or ÷
+    // The right side of subtraction needs parentheses at equal precedence.
     bool rNeedsParens = false;
     if (rightOp != null) {
       if (_precedence(op) > _precedence(rightOp)) rNeedsParens = true;
-      if (_precedence(op) == _precedence(rightOp) && (op == '-' || op == '÷')) {
+      if (_precedence(op) == _precedence(rightOp) && op == '-') {
         rNeedsParens = true;
       }
     }
@@ -74,18 +72,17 @@ class _BinaryOpNode extends _ExprNode {
     return '$lStr$op$rStr';
   }
 
-  int _precedence(String op) => (op == '×' || op == '÷') ? 2 : 1;
+  int _precedence(String op) => op == '×' ? 2 : 1;
 }
 
 _ExprNode _generateTree(
-    Random random, int target, int maxNodes, bool allowMultDiv) {
+    Random random, int target, int maxNodes, bool allowMultiply) {
   if (maxNodes <= 1 || target < 1) return _LiteralNode(max(1, target));
 
   List<String> ops = ['+'];
   if (target > 1) ops.add('-');
-  if (allowMultDiv) {
+  if (allowMultiply) {
     ops.add('×');
-    ops.add('÷');
   }
 
   ops.shuffle(random);
@@ -97,8 +94,8 @@ _ExprNode _generateTree(
       int leftNodes = 1 + random.nextInt(maxNodes - 1);
       int rightNodes = maxNodes - leftNodes;
       return _BinaryOpNode(
-        _generateTree(random, leftTarget, leftNodes, allowMultDiv),
-        _generateTree(random, rightTarget, rightNodes, allowMultDiv),
+        _generateTree(random, leftTarget, leftNodes, allowMultiply),
+        _generateTree(random, rightTarget, rightNodes, allowMultiply),
         '+',
       );
     } else if (op == '-') {
@@ -107,8 +104,8 @@ _ExprNode _generateTree(
       int leftNodes = 1 + random.nextInt(maxNodes - 1);
       int rightNodes = maxNodes - leftNodes;
       return _BinaryOpNode(
-        _generateTree(random, leftTarget, leftNodes, allowMultDiv),
-        _generateTree(random, rightTarget, rightNodes, allowMultDiv),
+        _generateTree(random, leftTarget, leftNodes, allowMultiply),
+        _generateTree(random, rightTarget, rightNodes, allowMultiply),
         '-',
       );
     } else if (op == '×') {
@@ -122,21 +119,11 @@ _ExprNode _generateTree(
         int leftNodes = 1 + random.nextInt(maxNodes - 1);
         int rightNodes = maxNodes - leftNodes;
         return _BinaryOpNode(
-          _generateTree(random, leftTarget, leftNodes, allowMultDiv),
-          _generateTree(random, rightTarget, rightNodes, allowMultDiv),
+          _generateTree(random, leftTarget, leftNodes, allowMultiply),
+          _generateTree(random, rightTarget, rightNodes, allowMultiply),
           '×',
         );
       }
-    } else if (op == '÷') {
-      int rightTarget = 2 + random.nextInt(9);
-      int leftTarget = target * rightTarget;
-      int leftNodes = 1 + random.nextInt(maxNodes - 1);
-      int rightNodes = maxNodes - leftNodes;
-      return _BinaryOpNode(
-        _generateTree(random, leftTarget, leftNodes, allowMultDiv),
-        _generateTree(random, rightTarget, rightNodes, allowMultDiv),
-        '÷',
-      );
     }
   }
 
@@ -144,7 +131,7 @@ _ExprNode _generateTree(
 }
 
 FormulaProblem generateFormulaProblem(Random random, int level) {
-  bool allowMultDiv = level >= 10;
+  bool allowMultiply = level >= 10;
 
   int targetValue;
   int maxLhsNodes;
@@ -190,8 +177,8 @@ FormulaProblem generateFormulaProblem(Random random, int level) {
 
   // Retry logic to ensure digits don't exceed maxDigits
   while (true) {
-    lhs = _generateTree(random, targetValue, maxLhsNodes, allowMultDiv);
-    rhs = _generateTree(random, targetValue, maxRhsNodes, allowMultDiv);
+    lhs = _generateTree(random, targetValue, maxLhsNodes, allowMultiply);
+    rhs = _generateTree(random, targetValue, maxRhsNodes, allowMultiply);
     lhsStr = lhs.toString();
     rhsStr = rhs.toString();
 

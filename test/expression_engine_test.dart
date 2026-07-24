@@ -19,11 +19,16 @@ void main() {
       expect(evaluateIntegerExpression('9^10').valid, isFalse);
     });
 
+    test('rejects the removed division operator', () {
+      expect(evaluateIntegerExpression('8÷2').valid, isFalse);
+      expect(evaluateIntegerExpression('8/2').valid, isFalse);
+    });
+
     test('validates the Sydney introduction equation', () {
       final result = validateLevelFormula(
         digitString: '238',
         expression: '2^3=8',
-        availableOperators: const {'+', '-', '×', '÷', '^', '='},
+        availableOperators: const {'+', '-', '×', '^', '='},
       );
       expect(result.valid, isTrue);
       expect(result.value, 8);
@@ -33,7 +38,7 @@ void main() {
       final result = validateLevelFormula(
         digitString: '238',
         expression: '2^3=8',
-        availableOperators: const {'+', '-', '×', '÷', '='},
+        availableOperators: const {'+', '-', '×', '='},
       );
       expect(result.valid, isFalse);
       expect(result.message, '^ 기호는 이 레벨에서 사용할 수 없습니다.');

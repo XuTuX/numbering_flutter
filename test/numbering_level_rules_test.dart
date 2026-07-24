@@ -7,7 +7,7 @@ void main() {
   test('migration contains one authoritative rule for every app level', () {
     final sql = File(
       'supabase/migrations/'
-      '20260724085500_add_numbering_exponents_and_sydney.sql',
+      '20260724181919_remove_numbering_division.sql',
     ).readAsStringSync();
     final generatedBlock = sql
         .split('-- LEVEL_RULE_VALUES_START')[1]
@@ -24,12 +24,8 @@ void main() {
       );
     }
 
-    expect(sql, contains("v_character in ('+', '-', '×', '÷', '^')"));
+    expect(sql, contains("v_character in ('+', '-', '×', '^')"));
     expect(sql, contains("and v_character <> '^'"));
-    expect(sql, contains("array['+', '-', '×', '÷', '^']"));
-    expect(
-      sql,
-      contains('public._numbering_sorted_digits(v_submitted_digits)'),
-    );
+    expect(sql, isNot(contains('÷')));
   });
 }

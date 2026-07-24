@@ -251,6 +251,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('operator-drag-^')), findsNothing);
+    expect(find.byKey(const ValueKey('operator-drag-÷')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('parenthesis-mode-button')),
+      findsOneWidget,
+    );
     expect(find.text('^'), findsNothing);
 
     final rightDigit = find.byKey(const ValueKey('formula-digit-drag-1'));
@@ -363,6 +368,17 @@ void main() {
 
     expect(
         tester.getCenter(find.text('×').first).dy, closeTo(exponentCenterY, 2));
+
+    await tester.tap(
+      find.byKey(const ValueKey('parenthesis-mode-button')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(firstExponentText);
+    await tester.tap(secondExponentText);
+    await tester.pumpAndSettle();
+
+    expect(find.text('(3'), findsOneWidget);
+    expect(find.text('8)'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

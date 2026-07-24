@@ -23,7 +23,6 @@ LevelData _buildLevel(int id) {
   final difficulty = _difficultyFor(id);
   final allowed = <String>{'+', '-', '='};
   if (id >= 21) allowed.add('×');
-  if (id >= 41) allowed.add('÷');
   if (id >= 81) allowed.add('^');
 
   final random = Random(id * 7919 + 20260721);
@@ -55,7 +54,7 @@ LevelData _buildLevel(int id) {
     if (id < 80 && RegExp(r'\d{2,}×\d{2,}').hasMatch(answer)) continue;
 
     final usedOperators = <String>{
-      for (final match in RegExp(r'[+\-×÷^]').allMatches(answer))
+      for (final match in RegExp(r'[+\-×^]').allMatches(answer))
         match.group(0)!,
     };
     final operatorHint = _operatorHint(usedOperators);
@@ -98,7 +97,6 @@ _Expression? _compose({
 
   final operations = <String>['+', '-'];
   if (allowed.contains('×') && target > 1) operations.add('×');
-  if (allowed.contains('÷')) operations.add('÷');
   if (allowed.contains('^') && target > 1) operations.add('^');
   operations.shuffle(random);
 
@@ -124,9 +122,6 @@ _Expression? _compose({
         if (factors.isEmpty) continue;
         rightTarget = factors[random.nextInt(factors.length)];
         leftTarget = target ~/ rightTarget;
-      case '÷':
-        rightTarget = 2 + random.nextInt(min(8, 9 * rightLeaves - 1));
-        leftTarget = target * rightTarget;
       case '^':
         final powers = <(int, int)>[];
         for (var exponent = 2;
@@ -162,7 +157,7 @@ _Expression? _compose({
 
     final precedence = switch (operation) {
       '^' => 3,
-      '×' || '÷' => 2,
+      '×' => 2,
       _ => 1,
     };
     var leftText = left.text;
@@ -172,8 +167,7 @@ _Expression? _compose({
       leftText = '($leftText)';
     }
     if (right.precedence < precedence ||
-        ((operation == '-' || operation == '÷') &&
-            right.precedence == precedence)) {
+        (operation == '-' && right.precedence == precedence)) {
       rightText = '($rightText)';
     }
     return _Expression('$leftText$operation$rightText', precedence);
@@ -213,11 +207,7 @@ String _operatorHint(Set<String> operators) {
     }
     return '위로 올라간 수는 밑의 수를 몇 번 곱할지 나타내요.';
   }
-  if (operators.contains('×') && operators.contains('÷')) {
-    return '곱셈과 나눗셈의 순서를 함께 살펴보세요.';
-  }
   if (operators.contains('×')) return '이 문제에는 곱셈 기호가 사용돼요.';
-  if (operators.contains('÷')) return '나눗셈으로 수의 크기를 바꿔 보세요.';
   if (operators.contains('+') && operators.contains('-')) {
     return '덧셈과 뺄셈을 모두 사용해 보세요.';
   }
@@ -258,9 +248,6 @@ LevelData _special({
   final digits = answer.replaceAll(RegExp(r'[^0-9]'), '');
   final allowed = <String>{'+', '-', '='};
   if (answer.contains('×') || perfectAnswer.contains('×')) allowed.add('×');
-  if (id >= 41 || answer.contains('÷') || perfectAnswer.contains('÷')) {
-    allowed.add('÷');
-  }
   if (id >= 81 || answer.contains('^') || perfectAnswer.contains('^')) {
     allowed.add('^');
   }
@@ -286,7 +273,7 @@ final Map<int, LevelData> _handcraftedLevels = {
   81: const LevelData(
     id: 81,
     digitString: '238',
-    availableOperators: {'+', '-', '×', '÷', '^', '='},
+    availableOperators: {'+', '-', '×', '^', '='},
     minimumScore: 6,
     targetScore: 8,
     officialAnswer: '2^3=8',

@@ -11,7 +11,7 @@ void main() {
     _generate(
       File(
         'supabase/migrations/'
-        '20260724085500_add_numbering_exponents_and_sydney.sql',
+        '20260724181919_remove_numbering_division.sql',
       ),
     );
   });
