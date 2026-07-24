@@ -181,7 +181,7 @@ class _TodayPuzzleCard extends StatelessWidget {
           _titleText(),
           const SizedBox(height: 5),
           Text(
-            '로그인 후 하루 한 번 참여 가능'.tr,
+            '로그인 후 12시간마다 참여 가능',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.bodySmall.copyWith(

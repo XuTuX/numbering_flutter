@@ -10,11 +10,13 @@ import 'package:numbering/screens/home/home_screen.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/numbering_score_service.dart';
 import 'package:numbering/services/hint_service.dart';
+import 'package:numbering/services/hint_purchase_service.dart';
 import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/services/ad_service.dart';
 import 'package:numbering/services/audio_service.dart';
 import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/utils/app_snackbar.dart';
+import 'package:numbering/widgets/home_screen/login_sheet.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_radius.dart';
 import 'package:numbering/theme/app_shadows.dart';
@@ -65,19 +67,24 @@ void main() async {
         authClient = Supabase.instance.client;
       } catch (error, stackTrace) {
         debugPrint(
-          'Supabase unavailable; continuing in offline guest mode: $error',
+          'Supabase unavailable; required sign-in cannot start: $error',
         );
         debugPrintStack(stackTrace: stackTrace);
       }
-    } else {
-      debugPrint('Supabase config omitted; starting in offline guest mode.');
     }
+
+    await hintService.connect(authClient);
+    final hintPurchaseService = await HintPurchaseService(
+      hintService: hintService,
+      supabase: authClient,
+    ).init();
 
     runApp(
       NumberingApp(
         settingsService: settingsService,
         levelProgressService: levelProgressService,
         hintService: hintService,
+        hintPurchaseService: hintPurchaseService,
         authClient: authClient,
       ),
     );
@@ -120,12 +127,14 @@ class AppBinding extends Bindings {
   final SettingsService settingsService;
   final LevelProgressService levelProgressService;
   final HintService hintService;
+  final HintPurchaseService hintPurchaseService;
   final SupabaseClient? authClient;
 
   AppBinding({
     required this.settingsService,
     required this.levelProgressService,
     required this.hintService,
+    required this.hintPurchaseService,
     required this.authClient,
   });
 
@@ -141,6 +150,7 @@ class AppBinding extends Bindings {
     Get.put<SettingsService>(settingsService, permanent: true);
     Get.put<LevelProgressService>(levelProgressService, permanent: true);
     Get.put<HintService>(hintService, permanent: true);
+    Get.put<HintPurchaseService>(hintPurchaseService, permanent: true);
   }
 }
 
@@ -148,6 +158,7 @@ class NumberingApp extends StatelessWidget {
   final SettingsService settingsService;
   final LevelProgressService levelProgressService;
   final HintService hintService;
+  final HintPurchaseService hintPurchaseService;
   final SupabaseClient? authClient;
 
   const NumberingApp({
@@ -155,6 +166,7 @@ class NumberingApp extends StatelessWidget {
     required this.settingsService,
     required this.levelProgressService,
     required this.hintService,
+    required this.hintPurchaseService,
     required this.authClient,
   });
 
@@ -168,6 +180,7 @@ class NumberingApp extends StatelessWidget {
         settingsService: settingsService,
         levelProgressService: levelProgressService,
         hintService: hintService,
+        hintPurchaseService: hintPurchaseService,
         authClient: authClient,
       ),
       navigatorKey: Get.key, // GetX 글로벌 키 설정
@@ -175,8 +188,33 @@ class NumberingApp extends StatelessWidget {
       theme: AppTheme.light,
       locale: settingsService.locale.value,
       fallbackLocale: AppTranslations.fallback,
+      builder: (context, child) => _AuthenticationGate(
+        child: child ?? const SizedBox.shrink(),
+      ),
       home: const HomeScreen(),
     );
+  }
+}
+
+class _AuthenticationGate extends StatelessWidget {
+  const _AuthenticationGate({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final authService = Get.find<AuthService>();
+
+    return Obx(() {
+      if (authService.user.value != null) {
+        return child;
+      }
+
+      return RequiredLoginScreen(
+        onGoogleSignIn: authService.signInWithGoogle,
+        onAppleSignIn: authService.signInWithApple,
+      );
+    });
   }
 }
 
@@ -233,8 +271,8 @@ class ConfigurationErrorApp extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     const Text(
-                      'Provide both Supabase values, or omit both to use '
-                      'offline guest mode.',
+                      'Provide both Supabase values to enable the required '
+                      'sign-in screen.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         height: 1.5,

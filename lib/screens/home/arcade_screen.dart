@@ -29,7 +29,8 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
         break;
       }
     }
-    _pageController = PageController(viewportFraction: 0.55, initialPage: _selected);
+    _pageController =
+        PageController(viewportFraction: 0.55, initialPage: _selected);
   }
 
   @override
@@ -52,7 +53,9 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: AppColors.textPrimary),
-        title: const Text('Arcade', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        title: const Text('Arcade',
+            style: TextStyle(
+                color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
       ),
       body: Stack(
         children: [
@@ -65,7 +68,8 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
               padding: EdgeInsets.symmetric(horizontal: isLandscape ? hPad : 0),
               child: Center(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: isLandscape ? sw * 0.95 : 480.0),
+                  constraints:
+                      BoxConstraints(maxWidth: isLandscape ? sw * 0.95 : 480.0),
                   child: Column(
                     children: [
                       Expanded(
@@ -83,22 +87,29 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
                             final isActive = i == _selected;
 
                             int cleared = 0;
-                            for (int lv = pack.startLevel; lv <= pack.endLevel; lv++) {
+                            for (int lv = pack.startLevel;
+                                lv <= pack.endLevel;
+                                lv++) {
                               if (records[lv]?.cleared ?? false) cleared++;
                             }
 
-                            final isLandscape = MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+                            final isLandscape =
+                                MediaQuery.sizeOf(context).width >
+                                    MediaQuery.sizeOf(context).height;
                             return AnimatedBuilder(
                               animation: _pageController,
                               builder: (context, child) {
                                 double value = 1.0;
                                 if (_pageController.hasClients &&
                                     _pageController.position.haveDimensions &&
-                                    _pageController.position.hasContentDimensions) {
+                                    _pageController
+                                        .position.hasContentDimensions) {
                                   try {
-                                    final page = _pageController.page ?? _selected.toDouble();
+                                    final page = _pageController.page ??
+                                        _selected.toDouble();
                                     double pageOffset = page - i;
-                                    value = (1 - (pageOffset.abs() * 0.15)).clamp(0.85, 1.0);
+                                    value = (1 - (pageOffset.abs() * 0.15))
+                                        .clamp(0.85, 1.0);
                                   } catch (_) {
                                     value = isActive ? 1.0 : 0.85;
                                   }
@@ -106,7 +117,9 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
                                   value = isActive ? 1.0 : 0.85;
                                 }
 
-                                final opacityValue = ((value - 0.85) / 0.15 * 0.5 + 0.5).clamp(0.0, 1.0);
+                                final opacityValue =
+                                    ((value - 0.85) / 0.15 * 0.5 + 0.5)
+                                        .clamp(0.0, 1.0);
 
                                 return Center(
                                   child: AspectRatio(
@@ -126,26 +139,30 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
                                 unlocked: unlocked,
                                 isActive: isActive,
                                 clearedCount: cleared,
-                                onTap: unlocked ? () {
-                                  if (!isActive) {
-                                    _pageController.animateToPage(
-                                      i,
-                                      duration: const Duration(milliseconds: 300),
-                                      curve: Curves.easeInOut,
-                                    );
-                                  } else {
-                                    Get.to(() => LevelListScreen(
-                                          pack: pack,
-                                        ));
-                                  }
-                                } : null,
+                                onTap: unlocked
+                                    ? () {
+                                        if (!isActive) {
+                                          _pageController.animateToPage(
+                                            i,
+                                            duration: const Duration(
+                                                milliseconds: 300),
+                                            curve: Curves.easeInOut,
+                                          );
+                                        } else {
+                                          Get.to(() => LevelListScreen(
+                                                pack: pack,
+                                              ));
+                                        }
+                                      }
+                                    : null,
                               ),
                             );
                           },
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _ContinueBar(currentLevel: current, onPressed: widget.onStartGame),
+                      _ContinueBar(
+                          currentLevel: current, onPressed: widget.onStartGame),
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -180,12 +197,20 @@ class _PackCard extends StatelessWidget {
       if (!unlocked) return AppColors.surfaceSoft;
       if (!isActive) return AppColors.canvas;
       switch (name.toLowerCase()) {
-        case 'seoul': return AppColors.blockLilac;
-        case 'tokyo': return AppColors.blockLime;
-        case 'new york': return AppColors.blockCream;
-        case 'london': return AppColors.blockMint;
-        case 'paris': return AppColors.blockPink;
-        default: return AppColors.blockLime;
+        case 'seoul':
+          return AppColors.blockLilac;
+        case 'tokyo':
+          return AppColors.blockLime;
+        case 'new york':
+          return AppColors.blockCream;
+        case 'sydney':
+          return AppColors.blockPink;
+        case 'london':
+          return AppColors.blockMint;
+        case 'paris':
+          return AppColors.blockPink;
+        default:
+          return AppColors.blockLime;
       }
     }
 
@@ -199,14 +224,18 @@ class _PackCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(24),
-          border: isColorBlock ? null : Border.all(color: AppColors.borderLight, width: 1.0),
+          border: isColorBlock
+              ? null
+              : Border.all(color: AppColors.borderLight, width: 1.0),
         ),
         child: Stack(
           children: [
             if (!unlocked)
               const Positioned(
-                top: 20, right: 20,
-                child: Icon(Icons.lock_rounded, size: 22, color: Color(0xFFC0C4CA)),
+                top: 20,
+                right: 20,
+                child: Icon(Icons.lock_rounded,
+                    size: 22, color: Color(0xFFC0C4CA)),
               ),
             Padding(
               padding: const EdgeInsets.all(24.0),
@@ -222,7 +251,11 @@ class _PackCard extends StatelessWidget {
                         fontSize: 34,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.2,
-                        color: isColorBlock ? AppColors.ink : (unlocked ? AppColors.ink : AppColors.textSecondary),
+                        color: isColorBlock
+                            ? AppColors.ink
+                            : (unlocked
+                                ? AppColors.ink
+                                : AppColors.textSecondary),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -238,7 +271,9 @@ class _PackCard extends StatelessWidget {
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 1.0,
-                            color: isColorBlock ? AppColors.ink.withValues(alpha: 0.6) : AppColors.textSecondary,
+                            color: isColorBlock
+                                ? AppColors.ink.withValues(alpha: 0.6)
+                                : AppColors.textSecondary,
                           ),
                         ),
                         Text(
@@ -260,7 +295,8 @@ class _PackCard extends StatelessWidget {
                         backgroundColor: isColorBlock
                             ? AppColors.canvas.withValues(alpha: 0.6)
                             : AppColors.surfaceSoft,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.ink),
+                        valueColor:
+                            const AlwaysStoppedAnimation<Color>(AppColors.ink),
                       ),
                     ),
                   ],
@@ -281,7 +317,9 @@ class _ContinueBar extends StatelessWidget {
 
   String _getPackName(int level) {
     for (var p in levelPacks) {
-      if (level >= p.startLevel && level <= p.endLevel) return p.name.toUpperCase();
+      if (level >= p.startLevel && level <= p.endLevel) {
+        return p.name.toUpperCase();
+      }
     }
     return 'SEOUL';
   }
@@ -302,13 +340,15 @@ class _ContinueBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 32, height: 32,
+              width: 32,
+              height: 32,
               decoration: const BoxDecoration(
                 color: AppColors.onPrimary,
                 shape: BoxShape.circle,
               ),
               child: const Center(
-                child: Icon(Icons.play_arrow_rounded, color: AppColors.primary, size: 20),
+                child: Icon(Icons.play_arrow_rounded,
+                    color: AppColors.primary, size: 20),
               ),
             ),
             const SizedBox(width: 14),
@@ -316,17 +356,30 @@ class _ContinueBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(packName,
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.onPrimary.withValues(alpha: 0.7), height: 1.0, letterSpacing: 0.5),
+                Text(
+                  packName,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.onPrimary.withValues(alpha: 0.7),
+                      height: 1.0,
+                      letterSpacing: 0.5),
                 ),
                 const SizedBox(height: 4),
-                Text('LEVEL $currentLevel',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.onPrimary, height: 1.0, letterSpacing: 0.5),
+                Text(
+                  'LEVEL $currentLevel',
+                  style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.onPrimary,
+                      height: 1.0,
+                      letterSpacing: 0.5),
                 ),
               ],
             ),
             const SizedBox(width: 16),
-            Icon(Icons.chevron_right_rounded, color: AppColors.onPrimary.withValues(alpha: 0.7), size: 24),
+            Icon(Icons.chevron_right_rounded,
+                color: AppColors.onPrimary.withValues(alpha: 0.7), size: 24),
           ],
         ),
       ),

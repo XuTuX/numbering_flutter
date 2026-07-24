@@ -67,20 +67,23 @@ class _GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SocialCircleButton(
-      isLoading: isLoading,
-      onTap: onTap,
-      backgroundColor: Colors.white,
-      border: Border.all(
-        color: const Color(0xFFDADCE0),
-        width: 1,
-      ),
-      child: SizedBox(
-        width: 24,
-        height: 24,
-        child: Image.asset(
-          'assets/icons/google_logo.png',
-          fit: BoxFit.contain,
+    return KeyedSubtree(
+      key: const ValueKey('google-sign-in-button'),
+      child: _SocialCircleButton(
+        isLoading: isLoading,
+        onTap: onTap,
+        backgroundColor: Colors.white,
+        border: Border.all(
+          color: const Color(0xFFDADCE0),
+          width: 1,
+        ),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: Image.asset(
+            'assets/icons/google_logo.png',
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
@@ -98,14 +101,17 @@ class _AppleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SocialCircleButton(
-      isLoading: isLoading,
-      onTap: onTap,
-      backgroundColor: const Color(0xFF1A1A1A),
-      child: const Icon(
-        Icons.apple,
-        color: Colors.white,
-        size: 28,
+    return KeyedSubtree(
+      key: const ValueKey('apple-sign-in-button'),
+      child: _SocialCircleButton(
+        isLoading: isLoading,
+        onTap: onTap,
+        backgroundColor: const Color(0xFF1A1A1A),
+        child: const Icon(
+          Icons.apple,
+          color: Colors.white,
+          size: 28,
+        ),
       ),
     );
   }

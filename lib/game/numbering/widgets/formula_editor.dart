@@ -12,6 +12,8 @@ class _FormulaEditor extends StatefulWidget {
     required this.visibleHints,
     required this.requiresEquals,
     this.allowDigitReordering = false,
+    this.initialProgress,
+    this.onProgressChanged,
     required this.validateExpression,
     required this.onValidSubmission,
   });
@@ -23,6 +25,8 @@ class _FormulaEditor extends StatefulWidget {
   final List<String> visibleHints;
   final bool requiresEquals;
   final bool allowDigitReordering;
+  final DailyPuzzleProgress? initialProgress;
+  final ValueChanged<DailyPuzzleProgress>? onProgressChanged;
   final ValidationResult Function(String expression) validateExpression;
   final void Function(String expression, int score) onValidSubmission;
 
@@ -31,15 +35,17 @@ class _FormulaEditor extends StatefulWidget {
 }
 
 class _EditorSnapshot {
-  _EditorSnapshot(this.operators, this.parentheses);
+  _EditorSnapshot(this.operators, this.parentheses, this.liftedIndices);
   final List<InlineOperator?> operators;
   final List<ParenthesisRange> parentheses;
+  final Set<int> liftedIndices;
 }
 
 class _FormulaEditorState extends State<_FormulaEditor> {
   late List<String> _digits;
   late List<InlineOperator?> _operators;
   final List<ParenthesisRange> _parentheses = [];
+  final Set<int> _liftedIndices = {};
   final List<_EditorSnapshot> _history = [];
   int? _selectedDigitIndex;
   String? _message;
@@ -48,13 +54,31 @@ class _FormulaEditorState extends State<_FormulaEditor> {
         digits: _digits,
         operators: _operators,
         parentheses: _parentheses,
+        liftedIndices: _liftedIndices,
       );
 
   @override
   void initState() {
     super.initState();
-    _digits = List.of(widget.digits);
-    _operators = List.filled(widget.digits.length - 1, null);
+    final restored = _validatedProgress(widget.initialProgress);
+    _digits =
+        restored == null ? List.of(widget.digits) : List.of(restored.digits);
+    _operators = restored == null
+        ? List.filled(widget.digits.length - 1, null)
+        : restored.operators.map(_operatorForSymbol).toList(growable: false);
+    if (restored != null) {
+      _parentheses.addAll(
+        restored.parentheses.map(
+          (range) => ParenthesisRange(
+            id: '${range.start}:${range.end}',
+            startDigitIndex: range.start,
+            endDigitIndex: range.end,
+          ),
+        ),
+      );
+      _liftedIndices.addAll(restored.liftedIndices);
+    }
+    _message = null;
   }
 
   @override
@@ -70,6 +94,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                 digits: _digits,
                 operators: _operators,
                 parentheses: _parentheses,
+                liftedIndices: _liftedIndices,
                 availableOperators: widget.availableOperators,
                 accent: widget.accent,
                 selectedDigitIndex: _selectedDigitIndex,
@@ -77,6 +102,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                 visibleHints: widget.visibleHints,
                 allowDigitReordering: widget.allowDigitReordering,
                 onDigitTapped: _handleDigitTap,
+                onDigitLiftToggled: _toggleLiftDigit,
                 onDigitReordered: _reorderDigit,
                 onOperatorChanged: _changeOperator,
               ),
@@ -106,7 +132,27 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   }
 
   void _saveSnapshot() {
-    _history.add(_EditorSnapshot(List.of(_operators), List.of(_parentheses)));
+    _history.add(
+        _EditorSnapshot(List.of(_operators), List.of(_parentheses), Set.of(_liftedIndices)));
+  }
+
+  void _toggleLiftDigit(int index) {
+    if (index == 0 && !_liftedIndices.contains(0)) {
+      // First digit cannot be lifted as an exponent (needs a base before it)
+      return;
+    }
+    _saveSnapshot();
+    setState(() {
+      if (_liftedIndices.contains(index)) {
+        _liftedIndices.remove(index);
+      } else {
+        _liftedIndices.add(index);
+      }
+      _selectedDigitIndex = null;
+      _message = null;
+    });
+    _notifyProgressChanged();
+    _previewValidation();
   }
 
   void _changeOperator(int index, InlineOperator? value) {
@@ -115,21 +161,53 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       _operators[index] = value;
       _message = null;
     });
+    _notifyProgressChanged();
     _previewValidation();
   }
 
   void _reorderDigit(int fromIndex, int toIndex) {
     if (!widget.allowDigitReordering || fromIndex == toIndex) return;
+    _saveSnapshot();
     setState(() {
       final digit = _digits.removeAt(fromIndex);
       _digits.insert(toIndex, digit);
+
+      // Re-map lifted indices after reordering
+      final wasLifted = _liftedIndices.contains(fromIndex);
+      final newLifted = <int>{};
+      for (final idx in _liftedIndices) {
+        var newIdx = idx;
+        if (idx == fromIndex) continue;
+        if (fromIndex < toIndex && idx > fromIndex && idx <= toIndex) {
+          newIdx--;
+        } else if (fromIndex > toIndex && idx >= toIndex && idx < fromIndex) {
+          newIdx++;
+        }
+        newLifted.add(newIdx);
+      }
+      if (wasLifted) {
+        newLifted.add(toIndex);
+      }
+      // Ensure index 0 is not lifted
+      newLifted.remove(0);
+      _liftedIndices
+        ..clear()
+        ..addAll(newLifted);
+
       _selectedDigitIndex = null;
       _message = null;
     });
+    _notifyProgressChanged();
     _previewValidation();
   }
 
   void _handleDigitTap(int index) {
+    if (_liftedIndices.contains(index)) {
+      // Tapping a lifted digit unlifts it (brings it down)
+      _toggleLiftDigit(index);
+      return;
+    }
+
     if (_selectedDigitIndex == null) {
       setState(() => _selectedDigitIndex = index);
       return;
@@ -155,6 +233,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
         _selectedDigitIndex = null;
         _message = null;
       });
+      _notifyProgressChanged();
       return;
     }
     final validation = validateParenthesisRange(
@@ -175,11 +254,12 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       _selectedDigitIndex = null;
       _message = null;
     });
+    _notifyProgressChanged();
   }
 
   void _previewValidation() {
-    if (_operators.contains(null)) return;
     if (widget.requiresEquals && !_operators.contains(InlineOperator.equals)) {
+      if (mounted && _message != null) setState(() => _message = null);
       return;
     }
 
@@ -204,13 +284,78 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       _digits = List.of(widget.digits);
       _operators = List.filled(widget.digits.length - 1, null);
       _parentheses.clear();
+      _liftedIndices.clear();
       _history.clear();
       _selectedDigitIndex = null;
       _message = null;
     });
+    _notifyProgressChanged();
   }
 
   void showMessage(String message) => setState(() => _message = message);
+
+  DailyPuzzleProgress? _validatedProgress(DailyPuzzleProgress? progress) {
+    if (progress == null || !widget.allowDigitReordering) return null;
+    if (progress.digits.length != widget.digits.length ||
+        progress.operators.length != widget.digits.length - 1) {
+      return null;
+    }
+    final expectedDigits = List.of(widget.digits)..sort();
+    final restoredDigits = List.of(progress.digits)..sort();
+    if (!listEquals(expectedDigits, restoredDigits)) return null;
+    if (progress.operators.any(
+      (symbol) => symbol != null && _operatorForSymbol(symbol) == null,
+    )) {
+      return null;
+    }
+
+    final acceptedRanges = <ParenthesisRange>[];
+    for (final range in progress.parentheses) {
+      final candidate = ParenthesisRange(
+        id: '${range.start}:${range.end}',
+        startDigitIndex: range.start,
+        endDigitIndex: range.end,
+      ).normalized();
+      final validation = validateParenthesisRange(
+        digitCount: progress.digits.length,
+        candidate: candidate,
+        existing: acceptedRanges,
+      );
+      if (!validation.valid) return null;
+      acceptedRanges.add(candidate);
+    }
+    return progress;
+  }
+
+  InlineOperator? _operatorForSymbol(String? symbol) {
+    for (final operator in InlineOperator.values) {
+      if (operator.symbol == symbol) return operator;
+    }
+    return null;
+  }
+
+  void _notifyProgressChanged() {
+    widget.onProgressChanged?.call(
+      DailyPuzzleProgress(
+        digits: List.unmodifiable(_digits),
+        operators: List.unmodifiable(
+          _operators.map((operator) => operator?.symbol),
+        ),
+        parentheses: List.unmodifiable(
+          _parentheses.map(
+            (range) {
+              final normalized = range.normalized();
+              return DailyPuzzleParenthesis(
+                start: normalized.startDigitIndex,
+                end: normalized.endDigitIndex,
+              );
+            },
+          ),
+        ),
+        liftedIndices: List.unmodifiable(_liftedIndices.toList()..sort()),
+      ),
+    );
+  }
 }
 
 // ─── 드래그 드롭 편집기 ──────────────────────────────────────

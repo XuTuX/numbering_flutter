@@ -5,20 +5,20 @@ import 'package:numbering/game/numbering/level_models.dart';
 import 'package:numbering/screens/home/widgets/home_screen_content.dart';
 
 void main() {
-  test('catalog contains 160 ordered, playable levels', () {
-    expect(LevelCatalog.all, hasLength(160));
+  test('catalog contains 200 ordered, playable levels', () {
+    expect(LevelCatalog.all, hasLength(200));
     expect(
       LevelCatalog.all.map((level) => level.id),
-      orderedEquals(List.generate(160, (index) => index + 1)),
+      orderedEquals(List.generate(200, (index) => index + 1)),
     );
     expect(
       LevelCatalog.all.map((level) => level.officialAnswer).toSet(),
-      hasLength(160),
+      hasLength(200),
       reason: 'Each fixed level must have a distinct official construction.',
     );
 
     for (final level in LevelCatalog.all) {
-      if (level.perfectAnswer == null) {
+      if (level.perfectAnswer == null && level.id != 81) {
         expect(
           level.digits.length,
           inInclusiveRange(_minimumDigits(level.id), _maximumDigits(level.id)),
@@ -27,6 +27,23 @@ void main() {
       }
       expect(level.minimumScore, lessThanOrEqualTo(level.targetScore));
       expect(level.availableOperators, contains('='));
+      if (level.id >= 81) {
+        expect(level.availableOperators, contains('^'));
+      } else {
+        expect(level.availableOperators, isNot(contains('^')));
+      }
+      if (level.id >= 81 && level.id <= 120) {
+        expect(
+          level.officialAnswer,
+          contains('^'),
+          reason: 'Sydney LEVEL ${level.id} must teach exponent use.',
+        );
+        expect(
+          level.hints.third,
+          isNot(contains('^')),
+          reason: 'Player-facing hints should use raised exponent notation.',
+        );
+      }
 
       final result = validateLevelFormula(
         digitString: level.digitString,
@@ -67,6 +84,17 @@ void main() {
     }
   });
 
+  test('Sydney mixes exponentiation with the existing operations', () {
+    final answers = LevelCatalog.all
+        .where((level) => level.id >= 81 && level.id <= 120)
+        .map((level) => level.officialAnswer)
+        .join();
+
+    for (final operator in const ['^', '+', '-', '×', '÷']) {
+      expect(answers, contains(operator));
+    }
+  });
+
   test('score evaluation follows fail, one-star, three-star, perfect order',
       () {
     final level = LevelCatalog.byId(50);
@@ -84,7 +112,12 @@ void main() {
     expect(levelPackFor(20).name, 'Seoul');
     expect(levelPackFor(21).name, 'Tokyo');
     expect(levelPackFor(80).name, 'New York');
-    expect(levelPackFor(160).name, 'Paris');
+    expect(levelPackFor(81).name, 'Sydney');
+    expect(levelPackFor(120).name, 'Sydney');
+    expect(levelPackFor(121).name, 'London');
+    expect(levelPackFor(160).name, 'London');
+    expect(levelPackFor(161).name, 'Paris');
+    expect(levelPackFor(200).name, 'Paris');
   });
 }
 

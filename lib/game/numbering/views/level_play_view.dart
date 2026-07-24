@@ -98,11 +98,15 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
       final hintService = Get.find<HintService>();
       if (!hintService.hasHints) {
         if (mounted) {
-          showAppSnackBar(
-            title: '힌트 부족',
-            message: '보유한 힌트가 없습니다. 매일 출석 시 힌트 3개가 지급됩니다!',
-            icon: Icons.lightbulb_outline_rounded,
-          );
+          if (Get.isRegistered<HintPurchaseService>()) {
+            await Get.to(() => const HintStoreScreen());
+          } else {
+            showAppSnackBar(
+              title: '힌트 부족',
+              message: '보유한 힌트가 없습니다. 매일 출석 시 힌트 3개가 지급됩니다!',
+              icon: Icons.lightbulb_outline_rounded,
+            );
+          }
         }
         return;
       }
@@ -202,7 +206,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
           _removeResultOverlay();
           widget.onShowLevels();
         },
-        onNext: widget.level.id < 160
+        onNext: widget.level.id < LevelCatalog.all.length
             ? () {
                 _removeResultOverlay();
                 widget.onNext(widget.level.id + 1);

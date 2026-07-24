@@ -13,6 +13,9 @@ class KstClock {
 
   static String currentDateKey() => dateKeyFor(nowInKst());
 
+  static String currentChallengePeriodKey() =>
+      challengePeriodKeyFor(nowInKst());
+
   static String currentWeekKey() => isoWeekKeyFor(nowInKst());
 
   static List<String> recentDateKeys({int days = 30}) {
@@ -26,10 +29,17 @@ class KstClock {
 
   static String compactDateLabel(String dateKey) {
     final parts = dateKey.split('-');
-    if (parts.length != 3) {
+    if (parts.length < 3) {
       return dateKey;
     }
-    return '${parts[1]}.${parts[2]}';
+    final slotLabel = parts.length >= 4
+        ? switch (parts[3]) {
+            '00' => ' 오전',
+            '12' => ' 오후',
+            _ => '',
+          }
+        : '';
+    return '${parts[1]}.${parts[2]}$slotLabel';
   }
 
   static String weekdayLabel(String dateKey) {
@@ -71,6 +81,11 @@ class KstClock {
     final month = value.month.toString().padLeft(2, '0');
     final day = value.day.toString().padLeft(2, '0');
     return '$year-$month-$day';
+  }
+
+  static String challengePeriodKeyFor(DateTime kstTime) {
+    final slot = kstTime.hour < 12 ? '00' : '12';
+    return '${dateKeyFor(kstTime)}-$slot';
   }
 
   static String isoWeekKeyFor(DateTime kstTime) {

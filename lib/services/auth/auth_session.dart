@@ -9,7 +9,9 @@ void _bindAuthStateChanges(AuthService service) {
   service._authStateSubscription?.cancel();
   service._authStateSubscription = supabase.auth.onAuthStateChange.listen(
     (data) {
-      service.user.value = data.session?.user;
+      final session = data.session;
+      service.user.value =
+          session == null || session.isExpired ? null : session.user;
       service._invalidateProfileLoadRequests();
 
       if (data.event == AuthChangeEvent.tokenRefreshed) {
@@ -52,6 +54,11 @@ Future<void> _tryRecoverSession(AuthService service) async {
       debugPrint('🟡 [AuthService] Session expired, attempting refresh...');
       try {
         await supabase.auth.refreshSession();
+        final refreshedSession = supabase.auth.currentSession;
+        if (refreshedSession == null || refreshedSession.isExpired) {
+          throw StateError('Session refresh did not produce a valid session.');
+        }
+        service.user.value = refreshedSession.user;
         debugPrint('🟢 [AuthService] Session refreshed successfully');
       } catch (e) {
         debugPrint('🔴 [AuthService] Session refresh failed, signing out: $e');

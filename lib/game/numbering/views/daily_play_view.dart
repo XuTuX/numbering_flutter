@@ -19,6 +19,12 @@ class _DailyPlayView extends StatefulWidget {
 class _DailyPlayViewState extends State<_DailyPlayView> {
   late final String _digits;
   final _editorKey = GlobalKey<_FormulaEditorState>();
+  DailyPuzzleProgress? _restoredProgress;
+  DailyPuzzleProgress? _pendingProgress;
+  Timer? _progressSaveTimer;
+  Future<void> _progressSaveQueue = Future<void>.value();
+  bool _isLoadingProgress = false;
+  bool _isCompleted = false;
   bool _isSubmitting = false;
   String? _submissionError;
   String? _pendingExpression;
@@ -28,6 +34,62 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
     super.initState();
     final seed = widget.session.seed ?? 0;
     _digits = generateDailyNumberingPuzzle(seed);
+    if (widget.session.isOfficialScoreSubmission) {
+      _isLoadingProgress = true;
+      unawaited(_loadProgress());
+    }
+  }
+
+  Future<void> _loadProgress() async {
+    try {
+      final progress = await Get.find<NumberingScoreService>().getDailyProgress(
+        periodKey: widget.session.dateKey ?? '',
+        seed: widget.session.seed ?? 0,
+      );
+      if (!mounted) return;
+      setState(() {
+        _restoredProgress = progress;
+        _isLoadingProgress = false;
+      });
+    } on NumberingServiceException {
+      if (!mounted) return;
+      setState(() => _isLoadingProgress = false);
+    }
+  }
+
+  void _handleProgressChanged(DailyPuzzleProgress progress) {
+    if (!widget.session.isOfficialScoreSubmission || _isCompleted) return;
+    _pendingProgress = progress;
+    _progressSaveTimer?.cancel();
+    _progressSaveTimer = Timer(
+      const Duration(milliseconds: 350),
+      () => unawaited(_flushProgress()),
+    );
+  }
+
+  Future<void> _flushProgress() async {
+    _progressSaveTimer?.cancel();
+    _progressSaveTimer = null;
+    final progress = _pendingProgress;
+    if (progress == null || _isCompleted) return;
+    _pendingProgress = null;
+    _progressSaveQueue = _progressSaveQueue.then((_) async {
+      try {
+        await Get.find<NumberingScoreService>().saveDailyProgress(
+          periodKey: widget.session.dateKey ?? '',
+          seed: widget.session.seed ?? 0,
+          progress: progress,
+        );
+      } on NumberingServiceException {
+        _pendingProgress ??= progress;
+      }
+    });
+    await _progressSaveQueue;
+  }
+
+  Future<void> _handleExit() async {
+    await _flushProgress();
+    widget.onShowLevels();
   }
 
   Future<void> _handleSubmission(String expression, int clientScore) async {
@@ -60,9 +122,18 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
     }
 
     if (!mounted) return;
+    _isCompleted = true;
+    _pendingProgress = null;
+    _progressSaveTimer?.cancel();
+    if (widget.session.isOfficialScoreSubmission) {
+      unawaited(
+        Get.find<NumberingScoreService>().clearDailyProgress(
+          periodKey: widget.session.dateKey ?? '',
+        ),
+      );
+    }
     setState(() => _isSubmitting = false);
     final score = serverResult?.verifiedScore ?? clientScore;
-    final rank = serverResult?.rank;
 
     showDialog<void>(
         context: context,
@@ -89,11 +160,9 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  rank == null
-                      ? (widget.session.isOfficialScoreSubmission
-                          ? '오늘의 점수가 안전하게 저장되었습니다.'
-                          : '연습 기록은 공식 랭킹에 반영되지 않습니다.')
-                      : '오늘의 순위: $rank위',
+                  widget.session.isOfficialScoreSubmission
+                      ? '점수가 저장되었습니다. 참가자들의 순위를 확인해 보세요.'
+                      : '연습 기록은 공식 랭킹에 반영되지 않습니다.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 14,
@@ -127,12 +196,12 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
                     );
                   },
                   style: FilledButton.styleFrom(backgroundColor: widget.accent),
-                  child: const Text('오늘의 랭킹'),
+                  child: const Text('참가자 순위 보기'),
                 ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  widget.onShowLevels();
+                  unawaited(_handleExit());
                 },
                 child: const Text('나가기'),
               )
@@ -151,7 +220,7 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
         _GameHeader(
           title: '오늘의 퍼즐',
           backLabel: '나가기',
-          onBack: widget.onShowLevels,
+          onBack: () => unawaited(_handleExit()),
           trailing: const SizedBox.shrink(),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -190,23 +259,37 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
             ),
           ),
         Expanded(
-          child: _FormulaEditor(
-            key: _editorKey,
-            digits: _digits.split(''),
-            availableOperators: const {'+', '-', '×', '÷', '='},
-            accent: widget.accent,
-            isLandscape: isLandscape,
-            visibleHints: const [],
-            requiresEquals: true,
-            allowDigitReordering: true,
-            validateExpression: (expression) => validateDailyPuzzleFormula(
-              digitString: _digits,
-              expression: expression,
-            ),
-            onValidSubmission: _handleSubmission,
-          ),
+          child: _isLoadingProgress
+              ? const Center(child: CircularProgressIndicator())
+              : _FormulaEditor(
+                  key: _editorKey,
+                  digits: _digits.split(''),
+                  availableOperators: const {'+', '-', '×', '÷', '^', '='},
+                  accent: widget.accent,
+                  isLandscape: isLandscape,
+                  visibleHints: const [],
+                  requiresEquals: true,
+                  allowDigitReordering: true,
+                  initialProgress: _restoredProgress,
+                  onProgressChanged: _handleProgressChanged,
+                  validateExpression: (expression) =>
+                      validateDailyPuzzleFormula(
+                    digitString: _digits,
+                    expression: expression,
+                  ),
+                  onValidSubmission: _handleSubmission,
+                ),
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _progressSaveTimer?.cancel();
+    if (_pendingProgress != null && !_isCompleted) {
+      unawaited(_flushProgress());
+    }
+    super.dispose();
   }
 }

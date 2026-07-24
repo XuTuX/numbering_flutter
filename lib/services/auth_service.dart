@@ -42,7 +42,8 @@ class AuthService extends GetxController {
       return;
     }
 
-    user.value = supabase.auth.currentUser;
+    final session = supabase.auth.currentSession;
+    user.value = session == null || session.isExpired ? null : session.user;
     isProfileLoaded.value = user.value == null;
     hasProfileLoadError.value = false;
 

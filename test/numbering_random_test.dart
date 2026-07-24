@@ -55,6 +55,16 @@ void main() {
       expect(result.value, 6);
     });
 
+    test('supports exponent equations after reordering digits', () {
+      final result = validateDailyPuzzleFormula(
+        digitString: '81243126',
+        expression: '2^3+4+1-1=8+6-2',
+      );
+
+      expect(result.valid, isTrue);
+      expect(result.value, 12);
+    });
+
     test('rejects digits outside the supplied multiset', () {
       final result = validateDailyPuzzleFormula(
         digitString: '123321',

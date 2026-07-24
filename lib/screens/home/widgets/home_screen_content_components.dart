@@ -327,44 +327,60 @@ class _HomeHeaderHintBadge extends StatelessWidget {
       return const _HintBadge(hints: 20);
     }
     final hintService = Get.find<HintService>();
-    return Obx(() => _HintBadge(hints: hintService.hints.value));
+    return Obx(
+      () => _HintBadge(
+        hints: hintService.hints.value,
+        onTap: Get.isRegistered<HintPurchaseService>()
+            ? () => Get.to(() => const HintStoreScreen())
+            : null,
+      ),
+    );
   }
 }
 
 class _HintBadge extends StatelessWidget {
-  const _HintBadge({required this.hints});
+  const _HintBadge({required this.hints, this.onTap});
   final int hints;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: '보유 힌트 (매일 출석 시 +3개)',
-      child: Container(
-        height: 38,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: _challengeSurface,
-          borderRadius: BorderRadius.circular(19),
-          border: Border.all(color: _homeBorder),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.lightbulb_rounded,
-              size: 18,
-              color: Color(0xFFFFB800),
+      message: onTap == null ? '보유 힌트 (매일 출석 시 +3개)' : '힌트 상점 열기',
+      child: Material(
+        color: _challengeSurface,
+        shape: const StadiumBorder(side: BorderSide(color: _homeBorder)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          key: const ValueKey('home-hint-store'),
+          onTap: onTap,
+          child: Container(
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.lightbulb_rounded,
+                  size: 18,
+                  color: Color(0xFFFFB800),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '$hints',
+                  style: const TextStyle(
+                    color: _homeInk,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                if (onTap != null) ...[
+                  const SizedBox(width: 3),
+                  const Icon(Icons.add_rounded, size: 15, color: _homeInk),
+                ],
+              ],
             ),
-            const SizedBox(width: 6),
-            Text(
-              '$hints',
-              style: const TextStyle(
-                color: _homeInk,
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

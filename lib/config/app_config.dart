@@ -22,8 +22,6 @@ class AppConfig {
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
   static void validateRequired() {
-    if (supabaseUrl.isEmpty && supabaseAnonKey.isEmpty) return;
-
     final missing = <String>[
       if (supabaseUrl.isEmpty) 'SUPABASE_URL',
       if (supabaseAnonKey.isEmpty) 'SUPABASE_ANON_KEY',
@@ -32,8 +30,8 @@ class AppConfig {
     if (missing.isNotEmpty) {
       throw StateError(
         'Missing required values: ${missing.join(', ')}. '
-        'Provide both SUPABASE_URL and SUPABASE_ANON_KEY, or omit both for '
-        'offline guest mode.',
+        'Login is required, so both SUPABASE_URL and SUPABASE_ANON_KEY '
+        'must be provided.',
       );
     }
   }

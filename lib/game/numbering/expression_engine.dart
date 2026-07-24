@@ -7,6 +7,7 @@ enum InlineOperator {
   subtract('-'),
   multiply('×'),
   divide('÷'),
+  exponent('^'),
   equals('=');
 
   const InlineOperator(this.symbol);
@@ -48,6 +49,7 @@ String assembleInlineExpression({
   required List<String> digits,
   required List<InlineOperator?> operators,
   List<ParenthesisRange> parentheses = const [],
+  Set<int> liftedIndices = const {},
 }) {
   if (operators.length != digits.length - 1) {
     throw ArgumentError('연산자 슬롯 수가 숫자 사이의 칸 수와 다릅니다.');
@@ -56,6 +58,15 @@ String assembleInlineExpression({
   final normalized = parentheses.map((range) => range.normalized()).toList();
   final buffer = StringBuffer();
   for (var index = 0; index < digits.length; index++) {
+    final isLifted = liftedIndices.contains(index);
+    final isPrevLifted = index > 0 && liftedIndices.contains(index - 1);
+    final isNextLifted =
+        index < digits.length - 1 && liftedIndices.contains(index + 1);
+
+    if (isLifted && !isPrevLifted) {
+      buffer.write('^(');
+    }
+
     final openingCount =
         normalized.where((range) => range.startDigitIndex == index).length;
     final closingCount =
@@ -63,8 +74,17 @@ String assembleInlineExpression({
     buffer.write('(' * openingCount);
     buffer.write(digits[index]);
     buffer.write(')' * closingCount);
+
+    if (isLifted && !isNextLifted) {
+      buffer.write(')');
+    }
+
     if (index < operators.length) {
-      buffer.write(operators[index]?.symbol ?? '');
+      if (isNextLifted && !isLifted) {
+        // Skip operator between base and start of exponent block
+      } else {
+        buffer.write(operators[index]?.symbol ?? '');
+      }
     }
   }
   return buffer.toString();
@@ -130,13 +150,21 @@ ValidationResult evaluateIntegerExpression(String source) {
           return fail('나눗셈의 중간 결과는 정수여야 합니다.');
         }
         values.add(left ~/ right);
+      case '^':
+        final exponentiation = _integerPower(left, right);
+        if (!exponentiation.valid) return exponentiation;
+        values.add(exponentiation.value!);
       default:
         return fail('알 수 없는 연산자입니다.');
     }
     return ValidationResult.success(values.last);
   }
 
-  int precedence(String operator) => operator == '×' || operator == '÷' ? 2 : 1;
+  int precedence(String operator) => switch (operator) {
+        '^' => 3,
+        '×' || '÷' => 2,
+        _ => 1,
+      };
 
   while (index < source.length) {
     final character = source[index];
@@ -180,11 +208,14 @@ ValidationResult evaluateIntegerExpression(String source) {
     if (character == '+' ||
         character == '-' ||
         character == '×' ||
-        character == '÷') {
+        character == '÷' ||
+        character == '^') {
       if (expectsOperand) return fail('단항 연산자는 허용하지 않습니다.');
       while (operators.isNotEmpty &&
           operators.last != '(' &&
-          precedence(operators.last) >= precedence(character)) {
+          (precedence(operators.last) > precedence(character) ||
+              (precedence(operators.last) == precedence(character) &&
+                  character != '^'))) {
         final result = applyTopOperator();
         if (!result.valid) return result;
       }
@@ -207,6 +238,36 @@ ValidationResult evaluateIntegerExpression(String source) {
   return ValidationResult.success(values.single);
 }
 
+ValidationResult _integerPower(int base, int exponent) {
+  const maximumMagnitude = 999999999;
+  if (exponent < 0) {
+    return const ValidationResult.failure('지수는 0 이상의 정수여야 합니다.');
+  }
+  if (base == 0 && exponent == 0) {
+    return const ValidationResult.failure('0의 0승은 사용할 수 없습니다.');
+  }
+
+  var result = 1;
+  var factor = base;
+  var remaining = exponent;
+  while (remaining > 0) {
+    if (remaining.isOdd) {
+      result *= factor;
+      if (result.abs() > maximumMagnitude) {
+        return const ValidationResult.failure('지수 계산 결과가 너무 큽니다.');
+      }
+    }
+    remaining ~/= 2;
+    if (remaining > 0) {
+      factor *= factor;
+      if (factor.abs() > maximumMagnitude) {
+        return const ValidationResult.failure('지수 계산 결과가 너무 큽니다.');
+      }
+    }
+  }
+  return ValidationResult.success(result);
+}
+
 ValidationResult validateFormulaWorkshop({
   required String digitString,
   required String expression,
@@ -214,7 +275,7 @@ ValidationResult validateFormulaWorkshop({
   return validateLevelFormula(
     digitString: digitString,
     expression: expression,
-    availableOperators: const {'+', '-', '×', '÷', '='},
+    availableOperators: const {'+', '-', '×', '÷', '^', '='},
   );
 }
 
@@ -227,7 +288,7 @@ ValidationResult validateLevelFormula({
   if (preservedDigits != digitString) {
     return const ValidationResult.failure('주어진 숫자를 순서대로 모두 사용해야 합니다.');
   }
-  for (final match in RegExp(r'[+\-×÷=]').allMatches(expression)) {
+  for (final match in RegExp(r'[+\-×÷^=]').allMatches(expression)) {
     final symbol = match.group(0)!;
     if (!availableOperators.contains(symbol)) {
       return ValidationResult.failure('$symbol 기호는 이 레벨에서 사용할 수 없습니다.');
@@ -265,9 +326,9 @@ ValidationResult validateDailyPuzzleFormula({
     return const ValidationResult.failure('주어진 8개의 숫자만 사용할 수 있습니다.');
   }
 
-  for (final match in RegExp(r'[+\-×÷=]').allMatches(expression)) {
+  for (final match in RegExp(r'[+\-×÷^=]').allMatches(expression)) {
     final symbol = match.group(0)!;
-    if (!const {'+', '-', '×', '÷', '='}.contains(symbol)) {
+    if (!const {'+', '-', '×', '÷', '^', '='}.contains(symbol)) {
       return ValidationResult.failure('$symbol 기호는 사용할 수 없습니다.');
     }
   }

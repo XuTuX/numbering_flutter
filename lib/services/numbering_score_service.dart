@@ -80,6 +80,76 @@ class NumberingLeaderboardEntry {
   }
 }
 
+@immutable
+class DailyPuzzleParenthesis {
+  const DailyPuzzleParenthesis({
+    required this.start,
+    required this.end,
+  });
+
+  final int start;
+  final int end;
+
+  Map<String, Object?> toJson() => {'start': start, 'end': end};
+}
+
+@immutable
+class DailyPuzzleProgress {
+  const DailyPuzzleProgress({
+    required this.digits,
+    required this.operators,
+    required this.parentheses,
+    this.liftedIndices = const [],
+  });
+
+  final List<String> digits;
+  final List<String?> operators;
+  final List<DailyPuzzleParenthesis> parentheses;
+  final List<int> liftedIndices;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+        'version': 2,
+        'digits': digits,
+        'operators': operators,
+        'parentheses': parentheses.map((item) => item.toJson()).toList(),
+        'liftedIndices': liftedIndices,
+      };
+
+  factory DailyPuzzleProgress.fromJson(Map<String, Object?> json) {
+    final rawDigits = json['digits'];
+    final rawOperators = json['operators'];
+    final rawParentheses = json['parentheses'];
+    final rawLifted = json['liftedIndices'];
+    return DailyPuzzleProgress(
+      digits: rawDigits is List
+          ? rawDigits.map((item) => item.toString()).toList(growable: false)
+          : const [],
+      operators: rawOperators is List
+          ? rawOperators
+              .map<String?>((item) => item?.toString())
+              .toList(growable: false)
+          : const [],
+      parentheses: rawParentheses is List
+          ? rawParentheses
+              .whereType<Map>()
+              .map(
+                (item) => DailyPuzzleParenthesis(
+                  start: _optionalInt(item['start']) ?? -1,
+                  end: _optionalInt(item['end']) ?? -1,
+                ),
+              )
+              .toList(growable: false)
+          : const [],
+      liftedIndices: rawLifted is List
+          ? rawLifted
+              .map((item) => _optionalInt(item))
+              .whereType<int>()
+              .toList(growable: false)
+          : const [],
+    );
+  }
+}
+
 class NumberingServiceException implements Exception {
   const NumberingServiceException(this.code, this.userMessage);
 
@@ -165,6 +235,66 @@ class NumberingScoreService {
       },
     );
     return NumberingSubmissionResult.fromJson(_asMap(response));
+  }
+
+  Future<DailyPuzzleProgress?> getDailyProgress({
+    required String periodKey,
+    required int seed,
+  }) async {
+    final client = _supabase;
+    final user = client?.auth.currentUser;
+    if (client == null || user == null) return null;
+    try {
+      final row = await client
+          .from('numbering_daily_progress')
+          .select('seed, state')
+          .eq('user_id', user.id)
+          .eq('period_key', periodKey)
+          .maybeSingle();
+      if (row == null || _optionalInt(row['seed']) != seed) return null;
+      return DailyPuzzleProgress.fromJson(_asMap(row['state']));
+    } on PostgrestException catch (error) {
+      throw _mapPostgrestError(error);
+    }
+  }
+
+  Future<void> saveDailyProgress({
+    required String periodKey,
+    required int seed,
+    required DailyPuzzleProgress progress,
+  }) async {
+    final client = _supabase;
+    final user = client?.auth.currentUser;
+    if (client == null || user == null) return;
+    try {
+      await client.from('numbering_daily_progress').upsert(
+        <String, Object?>{
+          'user_id': user.id,
+          'period_key': periodKey,
+          'seed': seed,
+          'state': progress.toJson(),
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        },
+        onConflict: 'user_id,period_key',
+      );
+    } on PostgrestException catch (error) {
+      throw _mapPostgrestError(error);
+    }
+  }
+
+  Future<void> clearDailyProgress({required String periodKey}) async {
+    final client = _supabase;
+    final user = client?.auth.currentUser;
+    if (client == null || user == null) return;
+    try {
+      await client
+          .from('numbering_daily_progress')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('period_key', periodKey);
+    } on PostgrestException catch (error) {
+      throw _mapPostgrestError(error);
+    }
   }
 
   Future<List<NumberingLeaderboardEntry>> getAllTimeLeaderboard({
@@ -256,14 +386,14 @@ NumberingServiceException _mapPostgrestError(PostgrestException error) {
       message.contains('already participated')) {
     return const NumberingServiceException(
       'already_participated',
-      '오늘의 게임에 이미 참여했습니다.',
+      '이번 12시간 퍼즐에 이미 참여했습니다.',
     );
   }
   if (message.contains('already submitted') ||
       message.contains('already finalized')) {
     return const NumberingServiceException(
       'already_submitted',
-      '오늘의 점수 제출이 이미 완료되었습니다.',
+      '이번 12시간 퍼즐 점수 제출이 이미 완료되었습니다.',
     );
   }
   if (message.contains('seed')) {

@@ -50,4 +50,39 @@ void main() {
     expect(find.byType(SingleChildScrollView), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('required login screen has no guest entry path', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    var googleAttempts = 0;
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: RequiredLoginScreen(
+          onGoogleSignIn: () async {
+            googleAttempts++;
+            return '로그인에 실패했어요. 다시 시도해 주세요.';
+          },
+          onAppleSignIn: () async => null,
+        ),
+      ),
+    );
+
+    expect(find.text('로그인 후 시작할 수 있어요'), findsOneWidget);
+    expect(
+      find.text('NUMBERING을 이용하려면 먼저 로그인해 주세요.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('건너뛰'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('google-sign-in-button')));
+    await tester.pumpAndSettle();
+
+    expect(googleAttempts, 1);
+    expect(
+      find.text('로그인에 실패했어요. 다시 시도해 주세요.'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

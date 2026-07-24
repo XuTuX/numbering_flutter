@@ -133,7 +133,7 @@ class GameSelectionSheet extends StatelessWidget {
                                   BorderRadius.circular(AppRadius.pill),
                             ),
                             child: Text(
-                              '160 레벨'.tr,
+                              '200 레벨'.tr,
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,

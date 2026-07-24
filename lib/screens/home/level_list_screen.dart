@@ -23,6 +23,8 @@ class LevelListScreen extends StatelessWidget {
         return AppColors.blockLime;
       case 'new york':
         return AppColors.blockCream;
+      case 'sydney':
+        return AppColors.blockPink;
       case 'london':
         return AppColors.blockMint;
       case 'paris':

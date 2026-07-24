@@ -40,8 +40,8 @@ Future<void> openDailyChallenge(AuthService authService) async {
     var challenge = await scoreService.getDailyChallenge();
     if (challenge.myScore != null) {
       showAppSnackBar(
-        title: '오늘의 게임 완료',
-        message: '오늘 점수는 ${challenge.myScore}점입니다.',
+        title: '이번 퍼즐 완료',
+        message: '이번 12시간 퍼즐 점수는 ${challenge.myScore}점입니다.',
       );
       showDailyRankingSheet(dateKey: challenge.dateKey);
       return;
@@ -64,7 +64,7 @@ Future<void> openDailyChallenge(AuthService authService) async {
 }
 
 Future<void> openDailyChallengeTest() async {
-  final dateKey = KstClock.currentDateKey();
+  final dateKey = KstClock.currentChallengePeriodKey();
   final seed = _localDailySeed(dateKey);
   showAppSnackBar(
     title: '테스트 모드'.tr,

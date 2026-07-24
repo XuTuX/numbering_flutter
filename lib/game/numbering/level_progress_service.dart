@@ -4,10 +4,12 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'level_models.dart';
+import 'level_catalog.dart';
 
 class LevelProgressService extends GetxService {
   static const _progressKey = 'numbering_level_progress_v1';
   static const _lastLevelKey = 'numbering_last_level_v1';
+  static const _sydneyMigrationKey = 'numbering_sydney_progress_migrated_v1';
 
   final progress = <int, LevelProgress>{}.obs;
   final lastPlayedLevel = 1.obs;
@@ -26,12 +28,40 @@ class LevelProgressService extends GetxService {
           ),
       });
     }
+    await _migrateProgressForSydney();
     return this;
+  }
+
+  Future<void> _migrateProgressForSydney() async {
+    if (_preferences.getBool(_sydneyMigrationKey) ?? false) return;
+
+    final migrated = <int, LevelProgress>{};
+    for (final entry in progress.entries) {
+      final newId =
+          entry.key >= 81 && entry.key <= 160 ? entry.key + 40 : entry.key;
+      final value = entry.value;
+      migrated[newId] = LevelProgress(
+        levelId: newId,
+        cleared: value.cleared,
+        bestScore: value.bestScore,
+        stars: value.stars,
+        perfect: value.perfect,
+        usedHints: value.usedHints,
+      );
+    }
+    progress.assignAll(migrated);
+
+    if (lastPlayedLevel.value >= 81 && lastPlayedLevel.value <= 160) {
+      lastPlayedLevel.value += 40;
+      await _preferences.setInt(_lastLevelKey, lastPlayedLevel.value);
+    }
+    if (migrated.isNotEmpty) await _save();
+    await _preferences.setBool(_sydneyMigrationKey, true);
   }
 
   int get highestUnlockedLevel {
     var highest = 1;
-    for (var id = 1; id < 160; id++) {
+    for (var id = 1; id < LevelCatalog.all.length; id++) {
       if (!(progress[id]?.cleared ?? false)) break;
       highest = id + 1;
     }

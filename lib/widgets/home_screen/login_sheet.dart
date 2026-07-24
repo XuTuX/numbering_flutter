@@ -8,6 +8,7 @@ import 'package:numbering/theme/app_typography.dart';
 part 'login/login_sheet_view.dart';
 part 'login/login_sheet_legal.dart';
 part 'login/login_sheet_social.dart';
+part 'login/required_login_screen.dart';
 
 class LoginSheet extends StatefulWidget {
   const LoginSheet({

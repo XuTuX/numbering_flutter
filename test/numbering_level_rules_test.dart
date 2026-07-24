@@ -6,7 +6,8 @@ import 'package:numbering/game/numbering/level_catalog.dart';
 void main() {
   test('migration contains one authoritative rule for every app level', () {
     final sql = File(
-      'supabase/migrations/20260722200417_add_numbering_rankings.sql',
+      'supabase/migrations/'
+      '20260724085500_add_numbering_exponents_and_sydney.sql',
     ).readAsStringSync();
     final generatedBlock = sql
         .split('-- LEVEL_RULE_VALUES_START')[1]
@@ -14,7 +15,7 @@ void main() {
     final rowCount =
         RegExp(r'^  \(\d+,', multiLine: true).allMatches(generatedBlock).length;
 
-    expect(LevelCatalog.all, hasLength(160));
+    expect(LevelCatalog.all, hasLength(200));
     expect(rowCount, LevelCatalog.all.length);
     for (final level in LevelCatalog.all) {
       expect(
@@ -22,5 +23,13 @@ void main() {
         contains("(${level.id}, '${level.digitString}',"),
       );
     }
+
+    expect(sql, contains("v_character in ('+', '-', '×', '÷', '^')"));
+    expect(sql, contains("and v_character <> '^'"));
+    expect(sql, contains("array['+', '-', '×', '÷', '^']"));
+    expect(
+      sql,
+      contains('public._numbering_sorted_digits(v_submitted_digits)'),
+    );
   });
 }

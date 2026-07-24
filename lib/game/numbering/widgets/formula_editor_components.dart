@@ -5,10 +5,12 @@ class _DragDropEditor extends StatefulWidget {
     required this.digits,
     required this.operators,
     required this.parentheses,
+    required this.liftedIndices,
     required this.availableOperators,
     required this.accent,
     required this.selectedDigitIndex,
     required this.onDigitTapped,
+    required this.onDigitLiftToggled,
     required this.onDigitReordered,
     required this.onOperatorChanged,
     required this.isLandscape,
@@ -19,10 +21,12 @@ class _DragDropEditor extends StatefulWidget {
   final List<String> digits;
   final List<InlineOperator?> operators;
   final List<ParenthesisRange> parentheses;
+  final Set<int> liftedIndices;
   final Set<String> availableOperators;
   final Color accent;
   final int? selectedDigitIndex;
   final ValueChanged<int> onDigitTapped;
+  final ValueChanged<int> onDigitLiftToggled;
   final void Function(int fromIndex, int toIndex) onDigitReordered;
   final void Function(int index, InlineOperator? value) onOperatorChanged;
   final bool isLandscape;
@@ -37,6 +41,7 @@ class _DragDropEditorState extends State<_DragDropEditor> {
   final GlobalKey _formulaRowKey = GlobalKey();
   late List<GlobalKey> _slotKeys;
   int? _hoveredSlotIndex;
+  int? _draggingDigitIndex;
 
   @override
   void initState() {
@@ -51,6 +56,7 @@ class _DragDropEditorState extends State<_DragDropEditor> {
     if (_slotKeys.length != slotCount) {
       _slotKeys = _createSlotKeys();
       _hoveredSlotIndex = null;
+      _draggingDigitIndex = null;
     }
   }
 
@@ -72,7 +78,14 @@ class _DragDropEditorState extends State<_DragDropEditor> {
             ? (widget.digits.length >= 8 ? 4.0 : (isLandscape ? 14.0 : 7.0))
             : 13.0;
         final operatorFontSize = (digitFontSize * 0.55).clamp(24.0, 48.0);
+        final exponentAvailable =
+            widget.availableOperators.contains(InlineOperator.exponent.symbol);
+        final exponentTargetHeight =
+            exponentAvailable ? (digitFontSize * 0.58).clamp(32.0, 48.0) : 0.0;
+        final exponentFontSize = (digitFontSize * 0.52).clamp(18.0, 42.0);
+
         final items = List<Widget>.generate(widget.digits.length, (digitIndex) {
+          final isLifted = widget.liftedIndices.contains(digitIndex);
           final openingCount = widget.parentheses
               .where(
                   (range) => range.normalized().startDigitIndex == digitIndex)
@@ -81,20 +94,37 @@ class _DragDropEditorState extends State<_DragDropEditor> {
               .where((range) => range.normalized().endDigitIndex == digitIndex)
               .length;
           final selected = widget.selectedDigitIndex == digitIndex;
+
           Widget digitSurface({
             Key? key,
             bool feedback = false,
             bool dropHighlighted = false,
+            bool isGhost = false,
+            bool isFeedback = false,
           }) {
+            final effectiveIsLifted = isGhost || isLifted;
+            final textContent =
+                '${'(' * openingCount}${widget.digits[digitIndex]}${')' * closingCount}';
+
             return GestureDetector(
               key: key,
               behavior: HitTestBehavior.opaque,
-              onTap: feedback ? null : () => widget.onDigitTapped(digitIndex),
+              onTap: feedback || isGhost
+                  ? null
+                  : () {
+                      if (isLifted) {
+                        widget.onDigitLiftToggled(digitIndex);
+                      } else {
+                        widget.onDigitTapped(digitIndex);
+                      }
+                    },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 100),
                 padding: EdgeInsets.symmetric(
-                  horizontal: digitPadding,
-                  vertical: 8,
+                  horizontal: effectiveIsLifted
+                      ? digitPadding * 0.35
+                      : digitPadding,
+                  vertical: effectiveIsLifted ? 4 : 8,
                 ),
                 decoration: BoxDecoration(
                   color: dropHighlighted
@@ -102,19 +132,34 @@ class _DragDropEditorState extends State<_DragDropEditor> {
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 150),
-                  style: TextStyle(
-                    fontSize: digitFontSize,
-                    height: 1,
-                    fontWeight: FontWeight.w800,
-                    color: selected ? widget.accent : const Color(0xFF17191D),
+                child: Transform.translate(
+                  offset: Offset(
+                    0,
+                    effectiveIsLifted ? -digitFontSize * 0.38 : 0,
                   ),
-                  child: Text(
-                    '${'(' * openingCount}${widget.digits[digitIndex]}${')' * closingCount}',
-                    key: feedback
-                        ? null
-                        : ValueKey('formula-digit-text-$digitIndex'),
+                  child: Opacity(
+                    opacity: isGhost ? 0.45 : 1.0,
+                    child: AnimatedDefaultTextStyle(
+                      duration: const Duration(milliseconds: 150),
+                      style: TextStyle(
+                        fontSize: isFeedback
+                            ? digitFontSize * 0.7
+                            : (effectiveIsLifted
+                                ? exponentFontSize
+                                : digitFontSize),
+                        height: 1,
+                        fontWeight: FontWeight.w800,
+                        color: isGhost
+                            ? widget.accent
+                            : (selected ? widget.accent : const Color(0xFF17191D)),
+                      ),
+                      child: Text(
+                        textContent,
+                        key: feedback || isGhost
+                            ? null
+                            : ValueKey('formula-digit-text-$digitIndex'),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -122,6 +167,29 @@ class _DragDropEditorState extends State<_DragDropEditor> {
           }
 
           final Widget digit;
+          final canLiftAsExponent = exponentAvailable && digitIndex > 0;
+          final canDrag = widget.allowDigitReordering || canLiftAsExponent;
+
+          Widget draggableDigit(Widget surface) => Draggable<int>(
+                key: ValueKey('formula-digit-drag-$digitIndex'),
+                data: digitIndex,
+                onDragStarted: () {
+                  setState(() {
+                    _draggingDigitIndex = digitIndex;
+                  });
+                },
+                onDragEnd: (_) => _finishDigitDrag(),
+                feedback: Material(
+                  color: Colors.transparent,
+                  child: Transform.scale(
+                    scale: 0.88,
+                    child: digitSurface(feedback: true, isFeedback: true),
+                  ),
+                ),
+                childWhenDragging: Opacity(opacity: 0.24, child: surface),
+                child: surface,
+              );
+
           if (widget.allowDigitReordering) {
             digit = DragTarget<int>(
               key: ValueKey('formula-digit-$digitIndex'),
@@ -132,35 +200,87 @@ class _DragDropEditorState extends State<_DragDropEditor> {
                 final highlighted = candidateData.any(
                   (sourceIndex) => sourceIndex != digitIndex,
                 );
-                final surface = digitSurface(dropHighlighted: highlighted);
-                return Draggable<int>(
-                  key: ValueKey('formula-digit-drag-$digitIndex'),
-                  data: digitIndex,
-                  feedback: Material(
-                    color: Colors.transparent,
-                    child: Transform.scale(
-                      scale: 1.04,
-                      child: digitSurface(feedback: true),
-                    ),
-                  ),
-                  childWhenDragging: Opacity(opacity: 0.24, child: surface),
-                  child: surface,
+                final surface = digitSurface(
+                  dropHighlighted: highlighted,
                 );
+                return draggableDigit(surface);
               },
             );
+          } else if (canDrag) {
+            digit = KeyedSubtree(
+              key: ValueKey('formula-digit-$digitIndex'),
+              child: draggableDigit(
+                digitSurface(),
+              ),
+            );
           } else {
-            digit = digitSurface(key: ValueKey('formula-digit-$digitIndex'));
+            digit = KeyedSubtree(
+              key: ValueKey('formula-digit-$digitIndex'),
+              child: digitSurface(),
+            );
           }
-          if (digitIndex == 0) return digit;
+
+          Widget digitWithTopLiftTarget;
+          if (canLiftAsExponent) {
+            digitWithTopLiftTarget = Stack(
+              clipBehavior: Clip.none,
+              children: [
+                digit,
+                // Top lift drag target (invisible area above digit)
+                if (_draggingDigitIndex == digitIndex)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: exponentTargetHeight,
+                    child: DragTarget<int>(
+                      onWillAcceptWithDetails: (details) =>
+                          details.data == digitIndex,
+                      onAcceptWithDetails: (_) =>
+                          widget.onDigitLiftToggled(digitIndex),
+                      builder: (context, candidateData, rejectedData) {
+                        final hoveringTop = candidateData.contains(digitIndex);
+                        if (hoveringTop) {
+                          // Show ghost preview at exponent position!
+                          return Align(
+                            alignment: Alignment.topCenter,
+                            child: digitSurface(isGhost: true),
+                          );
+                        }
+                        return const SizedBox.expand();
+                      },
+                    ),
+                  ),
+              ],
+            );
+          } else {
+            digitWithTopLiftTarget = digit;
+          }
+
+          if (digitIndex == 0) {
+            return Padding(
+              padding: EdgeInsets.only(top: exponentTargetHeight),
+              child: digitWithTopLiftTarget,
+            );
+          }
+
           final slotIndex = digitIndex - 1;
+          final isLeftLifted = widget.liftedIndices.contains(slotIndex);
+          final isRightLifted = widget.liftedIndices.contains(digitIndex);
+
           return _InlineOperatorTarget(
             key: _slotKeys[slotIndex],
             current: widget.operators[slotIndex],
-            digit: digit,
+            digit: digitWithTopLiftTarget,
             accent: widget.accent,
+            digitFontSize: digitFontSize,
             operatorFontSize: operatorFontSize,
             horizontalPadding: digitPadding * 0.65,
             hovering: _hoveredSlotIndex == slotIndex,
+            exponentAvailable: exponentAvailable,
+            exponentTargetHeight: exponentTargetHeight,
+            isExponentZone: isLeftLifted && isRightLifted,
+            isExponentTransition: !isLeftLifted && isRightLifted,
             onRemove: () => widget.onOperatorChanged(slotIndex, null),
           );
         });
@@ -172,7 +292,11 @@ class _DragDropEditorState extends State<_DragDropEditor> {
               alignment: Alignment.center,
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Row(mainAxisSize: MainAxisSize.min, children: items),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: items,
+                ),
               ),
             ),
             AnimatedSize(
@@ -260,6 +384,11 @@ class _DragDropEditorState extends State<_DragDropEditor> {
     setState(() => _hoveredSlotIndex = slotIndex);
   }
 
+  void _finishDigitDrag() {
+    if (!mounted) return;
+    setState(() => _draggingDigitIndex = null);
+  }
+
   void _placeOperator(InlineOperator operator, Offset feedbackCenter) {
     final slotIndex = _slotIndexAt(feedbackCenter);
     if (_hoveredSlotIndex != null) {
@@ -275,9 +404,6 @@ class _DragDropEditorState extends State<_DragDropEditor> {
         _formulaRowKey.currentContext?.findRenderObject() as RenderBox?;
     if (editorBox == null || !editorBox.hasSize) return null;
 
-    // Convert the floating feedback center from global coordinates into the
-    // formula row, then compare it with each rendered slot. This mirrors the
-    // board GlobalKey coordinate conversion used by the block drag system.
     final localFeedbackCenter = editorBox.globalToLocal(globalFeedbackCenter);
     for (var index = 0; index < _slotKeys.length; index++) {
       final slotBox =
@@ -310,46 +436,79 @@ class _InlineOperatorTarget extends StatelessWidget {
     required this.current,
     required this.digit,
     required this.accent,
+    required this.digitFontSize,
     required this.operatorFontSize,
     required this.horizontalPadding,
     required this.hovering,
+    required this.exponentAvailable,
+    required this.exponentTargetHeight,
+    required this.isExponentZone,
+    required this.isExponentTransition,
     required this.onRemove,
   });
 
   final InlineOperator? current;
   final Widget digit;
   final Color accent;
+  final double digitFontSize;
   final double operatorFontSize;
   final double horizontalPadding;
   final bool hovering;
+  final bool exponentAvailable;
+  final double exponentTargetHeight;
+  final bool isExponentZone;
+  final bool isExponentTransition;
   final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    return Stack(
+      clipBehavior: Clip.none,
       children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 70),
-          curve: Curves.easeOutCubic,
-          width: hovering && current == null ? operatorFontSize * 0.75 : 0,
-        ),
-        if (current case final current?)
-          GestureDetector(
-            onTap: onRemove,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: Text(
-                current.symbol,
-                style: TextStyle(
-                  fontSize: operatorFontSize,
-                  fontWeight: FontWeight.w700,
-                  color: hovering ? accent : const Color(0xFF253044),
-                ),
+        Padding(
+          padding: EdgeInsets.only(top: exponentTargetHeight),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 70),
+                curve: Curves.easeOutCubic,
+                width:
+                    hovering && current == null ? operatorFontSize * 0.75 : 0,
               ),
-            ),
+              if (isExponentTransition)
+                SizedBox(width: horizontalPadding * 0.2)
+              else if (current case final current?)
+                GestureDetector(
+                  onTap: onRemove,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isExponentZone
+                          ? horizontalPadding * 0.4
+                          : horizontalPadding,
+                    ),
+                    child: Transform.translate(
+                      offset: Offset(
+                        0,
+                        isExponentZone ? -digitFontSize * 0.38 : 0,
+                      ),
+                      child: Text(
+                        current.symbol,
+                        style: TextStyle(
+                          fontSize: isExponentZone
+                              ? operatorFontSize * 0.6
+                              : operatorFontSize,
+                          fontWeight: FontWeight.w700,
+                          color: hovering ? accent : const Color(0xFF253044),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              digit,
+            ],
           ),
-        digit,
+        ),
       ],
     );
   }
@@ -380,8 +539,9 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
   @override
   Widget build(BuildContext context) {
     final operators = InlineOperator.values
-        .where(
-            (operator) => widget.availableOperators.contains(operator.symbol))
+        .where((operator) =>
+            operator != InlineOperator.exponent &&
+            widget.availableOperators.contains(operator.symbol))
         .toList();
     final isLandscape =
         MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
@@ -420,8 +580,6 @@ class _OperatorPaletteState extends State<_OperatorPalette> {
               },
               onDragEnd: (details) {
                 setState(() => _dragging = null);
-                // DragEndDetails.offset is already the feedback's global
-                // top-left, unlike DragUpdateDetails.globalPosition (pointer).
                 widget.onDragEnd(
                   operators[index],
                   details.offset + Offset(size / 2, size / 2),

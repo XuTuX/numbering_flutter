@@ -4,7 +4,7 @@ import 'level_models.dart';
 
 abstract final class LevelCatalog {
   static final List<LevelData> all = List<LevelData>.unmodifiable(
-    List.generate(160, (index) => _buildLevel(index + 1)),
+    List.generate(200, (index) => _buildLevel(index + 1)),
   );
 
   static LevelData byId(int id) {
@@ -24,6 +24,7 @@ LevelData _buildLevel(int id) {
   final allowed = <String>{'+', '-', '='};
   if (id >= 21) allowed.add('×');
   if (id >= 41) allowed.add('÷');
+  if (id >= 81) allowed.add('^');
 
   final random = Random(id * 7919 + 20260721);
   for (var attempt = 0; attempt < 1200; attempt++) {
@@ -48,12 +49,13 @@ LevelData _buildLevel(int id) {
     if (left == null || right == null || left.text == right.text) continue;
 
     final answer = '${left.text}=${right.text}';
+    if (id >= 81 && id <= 120 && !answer.contains('^')) continue;
     final digits = answer.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.length != digitCount) continue;
     if (id < 80 && RegExp(r'\d{2,}×\d{2,}').hasMatch(answer)) continue;
 
     final usedOperators = <String>{
-      for (final match in RegExp(r'[+\-×÷]').allMatches(answer))
+      for (final match in RegExp(r'[+\-×÷^]').allMatches(answer))
         match.group(0)!,
     };
     final operatorHint = _operatorHint(usedOperators);
@@ -68,7 +70,7 @@ LevelData _buildLevel(int id) {
       hints: LevelHints(
         first: operatorHint,
         second: '완성된 수식의 기준 값은 $target이에요.',
-        third: '정답: $answer',
+        third: '정답: ${_displayExpression(answer)}',
       ),
       difficulty: difficulty,
     );
@@ -90,13 +92,14 @@ _Expression? _compose({
   required int depth,
 }) {
   if (leaves == 1) {
-    return target >= 1 && target <= 9 ? _Expression('$target', 3) : null;
+    return target >= 1 && target <= 9 ? _Expression('$target', 4) : null;
   }
   if (target <= 0 || depth > 12) return null;
 
   final operations = <String>['+', '-'];
   if (allowed.contains('×') && target > 1) operations.add('×');
   if (allowed.contains('÷')) operations.add('÷');
+  if (allowed.contains('^') && target > 1) operations.add('^');
   operations.shuffle(random);
 
   for (var attempt = 0; attempt < 36; attempt++) {
@@ -124,6 +127,21 @@ _Expression? _compose({
       case '÷':
         rightTarget = 2 + random.nextInt(min(8, 9 * rightLeaves - 1));
         leftTarget = target * rightTarget;
+      case '^':
+        final powers = <(int, int)>[];
+        for (var exponent = 2;
+            exponent <= min(6, 9 * rightLeaves);
+            exponent++) {
+          for (var base = 2; base <= min(9 * leftLeaves, 9); base++) {
+            if (_boundedPower(base, exponent) == target) {
+              powers.add((base, exponent));
+            }
+          }
+        }
+        if (powers.isEmpty) continue;
+        final power = powers[random.nextInt(powers.length)];
+        leftTarget = power.$1;
+        rightTarget = power.$2;
     }
 
     final left = _compose(
@@ -142,10 +160,17 @@ _Expression? _compose({
     );
     if (left == null || right == null) continue;
 
-    final precedence = operation == '×' || operation == '÷' ? 2 : 1;
+    final precedence = switch (operation) {
+      '^' => 3,
+      '×' || '÷' => 2,
+      _ => 1,
+    };
     var leftText = left.text;
     var rightText = right.text;
-    if (left.precedence < precedence) leftText = '($leftText)';
+    if (left.precedence < precedence ||
+        (operation == '^' && left.precedence == precedence)) {
+      leftText = '($leftText)';
+    }
     if (right.precedence < precedence ||
         ((operation == '-' || operation == '÷') &&
             right.precedence == precedence)) {
@@ -154,6 +179,15 @@ _Expression? _compose({
     return _Expression('$leftText$operation$rightText', precedence);
   }
   return null;
+}
+
+int _boundedPower(int base, int exponent) {
+  var result = 1;
+  for (var index = 0; index < exponent; index++) {
+    result *= base;
+    if (result > 999999999) return -1;
+  }
+  return result;
 }
 
 int _digitCountFor(int id) {
@@ -173,6 +207,12 @@ int _difficultyFor(int id) {
 }
 
 String _operatorHint(Set<String> operators) {
+  if (operators.contains('^')) {
+    if (operators.length > 1) {
+      return '지수와 다른 연산의 계산 순서를 함께 살펴보세요.';
+    }
+    return '위로 올라간 수는 밑의 수를 몇 번 곱할지 나타내요.';
+  }
   if (operators.contains('×') && operators.contains('÷')) {
     return '곱셈과 나눗셈의 순서를 함께 살펴보세요.';
   }
@@ -182,6 +222,30 @@ String _operatorHint(Set<String> operators) {
     return '덧셈과 뺄셈을 모두 사용해 보세요.';
   }
   return '같은 연산을 여러 번 배치해 보세요.';
+}
+
+String _displayExpression(String expression) {
+  const superscriptDigits = {
+    '0': '⁰',
+    '1': '¹',
+    '2': '²',
+    '3': '³',
+    '4': '⁴',
+    '5': '⁵',
+    '6': '⁶',
+    '7': '⁷',
+    '8': '⁸',
+    '9': '⁹',
+  };
+  final withSuperscriptDigits = expression.replaceAllMapped(
+    RegExp(r'\^(\d+)'),
+    (match) => match
+        .group(1)!
+        .split('')
+        .map((digit) => superscriptDigits[digit]!)
+        .join(),
+  );
+  return withSuperscriptDigits.replaceAll('^', '의 지수 ');
 }
 
 LevelData _special({
@@ -194,6 +258,12 @@ LevelData _special({
   final digits = answer.replaceAll(RegExp(r'[^0-9]'), '');
   final allowed = <String>{'+', '-', '='};
   if (answer.contains('×') || perfectAnswer.contains('×')) allowed.add('×');
+  if (id >= 41 || answer.contains('÷') || perfectAnswer.contains('÷')) {
+    allowed.add('÷');
+  }
+  if (id >= 81 || answer.contains('^') || perfectAnswer.contains('^')) {
+    allowed.add('^');
+  }
   return LevelData(
     id: id,
     digitString: digits,
@@ -206,13 +276,27 @@ LevelData _special({
     hints: LevelHints(
       first: _operatorHint(allowed.difference({'='})),
       second: '완성된 수식의 기준 값은 $target이에요.',
-      third: '정답: $answer',
+      third: '정답: ${_displayExpression(answer)}',
     ),
     difficulty: _difficultyFor(id),
   );
 }
 
 final Map<int, LevelData> _handcraftedLevels = {
+  81: const LevelData(
+    id: 81,
+    digitString: '238',
+    availableOperators: {'+', '-', '×', '÷', '^', '='},
+    minimumScore: 6,
+    targetScore: 8,
+    officialAnswer: '2^3=8',
+    hints: LevelHints(
+      first: '3을 잡아 2의 위쪽 지수 칸으로 올려 보세요.',
+      second: '2의 3승은 2×2×2예요.',
+      third: '정답: 2³=8',
+    ),
+    difficulty: 4,
+  ),
   6: _special(
     id: 6,
     answer: '2=2+3+4-7',

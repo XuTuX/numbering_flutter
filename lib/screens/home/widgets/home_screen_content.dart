@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:numbering/screens/home/arcade_screen.dart';
+import 'package:numbering/screens/hints/hint_store_screen.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/utils/kst_clock.dart';
 import 'package:numbering/services/hint_service.dart';
+import 'package:numbering/services/hint_purchase_service.dart';
 import 'package:numbering/services/numbering_score_service.dart';
 
 part 'home_screen_content_components.dart';
@@ -21,8 +23,9 @@ const levelPacks = [
   LevelPack('Seoul', 1, 20),
   LevelPack('Tokyo', 21, 40),
   LevelPack('New York', 41, 80),
-  LevelPack('London', 81, 120),
-  LevelPack('Paris', 121, 160),
+  LevelPack('Sydney', 81, 120),
+  LevelPack('London', 121, 160),
+  LevelPack('Paris', 161, 200),
 ];
 
 LevelPack levelPackFor(int levelId) => levelPacks.firstWhere(

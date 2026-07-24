@@ -34,15 +34,14 @@ editor while preserving the problem and session progress.
 
 This app now expects runtime values through `--dart-define`.
 
-Optional authentication values:
+Required authentication values:
 
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 
-If both values are omitted, the app starts in offline guest mode. Gameplay,
-local progress, settings, and daily practice remain available; social sign-in,
-official score submission, and official rankings are disabled. Providing only
-one value is treated as a configuration error.
+The app requires a valid login before any gameplay or other screen is shown.
+Omitting either value is treated as a configuration error; offline guest mode
+is not available.
 
 Example:
 

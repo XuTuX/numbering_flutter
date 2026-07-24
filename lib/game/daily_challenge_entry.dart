@@ -1,5 +1,3 @@
-import 'package:get/get.dart';
-
 import 'package:numbering/game/game_module.dart';
 import 'package:numbering/services/database_models.dart';
 
@@ -20,16 +18,16 @@ DailyChallengeLaunchDecision resolveDailyChallengeLaunch({
   required bool isLoggedIn,
 }) {
   if (!isLoggedIn) {
-    return DailyChallengeLaunchDecision(
+    return const DailyChallengeLaunchDecision(
       canLaunch: false,
-      noticeMessage: '오늘의 퍼즐은 로그인 후 하루 한 번만 참여할 수 있어요.'.tr,
+      noticeMessage: '오늘의 퍼즐은 로그인 후 12시간마다 참여할 수 있어요.',
     );
   }
 
   if (challenge.hasUsedEntry) {
-    return DailyChallengeLaunchDecision(
+    return const DailyChallengeLaunchDecision(
       canLaunch: false,
-      noticeMessage: '오늘의 퍼즐은 하루에 한 번만 가능해요.'.tr,
+      noticeMessage: '이번 12시간 퍼즐은 이미 참여했어요.',
     );
   }
 

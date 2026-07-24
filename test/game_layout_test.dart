@@ -184,8 +184,13 @@ void main() {
     expect(find.byKey(const ValueKey('formula-digit-0')), findsOneWidget);
     expect(find.byKey(const ValueKey('formula-digit-7')), findsOneWidget);
     expect(find.byKey(const ValueKey('operator-drag-+')), findsOneWidget);
+    expect(find.byKey(const ValueKey('operator-drag-^')), findsNothing);
     expect(find.byKey(const ValueKey('operator-drag-=')), findsOneWidget);
     expect(find.text('수식을 입력하세요'), findsNothing);
+    expect(
+      find.text('아직 수식이 완성되지 않았어요. 모든 빈칸에 연산자를 놓아 주세요.'),
+      findsNothing,
+    );
 
     final firstDigitText = find.byKey(const ValueKey('formula-digit-text-0'));
     final secondDigitText = find.byKey(const ValueKey('formula-digit-text-1'));
@@ -210,6 +215,66 @@ void main() {
     expect(
       find.descendant(of: secondDigit, matching: find.text('2')),
       findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Sydney renders a moved exponent digit above its base',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(667, 375));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: NumberingGamePage(
+                game: NumberingGame.formulaWorkshop,
+                session: const GameSessionConfig(
+                  mode: GameMode.normal,
+                  startLevelId: 81,
+                ),
+                callbacks: GameCallbacks(
+                  onScoreChanged: (_) {},
+                  onFinished: (_) {},
+                  onExit: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('operator-drag-^')), findsNothing);
+    expect(find.text('^'), findsNothing);
+
+    final rightDigit = find.byKey(const ValueKey('formula-digit-drag-1'));
+    final gesture = await tester.startGesture(tester.getCenter(rightDigit));
+    await gesture.moveBy(const Offset(0, -28));
+    await tester.pump();
+    final liftTarget = find.byKey(const ValueKey('exponent-lift-target'));
+    expect(liftTarget, findsOneWidget);
+    await gesture.moveTo(tester.getCenter(liftTarget));
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final baseText = find.byKey(const ValueKey('formula-digit-text-0'));
+    final exponentText = find.byKey(const ValueKey('formula-digit-text-1'));
+    expect(tester.getCenter(exponentText).dy,
+        lessThan(tester.getCenter(baseText).dy));
+    expect(find.text('^'), findsNothing);
+
+    await tester.tap(exponentText);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getCenter(exponentText).dy,
+      closeTo(tester.getCenter(baseText).dy, 2),
     );
     expect(tester.takeException(), isNull);
   });

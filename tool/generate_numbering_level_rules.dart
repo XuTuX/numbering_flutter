@@ -11,7 +11,7 @@ void main() {
     _generate(
       File(
         'supabase/migrations/'
-        '20260722200417_add_numbering_rankings.sql',
+        '20260724085500_add_numbering_exponents_and_sydney.sql',
       ),
     );
   });
