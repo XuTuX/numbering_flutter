@@ -21,63 +21,32 @@ class _ArcadeCard extends StatelessWidget {
     return _HomeCard(
       color: _arcadeSurface,
       onTap: onTap,
-      child: Stack(
-        children: [
-          Positioned(
-            left: -10,
-            bottom: -26,
-            child: ExcludeSemantics(
+      child: Padding(
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
               child: Text(
-                roundLabel,
-                key: const ValueKey('arcade-round-background'),
-                style: const TextStyle(
-                  color: Color(0x0C171716),
-                  fontSize: 120,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -6,
+                'Arcade',
+                style: TextStyle(
+                  color: _homeInk,
+                  fontSize: 36,
+                  height: 0.98,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1.6,
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Arcade',
-                      style: TextStyle(
-                        color: _homeInk,
-                        fontSize: 36,
-                        height: 0.98,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -1.6,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      roundLabel,
-                      style: const TextStyle(
-                        color: Color(0x8F171716),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-                const Align(
-                  alignment: Alignment.bottomRight,
-                  child: _ArrowCircle(),
-                ),
-              ],
+            const Align(
+              alignment: Alignment.bottomRight,
+              child: _ArrowCircle(),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -119,16 +88,6 @@ class _TimeAttackCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 2),
-                  Text(
-                    '3 MIN',
-                    style: TextStyle(
-                      color: Color(0x8F171716),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -158,10 +117,6 @@ class _RankingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bestLabel = bestNumber != null ? 'BEST $bestNumber' : null;
-    final scoreLabel = topScore != null ? 'TOP SCORE $topScore' : null;
-    final subLabel = [bestLabel, scoreLabel].whereType<String>().join(' · ');
-
     return _HomeCard(
       color: _rankingSurface,
       onTap: onTap,
@@ -200,21 +155,6 @@ class _RankingCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (subLabel.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        subLabel,
-                        style: const TextStyle(
-                          color: Color(0x8F171716),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),

@@ -31,19 +31,14 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('shows Arcade and Time Attack home cards in landscape', (tester) async {
+  testWidgets('shows minimal Arcade and Time Attack home cards in landscape', (tester) async {
     await pumpHome(tester, surfaceSize: const Size(844, 390));
 
     expect(find.text('NUMBERING'), findsOneWidget);
     expect(find.byTooltip('Settings'), findsOneWidget);
     expect(find.text('Arcade'), findsOneWidget);
-    expect(find.text('SEOUL'), findsNWidgets(2));
-    expect(
-      find.byKey(const ValueKey('arcade-round-background')),
-      findsOneWidget,
-    );
     expect(find.text('Time Attack'), findsOneWidget);
-    expect(find.text('3 MIN'), findsOneWidget);
+    expect(find.text('YOUR RANK'), findsOneWidget);
     expect(find.text('#—'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_forward_rounded), findsNWidgets(3));
     expect(find.byType(SingleChildScrollView), findsNothing);
