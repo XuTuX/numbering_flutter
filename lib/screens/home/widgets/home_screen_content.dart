@@ -4,10 +4,8 @@ import 'package:get/get.dart';
 import 'package:numbering/screens/home/arcade_screen.dart';
 import 'package:numbering/screens/hints/hint_store_screen.dart';
 import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/utils/kst_clock.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/hint_purchase_service.dart';
-import 'package:numbering/services/numbering_score_service.dart';
 
 part 'home_screen_content_components.dart';
 
@@ -22,10 +20,14 @@ class LevelPack {
 const levelPacks = [
   LevelPack('Seoul', 1, 20),
   LevelPack('Tokyo', 21, 40),
-  LevelPack('New York', 41, 80),
-  LevelPack('Sydney', 81, 120),
-  LevelPack('London', 121, 160),
-  LevelPack('Paris', 161, 200),
+  LevelPack('New York', 41, 60),
+  LevelPack('Singapore', 61, 80),
+  LevelPack('Sydney', 81, 100),
+  LevelPack('London', 101, 120),
+  LevelPack('Paris', 121, 140),
+  LevelPack('Berlin', 141, 160),
+  LevelPack('Cairo', 161, 180),
+  LevelPack('Rio', 181, 200),
 ];
 
 LevelPack levelPackFor(int levelId) => levelPacks.firstWhere(
@@ -40,39 +42,31 @@ class HomeScreenContent extends StatelessWidget {
     super.key,
     required this.onSettingsTap,
     required this.onStartGame,
-    required this.onStartDaily,
+    required this.onStartTimeAttack,
     required this.onRankingTap,
     this.nickname,
     this.onNicknameTap,
     this.currentLevel = 1,
-    this.dailyState = DailyChallengeUiState.loading,
-    this.dailyDateKey,
-    this.dailyScore,
-    this.allTimeRank,
-    this.allTimeBest,
+    this.rank,
+    this.bestNumber,
+    this.topScore,
   });
 
   final VoidCallback onSettingsTap;
   final VoidCallback onStartGame;
-  final Future<void> Function() onStartDaily;
+  final VoidCallback onStartTimeAttack;
   final VoidCallback onRankingTap;
   final String? nickname;
   final VoidCallback? onNicknameTap;
   final int currentLevel;
-  final DailyChallengeUiState dailyState;
-  final String? dailyDateKey;
-  final int? dailyScore;
-  final int? allTimeRank;
-  final int? allTimeBest;
+  final int? rank;
+  final int? bestNumber;
+  final int? topScore;
 
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
     final horizontalPadding = (mediaSize.width * 0.055).clamp(22.0, 48.0);
-    final today = KstClock.nowInKst();
-    final challengeDate = dailyDateKey == null
-        ? _formatChallengeDate(today)
-        : KstClock.compactDateLabel(dailyDateKey!);
 
     return Scaffold(
       backgroundColor: _homeBackground,
@@ -94,34 +88,32 @@ class HomeScreenContent extends StatelessWidget {
                   Expanded(
                     child: Builder(
                       builder: (context) {
-                        final challenge = _ChallengeCard(
-                          dateLabel: challengeDate,
-                          onTap: onStartDaily,
-                          state: dailyState,
-                          score: dailyScore,
-                        );
                         final currentPack = levelPackFor(currentLevel);
                         final arcade = _ArcadeCard(
                           roundLabel: currentPack.name.toUpperCase(),
                           onTap: () => _openArcade(onStartGame),
                         );
+                        final timeAttack = _TimeAttackCard(
+                          onTap: onStartTimeAttack,
+                        );
                         final ranking = _RankingCard(
                           onTap: onRankingTap,
-                          rank: allTimeRank,
-                          bestScore: allTimeBest,
+                          rank: rank,
+                          bestNumber: bestNumber,
+                          topScore: topScore,
                         );
 
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Expanded(flex: 7, child: challenge),
+                            Expanded(flex: 7, child: arcade),
                             const SizedBox(width: 14),
                             Expanded(
                               flex: 3,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Expanded(child: arcade),
+                                  Expanded(child: timeAttack),
                                   const SizedBox(height: 14),
                                   Expanded(child: ranking),
                                 ],
@@ -149,8 +141,4 @@ class HomeScreenContent extends StatelessWidget {
       duration: const Duration(milliseconds: 280),
     );
   }
-
-  String _formatChallengeDate(DateTime date) =>
-      '${date.month.toString().padLeft(2, '0')}.'
-      '${date.day.toString().padLeft(2, '0')}';
 }

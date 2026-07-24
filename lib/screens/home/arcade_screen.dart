@@ -209,6 +209,14 @@ class _PackCard extends StatelessWidget {
           return AppColors.blockMint;
         case 'paris':
           return AppColors.blockPink;
+        case 'singapore':
+          return AppColors.blockMint;
+        case 'berlin':
+          return AppColors.blockCream;
+        case 'cairo':
+          return AppColors.blockCoral;
+        case 'rio':
+          return AppColors.blockPink;
         default:
           return AppColors.blockLime;
       }
@@ -262,29 +270,16 @@ class _PackCard extends StatelessWidget {
                   ),
                   const Spacer(flex: 3),
                   if (unlocked) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'PROGRESS',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.0,
-                            color: isColorBlock
-                                ? AppColors.ink.withValues(alpha: 0.6)
-                                : AppColors.textSecondary,
-                          ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '$clearedCount / ${pack.totalLevels}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.ink,
                         ),
-                        Text(
-                          '$clearedCount / ${pack.totalLevels}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     ClipRRect(

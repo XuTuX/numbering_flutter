@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// Launch modes supplied by the unchanged home, daily, and settings flows.
-enum GameMode { normal, dailyPractice, dailyOfficial, replay, tutorial }
+enum GameMode { normal, timeAttack, dailyPractice, dailyOfficial, replay, tutorial }
 
 @immutable
 class GameSessionConfig {
@@ -25,6 +25,15 @@ class GameSessionConfig {
         isOfficialScoreSubmission = false,
         startLevelId = null;
 
+  const GameSessionConfig.timeAttack()
+      : mode = GameMode.timeAttack,
+        gameId = null,
+        seed = null,
+        dateKey = null,
+        weekKey = null,
+        isOfficialScoreSubmission = false,
+        startLevelId = null;
+
   final GameMode mode;
   final String? gameId;
   final int? seed;
@@ -34,11 +43,13 @@ class GameSessionConfig {
   final int? startLevelId;
 
   bool get isTutorialMode => mode == GameMode.tutorial;
+  bool get isTimeAttackMode => mode == GameMode.timeAttack;
   bool get isDailyMode =>
       mode == GameMode.dailyPractice || mode == GameMode.dailyOfficial;
 
   String get modeLabel => switch (mode) {
         GameMode.normal => '일반 모드'.tr,
+        GameMode.timeAttack => 'Time Attack'.tr,
         GameMode.dailyPractice => '오늘의 퍼즐 연습'.tr,
         GameMode.dailyOfficial => '오늘의 퍼즐'.tr,
         GameMode.replay => '리플레이'.tr,

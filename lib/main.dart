@@ -15,6 +15,7 @@ import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/services/ad_service.dart';
 import 'package:numbering/services/audio_service.dart';
 import 'package:numbering/controllers/daily_puzzle_controller.dart';
+import 'package:numbering/services/time_attack_score_service.dart';
 import 'package:numbering/utils/app_snackbar.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
 import 'package:numbering/theme/app_colors.dart';
@@ -30,10 +31,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _installGlobalErrorHandlers();
 
-  // 레벨 그리드와 퍼즐 편집기는 세로·가로 모바일 화면을 모두 지원합니다.
+  // 퍼즐과 레벨 선택 화면은 가로 플레이에 맞춰 설계되어 있습니다.
   await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
@@ -142,6 +141,7 @@ class AppBinding extends Bindings {
   void dependencies() {
     Get.put(AuthService(supabase: authClient), permanent: true);
     Get.put(NumberingScoreService(supabase: authClient), permanent: true);
+    Get.put(TimeAttackScoreService(), permanent: true);
     Get.put(ScoreController(), permanent: true);
     Get.put(DailyPuzzleController(), permanent: true);
     if (AppConfig.supportsAds) {

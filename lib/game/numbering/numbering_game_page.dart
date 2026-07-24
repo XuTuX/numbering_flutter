@@ -17,7 +17,6 @@ import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/numbering_random.dart';
 import 'package:numbering/game/numbering/numbering_visuals.dart';
-import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/numbering_score_service.dart';
 import 'package:numbering/utils/app_snackbar.dart';
@@ -25,8 +24,12 @@ import 'package:numbering/screens/ranking/ranking_screen.dart';
 import 'package:numbering/screens/hints/hint_store_screen.dart';
 import 'package:numbering/services/hint_purchase_service.dart';
 
+import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/time_attack_score_service.dart';
+
 part 'views/level_play_view.dart';
 part 'views/daily_play_view.dart';
+part 'views/time_attack_play_view.dart';
 part 'widgets/formula_editor.dart';
 part 'widgets/formula_editor_components.dart';
 
@@ -61,13 +64,25 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     } else {
       _selectedLevelId = _progress.highestUnlockedLevel;
     }
-    if (!widget.session.isDailyMode) {
+    if (!widget.session.isDailyMode && !widget.session.isTimeAttackMode) {
       unawaited(_progress.rememberLevel(_selectedLevelId));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.session.isTimeAttackMode) {
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 240),
+        child: _TimeAttackPlayView(
+          key: const ValueKey('time-attack-play'),
+          session: widget.session,
+          accent: widget.game.visuals.accent,
+          onShowLevels: widget.callbacks.onExit,
+        ),
+      );
+    }
+
     if (widget.session.isDailyMode) {
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 240),

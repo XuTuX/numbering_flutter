@@ -187,10 +187,7 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
                   onPressed: () {
                     Navigator.of(context).pop();
                     Get.to(
-                      () => RankingScreen(
-                        isDailyOnly: true,
-                        dailyDateKey: serverResult?.dateKey,
-                      ),
+                      () => const RankingScreen(),
                       transition: Transition.zoom,
                       duration: const Duration(milliseconds: 250),
                     );

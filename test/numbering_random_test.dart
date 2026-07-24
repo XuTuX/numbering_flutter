@@ -55,14 +55,14 @@ void main() {
       expect(result.value, 6);
     });
 
-    test('supports exponent equations after reordering digits', () {
+    test('supports division equations after reordering digits', () {
       final result = validateDailyPuzzleFormula(
-        digitString: '81243126',
-        expression: '2^3+4+1-1=8+6-2',
+        digitString: '824822',
+        expression: '8÷2+4=8+2-2',
       );
 
       expect(result.valid, isTrue);
-      expect(result.value, 12);
+      expect(result.value, 8);
     });
 
     test('rejects digits outside the supplied multiset', () {

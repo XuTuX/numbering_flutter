@@ -7,90 +7,6 @@ const _arcadeSurface = AppColors.blockLilac;
 const _rankingSurface = AppColors.blockMint;
 const _homeBorder = AppColors.hairline;
 
-class _ChallengeCard extends StatelessWidget {
-  const _ChallengeCard({
-    required this.dateLabel,
-    required this.onTap,
-    required this.state,
-    this.score,
-  });
-
-  final String dateLabel;
-  final Future<void> Function() onTap;
-  final DailyChallengeUiState state;
-  final int? score;
-
-  @override
-  Widget build(BuildContext context) {
-    return _HomeCard(
-      color: _challengeSurface,
-      onTap: () async => onTap(),
-      child: Stack(
-        children: [
-          Positioned(
-            left: -10,
-            bottom: -26,
-            child: ExcludeSemantics(
-              child: Text(
-                dateLabel,
-                key: const ValueKey('challenge-date'),
-                style: const TextStyle(
-                  color: Color(0x0C171716),
-                  fontSize: 132,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -8,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Today's\nChallenge",
-                  style: TextStyle(
-                    color: _homeInk,
-                    fontSize: 36,
-                    height: 0.98,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -1.6,
-                  ),
-                ),
-                if (state != DailyChallengeUiState.available) ...[
-                  Text(
-                    switch (state) {
-                      DailyChallengeUiState.loading => '불러오는 중…',
-                      DailyChallengeUiState.alreadyPlayed =>
-                        '완료 · ${score ?? 0}점',
-                      DailyChallengeUiState.notAuthenticated => '로그인 후 도전',
-                      DailyChallengeUiState.networkError => '연결 오류 · 다시 시도',
-                      DailyChallengeUiState.submissionError => '제출 오류 · 다시 시도',
-                      DailyChallengeUiState.available => '',
-                    },
-                    style: const TextStyle(
-                      color: Color(0x8F171716),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                const Align(
-                  alignment: Alignment.bottomRight,
-                  child: _ArrowCircle(),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ArcadeCard extends StatelessWidget {
   const _ArcadeCard({
     required this.roundLabel,
@@ -105,48 +21,113 @@ class _ArcadeCard extends StatelessWidget {
     return _HomeCard(
       color: _arcadeSurface,
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Stack(
-          children: [
-            Positioned(
-              left: -6,
-              right: -6,
-              bottom: -8,
-              child: ExcludeSemantics(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.bottomLeft,
-                  child: Text(
-                    roundLabel,
-                    key: const ValueKey('arcade-round-background'),
-                    maxLines: 1,
-                    style: const TextStyle(
-                      color: Color(0x0A171716),
-                      fontSize: 58,
-                      height: 1,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -3,
-                    ),
-                  ),
+      child: Stack(
+        children: [
+          Positioned(
+            left: -10,
+            bottom: -26,
+            child: ExcludeSemantics(
+              child: Text(
+                roundLabel,
+                key: const ValueKey('arcade-round-background'),
+                style: const TextStyle(
+                  color: Color(0x0C171716),
+                  fontSize: 120,
+                  height: 1,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -6,
                 ),
               ),
             ),
-            const Align(
-              alignment: Alignment.topLeft,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Arcade',
-                  style: TextStyle(
-                    color: _homeInk,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.8,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Arcade',
+                      style: TextStyle(
+                        color: _homeInk,
+                        fontSize: 36,
+                        height: 0.98,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      roundLabel,
+                      style: const TextStyle(
+                        color: Color(0x8F171716),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+                const Align(
+                  alignment: Alignment.bottomRight,
+                  child: _ArrowCircle(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimeAttackCard extends StatelessWidget {
+  const _TimeAttackCard({
+    required this.onTap,
+  });
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HomeCard(
+      color: _challengeSurface,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Time Attack',
+                    style: TextStyle(
+                      color: _homeInk,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.8,
+                    ),
                   ),
                 ),
-              ),
+                SizedBox(height: 2),
+                Text(
+                  '3 MIN',
+                  style: TextStyle(
+                    color: Color(0x8F171716),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ],
             ),
             const Align(
               alignment: Alignment.bottomRight,
@@ -163,57 +144,74 @@ class _RankingCard extends StatelessWidget {
   const _RankingCard({
     required this.onTap,
     required this.rank,
-    required this.bestScore,
+    this.bestNumber,
+    this.topScore,
   });
 
   final VoidCallback onTap;
   final int? rank;
-  final int? bestScore;
+  final int? bestNumber;
+  final int? topScore;
 
   @override
   Widget build(BuildContext context) {
+    final bestLabel = bestNumber != null ? 'BEST $bestNumber' : null;
+    final scoreLabel = topScore != null ? 'TOP SCORE $topScore' : null;
+    final subLabel = [bestLabel, scoreLabel].whereType<String>().join(' · ');
+
     return _HomeCard(
       color: _rankingSurface,
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'YOUR RANK',
-              style: TextStyle(
-                color: Color(0x8F171716),
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-              ),
-            ),
-            const SizedBox(height: 7),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                rank == null ? '#—' : '#$rank',
-                style: const TextStyle(
-                  color: _homeInk,
-                  fontSize: 29,
-                  height: 1,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -1.2,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'YOUR RANK',
+                  style: TextStyle(
+                    color: Color(0x8F171716),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                  ),
                 ),
-              ),
-            ),
-            if (bestScore != null)
-              Text(
-                'BEST $bestScore',
-                style: const TextStyle(
-                  color: Color(0x8F171716),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
+                const SizedBox(height: 4),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    rank == null ? '#—' : '#$rank',
+                    style: const TextStyle(
+                      color: _homeInk,
+                      fontSize: 26,
+                      height: 1,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1.2,
+                    ),
+                  ),
                 ),
-              ),
-            const Spacer(),
+                if (subLabel.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      subLabel,
+                      style: const TextStyle(
+                        color: Color(0x8F171716),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
             const Align(
               alignment: Alignment.bottomRight,
               child: _ArrowCircle(),
@@ -231,8 +229,8 @@ class _ArrowCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 36,
-      height: 36,
+      width: 32,
+      height: 32,
       decoration: const BoxDecoration(
         color: Color(0xDFFFFFFF),
         shape: BoxShape.circle,
@@ -240,7 +238,7 @@ class _ArrowCircle extends StatelessWidget {
       child: const Icon(
         Icons.arrow_forward_rounded,
         color: _homeInk,
-        size: 17,
+        size: 16,
       ),
     );
   }

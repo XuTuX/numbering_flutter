@@ -129,7 +129,7 @@ void showRankingSheet() {
 
 void showDailyRankingSheet({String? dateKey}) {
   Get.to(
-    () => RankingScreen(isDailyOnly: true, dailyDateKey: dateKey),
+    () => const RankingScreen(),
     transition: Transition.zoom,
     duration: const Duration(milliseconds: 250),
   );

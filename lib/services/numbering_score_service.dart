@@ -205,23 +205,6 @@ class NumberingScoreService {
     }
   }
 
-  Future<NumberingSubmissionResult> submitNormalResult({
-    required int levelId,
-    required String expression,
-    required int usedHints,
-  }) async {
-    _requireAuthentication();
-    final response = await _rpc(
-      'submit_numbering_result',
-      <String, Object?>{
-        'p_level_id': levelId,
-        'p_expression': expression,
-        'p_used_hints': usedHints,
-      },
-    );
-    return NumberingSubmissionResult.fromJson(_asMap(response));
-  }
-
   Future<NumberingSubmissionResult> submitDailyResult({
     required int seed,
     required String expression,
@@ -297,24 +280,6 @@ class NumberingScoreService {
     }
   }
 
-  Future<List<NumberingLeaderboardEntry>> getAllTimeLeaderboard({
-    int limit = 50,
-  }) {
-    return _getLeaderboard(
-      'get_all_time_leaderboard',
-      <String, Object?>{'p_game_id': gameId, 'p_limit': limit},
-    );
-  }
-
-  Future<List<NumberingLeaderboardEntry>> getWeeklyLeaderboard({
-    int limit = 50,
-  }) {
-    return _getLeaderboard(
-      'get_weekly_leaderboard',
-      <String, Object?>{'p_game_id': gameId, 'p_limit': limit},
-    );
-  }
-
   Future<List<NumberingLeaderboardEntry>> getDailyLeaderboard({
     required String dateKey,
     int limit = 50,
@@ -329,12 +294,32 @@ class NumberingScoreService {
     );
   }
 
-  Future<int?> getMyScore(
-      {required String functionName, String? dateKey}) async {
+  Future<int?> getMyDailyBestScore({required String dateKey}) {
+    return _getMyDailyValue(
+      functionName: 'get_my_daily_best_score',
+      dateKey: dateKey,
+    );
+  }
+
+  Future<int?> getMyDailyRank({required String dateKey}) {
+    return _getMyDailyValue(
+      functionName: 'get_my_daily_rank',
+      dateKey: dateKey,
+    );
+  }
+
+  Future<int?> _getMyDailyValue({
+    required String functionName,
+    required String dateKey,
+  }) async {
     if (!isAuthenticated) return null;
-    final params = <String, Object?>{'p_game_id': gameId};
-    if (dateKey != null) params['p_date_key'] = dateKey;
-    final response = await _rpc(functionName, params);
+    final response = await _rpc(
+      functionName,
+      <String, Object?>{
+        'p_game_id': gameId,
+        'p_date_key': dateKey,
+      },
+    );
     return _optionalInt(response);
   }
 

@@ -4,7 +4,7 @@ import 'level_models.dart';
 
 abstract final class LevelCatalog {
   static final List<LevelData> all = List<LevelData>.unmodifiable(
-    List.generate(200, (index) => _buildLevel(index + 1)),
+    _buildCatalog(),
   );
 
   static LevelData byId(int id) {
@@ -15,19 +15,52 @@ abstract final class LevelCatalog {
   }
 }
 
-LevelData _buildLevel(int id) {
-  final handcrafted = _handcraftedLevels[id];
-  if (handcrafted != null) return handcrafted;
+List<LevelData> _buildCatalog() {
+  final levels = <LevelData>[];
+  final shapeUseCounts = <String, int>{};
 
+  for (var id = 1; id <= 200; id++) {
+    final handcrafted = _handcraftedLevels[id];
+    final level = handcrafted ??
+        _buildGeneratedLevel(
+          id,
+          shapeUseCounts: shapeUseCounts,
+          recentShapes: levels
+              .skip(max(0, levels.length - 8))
+              .map((level) => _equationShape(level.officialAnswer))
+              .toSet(),
+          recentOperatorSequences: levels
+              .skip(max(0, levels.length - 4))
+              .map((level) => _operatorSequence(level.officialAnswer))
+              .toSet(),
+          recentTargets: levels
+              .skip(max(0, levels.length - 3))
+              .map((level) => level.targetScore)
+              .toSet(),
+        );
+    levels.add(level);
+    final shape = _equationShape(level.officialAnswer);
+    shapeUseCounts[shape] = (shapeUseCounts[shape] ?? 0) + 1;
+  }
+  return levels;
+}
+
+LevelData _buildGeneratedLevel(
+  int id, {
+  required Map<String, int> shapeUseCounts,
+  required Set<String> recentShapes,
+  required Set<String> recentOperatorSequences,
+  required Set<int> recentTargets,
+}) {
   final digitCount = _digitCountFor(id);
   final difficulty = _difficultyFor(id);
   final allowed = <String>{'+', '-', '='};
   if (id >= 21) allowed.add('×');
-  if (id >= 81) allowed.add('^');
+  if (id >= 41) allowed.add('÷');
 
   final random = Random(id * 7919 + 20260721);
-  for (var attempt = 0; attempt < 1200; attempt++) {
-    final leftLeaves = digitCount ~/ 2;
+  for (var attempt = 0; attempt < 3000; attempt++) {
+    final leftLeaves = 1 + random.nextInt(digitCount - 1);
     final rightLeaves = digitCount - leftLeaves;
     final maxTarget = min(leftLeaves, rightLeaves) * (id < 21 ? 7 : 9);
     final target = 3 + random.nextInt(max(2, maxTarget - 2));
@@ -48,13 +81,23 @@ LevelData _buildLevel(int id) {
     if (left == null || right == null || left.text == right.text) continue;
 
     final answer = '${left.text}=${right.text}';
-    if (id >= 81 && id <= 120 && !answer.contains('^')) continue;
+    if (id >= 41 && id <= 80 && !answer.contains('÷')) continue;
     final digits = answer.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.length != digitCount) continue;
     if (id < 80 && RegExp(r'\d{2,}×\d{2,}').hasMatch(answer)) continue;
 
+    final shape = _equationShape(answer);
+    final operatorSequence = _operatorSequence(answer);
+    final allowedShapeUses = attempt < 2200 ? 0 : 1;
+    if ((shapeUseCounts[shape] ?? 0) > allowedShapeUses) continue;
+    if (attempt < 2400 && recentShapes.contains(shape)) continue;
+    if (attempt < 1800 && recentOperatorSequences.contains(operatorSequence)) {
+      continue;
+    }
+    if (attempt < 1200 && recentTargets.contains(target)) continue;
+
     final usedOperators = <String>{
-      for (final match in RegExp(r'[+\-×^]').allMatches(answer))
+      for (final match in RegExp(r'[+\-×÷]').allMatches(answer))
         match.group(0)!,
     };
     final operatorHint = _operatorHint(usedOperators);
@@ -77,6 +120,18 @@ LevelData _buildLevel(int id) {
   throw StateError('Level $id 생성에 실패했습니다.');
 }
 
+String _equationShape(String expression) {
+  final sides = expression
+      .split('=')
+      .map((side) => side.replaceAll(RegExp(r'\d+'), '#'))
+      .toList()
+    ..sort();
+  return sides.join('=');
+}
+
+String _operatorSequence(String expression) =>
+    expression.replaceAll(RegExp(r'[0-9()]'), '');
+
 class _Expression {
   const _Expression(this.text, this.precedence);
   final String text;
@@ -97,7 +152,7 @@ _Expression? _compose({
 
   final operations = <String>['+', '-'];
   if (allowed.contains('×') && target > 1) operations.add('×');
-  if (allowed.contains('^') && target > 1) operations.add('^');
+  if (allowed.contains('÷') && target > 1) operations.add('÷');
   operations.shuffle(random);
 
   for (var attempt = 0; attempt < 36; attempt++) {
@@ -122,21 +177,9 @@ _Expression? _compose({
         if (factors.isEmpty) continue;
         rightTarget = factors[random.nextInt(factors.length)];
         leftTarget = target ~/ rightTarget;
-      case '^':
-        final powers = <(int, int)>[];
-        for (var exponent = 2;
-            exponent <= min(6, 9 * rightLeaves);
-            exponent++) {
-          for (var base = 2; base <= min(9 * leftLeaves, 9); base++) {
-            if (_boundedPower(base, exponent) == target) {
-              powers.add((base, exponent));
-            }
-          }
-        }
-        if (powers.isEmpty) continue;
-        final power = powers[random.nextInt(powers.length)];
-        leftTarget = power.$1;
-        rightTarget = power.$2;
+      case '÷':
+        rightTarget = 1 + random.nextInt(9 * rightLeaves);
+        leftTarget = target * rightTarget;
     }
 
     final left = _compose(
@@ -155,33 +198,20 @@ _Expression? _compose({
     );
     if (left == null || right == null) continue;
 
-    final precedence = switch (operation) {
-      '^' => 3,
-      '×' => 2,
-      _ => 1,
-    };
+    final precedence = (operation == '×' || operation == '÷') ? 2 : 1;
     var leftText = left.text;
     var rightText = right.text;
-    if (left.precedence < precedence ||
-        (operation == '^' && left.precedence == precedence)) {
+    if (left.precedence < precedence) {
       leftText = '($leftText)';
     }
     if (right.precedence < precedence ||
-        (operation == '-' && right.precedence == precedence)) {
+        (operation == '-' && right.precedence == precedence) ||
+        (operation == '÷' && right.precedence == precedence)) {
       rightText = '($rightText)';
     }
     return _Expression('$leftText$operation$rightText', precedence);
   }
   return null;
-}
-
-int _boundedPower(int base, int exponent) {
-  var result = 1;
-  for (var index = 0; index < exponent; index++) {
-    result *= base;
-    if (result > 999999999) return -1;
-  }
-  return result;
 }
 
 int _digitCountFor(int id) {
@@ -201,12 +231,7 @@ int _difficultyFor(int id) {
 }
 
 String _operatorHint(Set<String> operators) {
-  if (operators.contains('^')) {
-    if (operators.length > 1) {
-      return '지수와 다른 연산의 계산 순서를 함께 살펴보세요.';
-    }
-    return '위로 올라간 수는 밑의 수를 몇 번 곱할지 나타내요.';
-  }
+  if (operators.contains('÷')) return '이 문제에는 나눗셈 기호가 사용돼요.';
   if (operators.contains('×')) return '이 문제에는 곱셈 기호가 사용돼요.';
   if (operators.contains('+') && operators.contains('-')) {
     return '덧셈과 뺄셈을 모두 사용해 보세요.';
@@ -214,29 +239,7 @@ String _operatorHint(Set<String> operators) {
   return '같은 연산을 여러 번 배치해 보세요.';
 }
 
-String _displayExpression(String expression) {
-  const superscriptDigits = {
-    '0': '⁰',
-    '1': '¹',
-    '2': '²',
-    '3': '³',
-    '4': '⁴',
-    '5': '⁵',
-    '6': '⁶',
-    '7': '⁷',
-    '8': '⁸',
-    '9': '⁹',
-  };
-  final withSuperscriptDigits = expression.replaceAllMapped(
-    RegExp(r'\^(\d+)'),
-    (match) => match
-        .group(1)!
-        .split('')
-        .map((digit) => superscriptDigits[digit]!)
-        .join(),
-  );
-  return withSuperscriptDigits.replaceAll('^', '의 지수 ');
-}
+String _displayExpression(String expression) => expression;
 
 LevelData _special({
   required int id,
@@ -248,8 +251,8 @@ LevelData _special({
   final digits = answer.replaceAll(RegExp(r'[^0-9]'), '');
   final allowed = <String>{'+', '-', '='};
   if (answer.contains('×') || perfectAnswer.contains('×')) allowed.add('×');
-  if (id >= 81 || answer.contains('^') || perfectAnswer.contains('^')) {
-    allowed.add('^');
+  if (answer.contains('÷') || perfectAnswer.contains('÷') || id >= 41) {
+    allowed.add('÷');
   }
   return LevelData(
     id: id,
@@ -272,15 +275,15 @@ LevelData _special({
 final Map<int, LevelData> _handcraftedLevels = {
   81: const LevelData(
     id: 81,
-    digitString: '238',
-    availableOperators: {'+', '-', '×', '^', '='},
-    minimumScore: 6,
-    targetScore: 8,
-    officialAnswer: '2^3=8',
+    digitString: '824',
+    availableOperators: {'+', '-', '×', '÷', '='},
+    minimumScore: 3,
+    targetScore: 4,
+    officialAnswer: '8÷2=4',
     hints: LevelHints(
-      first: '3을 잡아 2의 위쪽 지수 칸으로 올려 보세요.',
-      second: '2의 3승은 2×2×2예요.',
-      third: '정답: 2³=8',
+      first: '이 문제에는 나눗셈 기호가 사용돼요.',
+      second: '완성된 수식의 기준 값은 4예요.',
+      third: '정답: 8÷2=4',
     ),
     difficulty: 4,
   ),

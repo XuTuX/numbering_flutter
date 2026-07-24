@@ -27,24 +27,12 @@ void main() {
       }
       expect(level.minimumScore, lessThanOrEqualTo(level.targetScore));
       expect(level.availableOperators, contains('='));
-      expect(level.availableOperators, isNot(contains('÷')));
-      expect(level.officialAnswer, isNot(contains('÷')));
-      if (level.id >= 81) {
-        expect(level.availableOperators, contains('^'));
+      expect(level.availableOperators, isNot(contains('^')));
+      expect(level.officialAnswer, isNot(contains('^')));
+      if (level.id >= 41) {
+        expect(level.availableOperators, contains('÷'));
       } else {
-        expect(level.availableOperators, isNot(contains('^')));
-      }
-      if (level.id >= 81 && level.id <= 120) {
-        expect(
-          level.officialAnswer,
-          contains('^'),
-          reason: 'Sydney LEVEL ${level.id} must teach exponent use.',
-        );
-        expect(
-          level.hints.third,
-          isNot(contains('^')),
-          reason: 'Player-facing hints should use raised exponent notation.',
-        );
+        expect(level.availableOperators, isNot(contains('÷')));
       }
 
       final result = validateLevelFormula(
@@ -86,13 +74,13 @@ void main() {
     }
   });
 
-  test('Sydney mixes exponentiation with the existing operations', () {
+  test('higher levels mix division with existing operations', () {
     final answers = LevelCatalog.all
-        .where((level) => level.id >= 81 && level.id <= 120)
+        .where((level) => level.id >= 41 && level.id <= 80)
         .map((level) => level.officialAnswer)
         .join();
 
-    for (final operator in const ['^', '+', '-', '×']) {
+    for (final operator in const ['÷', '+', '-', '×']) {
       expect(answers, contains(operator));
     }
   });
@@ -110,16 +98,22 @@ void main() {
   });
 
   test('level map resolves to the pack containing the current level', () {
+    expect(levelPacks, hasLength(10));
+    expect(levelPacks.every((pack) => pack.totalLevels == 20), isTrue);
     expect(levelPackFor(1).name, 'Seoul');
     expect(levelPackFor(20).name, 'Seoul');
     expect(levelPackFor(21).name, 'Tokyo');
-    expect(levelPackFor(80).name, 'New York');
+    expect(levelPackFor(60).name, 'New York');
+    expect(levelPackFor(61).name, 'Singapore');
+    expect(levelPackFor(80).name, 'Singapore');
     expect(levelPackFor(81).name, 'Sydney');
-    expect(levelPackFor(120).name, 'Sydney');
-    expect(levelPackFor(121).name, 'London');
-    expect(levelPackFor(160).name, 'London');
-    expect(levelPackFor(161).name, 'Paris');
-    expect(levelPackFor(200).name, 'Paris');
+    expect(levelPackFor(100).name, 'Sydney');
+    expect(levelPackFor(101).name, 'London');
+    expect(levelPackFor(121).name, 'Paris');
+    expect(levelPackFor(141).name, 'Berlin');
+    expect(levelPackFor(161).name, 'Cairo');
+    expect(levelPackFor(181).name, 'Rio');
+    expect(levelPackFor(200).name, 'Rio');
   });
 }
 
