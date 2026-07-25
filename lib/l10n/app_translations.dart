@@ -382,6 +382,10 @@ class AppTranslations extends Translations {
         'Great! Using the color bar this way helps you score faster.',
     '축하합니다! 이제 진짜 게임에서 실력을 발휘해 보세요!':
         'Nice work! Now show your skill in the real game!',
+    'Arcade': 'Arcade',
+    'Time Attack': 'Time Attack',
+    'YOUR RANK': 'YOUR RANK',
+    'Simulation Mode': 'Simulation Mode',
   };
 
   static const Map<String, String> _jaJP = {
@@ -603,6 +607,10 @@ class AppTranslations extends Translations {
     '대단해요! 이렇게 컬러바를 활용하면 점수를 더 빨리 올릴 수 있어요.':
         'すばらしい! カラーバーを活用すると、より早くスコアを伸ばせます。',
     '축하합니다! 이제 진짜 게임에서 실력을 발휘해 보세요!': 'おめでとうございます! 本番で実力を発揮しましょう!',
+    'Arcade': 'アーケード',
+    'Time Attack': 'タイムアタック',
+    'YOUR RANK': 'あなたの順位',
+    'Simulation Mode': 'シミュレーションモード',
   };
 
   static const Map<String, String> _zhCN = {

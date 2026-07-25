@@ -52,4 +52,16 @@ void main() {
     expect(find.text('계정'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('uses a side navigation on mobile landscape screens', (tester) async {
+    await pumpSettings(tester, surfaceSize: const Size(844, 390));
+
+    expect(
+      find.byKey(const ValueKey('settings-side-navigation')),
+      findsOneWidget,
+    );
+    expect(find.text('일반'), findsNWidgets(2));
+    expect(find.text('계정'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
 }

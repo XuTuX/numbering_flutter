@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:numbering/services/settings_service.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_typography.dart';
 
 import 'settings_rows.dart';
 import 'settings_surface.dart';
@@ -21,6 +23,9 @@ class SettingsProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final avatarLetter =
+        nickname.trim().isNotEmpty ? nickname.trim().characters.first.toUpperCase() : '?';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -28,14 +33,62 @@ class SettingsProfileSection extends StatelessWidget {
         SettingsCard(
           child: Column(
             children: [
-              SettingsInfoRow(
-                icon: Icons.email_outlined,
-                title: '이메일'.tr,
-                value: email,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.blockCream,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.hairline,
+                          width: 1.0,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        avatarLetter,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            nickname,
+                            style: AppTypography.body.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                          if (email.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              email,
+                              style: AppTypography.bodySmall.copyWith(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SettingsDivider(),
               SettingsTapRow(
-                icon: Icons.badge_outlined,
                 title: '닉네임'.tr,
                 value: nickname,
                 showEditIcon: true,
@@ -72,7 +125,6 @@ class SettingsGeneralSection extends StatelessWidget {
             children: [
               Obx(() {
                 return SettingsSwitchRow(
-                  icon: Icons.music_note_rounded,
                   title: '배경음악'.tr,
                   value: settingsService.isBgmOn.value,
                   onChanged: (_) => settingsService.toggleBgm(),
@@ -81,7 +133,6 @@ class SettingsGeneralSection extends StatelessWidget {
               const SettingsDivider(),
               Obx(() {
                 return SettingsSwitchRow(
-                  icon: Icons.graphic_eq_rounded,
                   title: '효과음'.tr,
                   value: settingsService.isSfxOn.value,
                   onChanged: (_) => settingsService.toggleSfx(),
@@ -90,7 +141,6 @@ class SettingsGeneralSection extends StatelessWidget {
               const SettingsDivider(),
               Obx(() {
                 return SettingsSwitchRow(
-                  icon: Icons.vibration_rounded,
                   title: '진동 피드백'.tr,
                   value: settingsService.isHapticsOn.value,
                   onChanged: (_) => settingsService.toggleHaptics(),
@@ -102,7 +152,6 @@ class SettingsGeneralSection extends StatelessWidget {
                 final localeKey =
                     '${locale.languageCode}_${locale.countryCode}';
                 return SettingsTapRow(
-                  icon: Icons.language_rounded,
                   title: '언어'.tr,
                   value: SettingsService.localeNames[localeKey] ?? localeKey,
                   onTap: () {
@@ -112,13 +161,11 @@ class SettingsGeneralSection extends StatelessWidget {
               }),
               const SettingsDivider(),
               SettingsTapRow(
-                icon: Icons.help_outline_rounded,
                 title: '게임 방법'.tr,
                 onTap: onShowTutorial,
               ),
               const SettingsDivider(),
               SettingsTapRow(
-                icon: Icons.chat_bubble_outline_rounded,
                 title: '문의하기'.tr,
                 onTap: onContact,
               ),
@@ -151,7 +198,6 @@ class SettingsAccountSection extends StatelessWidget {
         if (isLoggedIn)
           SettingsCard(
             child: SettingsTapRow(
-              icon: Icons.logout_rounded,
               title: '로그아웃'.tr,
               onTap: onLogout,
             ),
@@ -159,7 +205,6 @@ class SettingsAccountSection extends StatelessWidget {
         else
           SettingsCard(
             child: SettingsTapRow(
-              icon: Icons.login_rounded,
               title: '로그인'.tr,
               onTap: onLogin,
             ),

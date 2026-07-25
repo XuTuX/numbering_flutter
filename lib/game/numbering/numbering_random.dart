@@ -37,9 +37,13 @@ String generateDailyNumberingPuzzle(int seed) {
 }
 
 /// Builds guaranteed solvable N-digit (4, 5, 6) puzzles for Time Attack mode.
-String generateTimeAttackPuzzle(int digitCount, [int? seed]) {
+String generateTimeAttackPuzzle(
+  int digitCount, [
+  int? seed,
+  Set<String>? recentDigitSets,
+]) {
   final random = seed != null ? Random(seed) : Random();
-  final allowed = const {'+', '-', '×', '÷', '='};
+  const allowed = {'+', '-', '×', '÷', '='};
 
   for (var attempt = 0; attempt < 500; attempt++) {
     final leftLeaves = 1 + random.nextInt(digitCount - 1);
@@ -66,13 +70,37 @@ String generateTimeAttackPuzzle(int digitCount, [int? seed]) {
 
     final equation = '$left=$right';
     final digits = equation.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.length == digitCount && isSolvableTimeAttackPuzzle(digits)) {
-      final list = digits.split('')..shuffle(random);
-      return list.join();
+    if (digits.length == digitCount) {
+      final sortedKey = (digits.split('')..sort()).join();
+      if (recentDigitSets != null &&
+          (recentDigitSets.contains(digits) ||
+              recentDigitSets.contains(sortedKey))) {
+        continue;
+      }
+
+      if (isSolvableTimeAttackPuzzle(digits)) {
+        final list = digits.split('')..shuffle(random);
+        return list.join();
+      }
     }
   }
 
   // Guaranteed solver verification loop: keep trying random digits until a 100% solvable set is found
+  for (var attempt = 0; attempt < 1000; attempt++) {
+    final candidate =
+        List.generate(digitCount, (_) => '${1 + random.nextInt(9)}').join();
+    final sortedKey = (candidate.split('')..sort()).join();
+    if (recentDigitSets != null &&
+        (recentDigitSets.contains(candidate) ||
+            recentDigitSets.contains(sortedKey))) {
+      continue;
+    }
+    if (isSolvableTimeAttackPuzzle(candidate)) {
+      return candidate;
+    }
+  }
+
+  // Fallback if recentDigitSets is too restrictive
   while (true) {
     final candidate =
         List.generate(digitCount, (_) => '${1 + random.nextInt(9)}').join();

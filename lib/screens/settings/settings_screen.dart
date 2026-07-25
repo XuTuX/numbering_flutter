@@ -42,14 +42,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isWide = constraints.maxWidth >= 860;
+                final isLandscape = constraints.maxWidth > constraints.maxHeight;
+                final isWide = constraints.maxWidth >= 600 ||
+                    (isLandscape && constraints.maxWidth >= 520);
+                final isCompactLandscape =
+                    isLandscape && constraints.maxHeight < 500;
 
                 return Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1240),
                     child: Padding(
                       padding: isWide
-                          ? const EdgeInsets.fromLTRB(36, 28, 36, 0)
+                          ? (isCompactLandscape
+                              ? const EdgeInsets.fromLTRB(20, 8, 20, 0)
+                              : const EdgeInsets.fromLTRB(36, 20, 36, 0))
                           : EdgeInsets.zero,
                       child: Obx(() {
                         final user = widget.authService.user.value;
@@ -66,6 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           savedNickname: savedNickname,
                           isLoggedIn: user != null,
                           isWide: isWide,
+                          isCompactLandscape: isCompactLandscape,
                         );
 
                         if (!isWide) {
@@ -97,28 +104,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             SizedBox(
-                              width: 260,
+                              width: isCompactLandscape ? 190 : 250,
                               child: Column(
                                 children: [
-                                  const SettingsHeader(isWide: true),
+                                  SettingsHeader(
+                                    isWide: true,
+                                    isCompactLandscape: isCompactLandscape,
+                                  ),
                                   SettingsSidebar(
                                     selectedSection: selectedSection,
                                     showProfile: user != null,
                                     onSectionSelected: _selectSection,
+                                    isCompactLandscape: isCompactLandscape,
                                   ),
                                 ],
                               ),
                             ),
-                            const VerticalDivider(
-                              width: 64,
+                            VerticalDivider(
+                              width: isCompactLandscape ? 28 : 56,
                               thickness: 1,
                               color: AppColors.borderLight,
                             ),
                             Expanded(
                               child: ListView(
                                 key: const ValueKey('settings-content'),
-                                padding:
-                                    const EdgeInsets.fromLTRB(0, 38, 8, 48),
+                                padding: isCompactLandscape
+                                    ? const EdgeInsets.fromLTRB(0, 8, 8, 24)
+                                    : const EdgeInsets.fromLTRB(0, 24, 8, 48),
                                 children: sections,
                               ),
                             ),
@@ -154,8 +166,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required String? savedNickname,
     required bool isLoggedIn,
     required bool isWide,
+    bool isCompactLandscape = false,
   }) {
-    final sectionGap = isWide ? 32.0 : 24.0;
+    final sectionGap = isCompactLandscape ? 16.0 : (isWide ? 28.0 : 20.0);
 
     return [
       if (isLoggedIn) ...[

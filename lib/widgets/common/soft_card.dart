@@ -12,7 +12,8 @@ class SoftCard extends StatelessWidget {
     this.margin,
     this.radius = AppRadius.card,
     this.color = AppColors.surface,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.antiAlias,
+    this.onTap,
   });
 
   final Widget child;
@@ -21,20 +22,33 @@ class SoftCard extends StatelessWidget {
   final double radius;
   final Color color;
   final Clip clipBehavior;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: margin,
-      padding: padding,
-      clipBehavior: clipBehavior,
       decoration: BoxDecoration(
-        color: color,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: AppColors.borderLight),
         boxShadow: AppShadows.cardShadow,
       ),
-      child: child,
+      clipBehavior: clipBehavior,
+      child: Material(
+        color: color,
+        borderRadius: BorderRadius.circular(radius),
+        clipBehavior: clipBehavior,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(radius),
+          splashColor: onTap != null ? AppColors.ink.withValues(alpha: 0.04) : Colors.transparent,
+          highlightColor: onTap != null ? AppColors.ink.withValues(alpha: 0.025) : Colors.transparent,
+          child: Padding(
+            padding: padding ?? EdgeInsets.zero,
+            child: child,
+          ),
+        ),
+      ),
     );
   }
 }

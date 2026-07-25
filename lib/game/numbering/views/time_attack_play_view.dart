@@ -20,6 +20,7 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
   static const int _initialTimeSeconds = 180; // 3 minutes
 
   late String _digits;
+  final Set<String> _recentDigitSets = {};
   final _editorKey = GlobalKey<_FormulaEditorState>();
   Timer? _timer;
   int _secondsRemaining = _initialTimeSeconds;
@@ -35,11 +36,39 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
     return 6;
   }
 
+  String _generateUniquePuzzle(int digitCount) {
+    final puzzle = generateTimeAttackPuzzle(
+      digitCount,
+      null,
+      _recentDigitSets,
+    );
+    _recentDigitSets.add(puzzle);
+    _recentDigitSets.add((puzzle.split('')..sort()).join());
+    if (_recentDigitSets.length > 40) {
+      _recentDigitSets.removeAll(_recentDigitSets.take(20).toList());
+    }
+    return puzzle;
+  }
+
   @override
   void initState() {
     super.initState();
-    _digits = generateTimeAttackPuzzle(_getDigitCountForSolves(0));
+    _digits = _generateUniquePuzzle(_getDigitCountForSolves(0));
     _startTimer();
+    
+    if (SimulationMode.isEnabled.value) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted) return;
+        _timer?.cancel();
+        setState(() {
+          _secondsRemaining = 0;
+          _highestNumber = 999;
+          _totalScore = 12345;
+          _isFinished = true;
+        });
+        unawaited(_handleTimeExpired());
+      });
+    }
   }
 
   void _startTimer() {
@@ -67,7 +96,7 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
       _totalScore = 0;
       _highestNumberAchievedAt = null;
       _isFinished = false;
-      _digits = generateTimeAttackPuzzle(_getDigitCountForSolves(0));
+      _digits = _generateUniquePuzzle(_getDigitCountForSolves(0));
     });
     _editorKey.currentState?.reset();
     _startTimer();
@@ -75,7 +104,7 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
 
   void _nextPuzzle() {
     setState(() {
-      _digits = generateTimeAttackPuzzle(_getDigitCountForSolves(_solvesCount));
+      _digits = _generateUniquePuzzle(_getDigitCountForSolves(_solvesCount));
     });
     _editorKey.currentState?.reset();
   }
@@ -113,66 +142,139 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          title: const Text(
-            '종료',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.w900),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'BEST $_highestNumber',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  color: widget.accent,
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.all(24),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0.9, end: 1.0),
+            duration: const Duration(milliseconds: 200),
+            builder: (context, scale, child) {
+              return Transform.scale(
+                scale: scale,
+                child: Opacity(
+                  opacity: ((scale - 0.9) / 0.1).clamp(0.0, 1.0),
+                  child: child,
                 ),
+              );
+            },
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 260),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '총점: $_totalScore점',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.emoji_events_rounded,
+                        color: widget.accent,
+                        size: 32,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$_highestNumber',
+                        style: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w900,
+                          color: widget.accent,
+                          height: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 20,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '$_totalScore',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          widget.onShowLevels();
+                        },
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          size: 22,
+                          color: AppColors.textPrimary,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color(0xFFF3F4F6),
+                          padding: const EdgeInsets.all(12),
+                          shape: const CircleBorder(),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _restartGame();
+                        },
+                        icon: const Icon(
+                          Icons.refresh_rounded,
+                          size: 22,
+                          color: Colors.white,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: widget.accent,
+                          padding: const EdgeInsets.all(12),
+                          shape: const CircleBorder(),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          widget.onShowLevels();
+                          Get.to(
+                            () => const RankingScreen(showCloseButton: true),
+                            transition: Transition.zoom,
+                            duration: const Duration(milliseconds: 250),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.bar_chart_rounded,
+                          size: 22,
+                          color: AppColors.textPrimary,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color(0xFFF3F4F6),
+                          padding: const EdgeInsets.all(12),
+                          shape: const CircleBorder(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-          actionsAlignment: MainAxisAlignment.center,
-          actions: [
-            FilledButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _restartGame();
-              },
-              style: FilledButton.styleFrom(backgroundColor: widget.accent),
-              child: const Text('다시하기'),
-            ),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Get.to(
-                  () => const RankingScreen(),
-                  transition: Transition.zoom,
-                  duration: const Duration(milliseconds: 250),
-                );
-              },
-              child: const Text('순위 보기'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                widget.onShowLevels();
-              },
-              child: const Text('나가기'),
-            ),
-          ],
         );
       },
     );

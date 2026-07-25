@@ -13,11 +13,13 @@ class SettingsSidebar extends StatelessWidget {
     required this.selectedSection,
     required this.showProfile,
     required this.onSectionSelected,
+    this.isCompactLandscape = false,
   });
 
   final SettingsSection selectedSection;
   final bool showProfile;
   final ValueChanged<SettingsSection> onSectionSelected;
+  final bool isCompactLandscape;
 
   @override
   Widget build(BuildContext context) {
@@ -28,21 +30,21 @@ class SettingsSidebar extends StatelessWidget {
         children: [
           if (showProfile)
             _SettingsSidebarItem(
-              icon: Icons.person_outline_rounded,
               label: '프로필'.tr,
               isSelected: selectedSection == SettingsSection.profile,
+              isCompactLandscape: isCompactLandscape,
               onTap: () => onSectionSelected(SettingsSection.profile),
             ),
           _SettingsSidebarItem(
-            icon: Icons.tune_rounded,
             label: '일반'.tr,
             isSelected: selectedSection == SettingsSection.general,
+            isCompactLandscape: isCompactLandscape,
             onTap: () => onSectionSelected(SettingsSection.general),
           ),
           _SettingsSidebarItem(
-            icon: Icons.manage_accounts_outlined,
             label: '계정'.tr,
             isSelected: selectedSection == SettingsSection.account,
+            isCompactLandscape: isCompactLandscape,
             onTap: () => onSectionSelected(SettingsSection.account),
           ),
         ],
@@ -53,47 +55,51 @@ class SettingsSidebar extends StatelessWidget {
 
 class _SettingsSidebarItem extends StatelessWidget {
   const _SettingsSidebarItem({
-    required this.icon,
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.isCompactLandscape = false,
   });
 
-  final IconData icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool isCompactLandscape;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: isSelected ? AppColors.surfaceSoft : Colors.transparent,
-        borderRadius: BorderRadius.circular(AppRadius.medium),
-        child: InkWell(
-          onTap: onTap,
+      padding: EdgeInsets.only(bottom: isCompactLandscape ? 4 : 6),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.surface : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.medium),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            height: 62,
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  size: 25,
+          border: Border.all(
+            color: isSelected ? AppColors.hairline : Colors.transparent,
+            width: 1.0,
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppRadius.medium),
+            child: Container(
+              height: isCompactLandscape ? 42 : 48,
+              padding: EdgeInsets.symmetric(
+                horizontal: isCompactLandscape ? 14 : 18,
+              ),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                style: AppTypography.body.copyWith(
+                  fontSize: isCompactLandscape ? 14 : 15,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                   color: isSelected ? AppColors.ink : AppColors.textSecondary,
                 ),
-                const SizedBox(width: 16),
-                Text(
-                  label,
-                  style: AppTypography.body.copyWith(
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected ? AppColors.ink : AppColors.textSecondary,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

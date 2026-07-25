@@ -4,8 +4,12 @@ import 'package:get/get.dart';
 import 'package:numbering/screens/home/arcade_screen.dart';
 import 'package:numbering/screens/hints/hint_store_screen.dart';
 import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_text_styles.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/hint_purchase_service.dart';
+import 'package:numbering/utils/app_snackbar.dart';
+import 'package:numbering/widgets/common/soft_card.dart';
+import 'package:numbering/simulation_mode.dart';
 
 part 'home_screen_content_components.dart';
 

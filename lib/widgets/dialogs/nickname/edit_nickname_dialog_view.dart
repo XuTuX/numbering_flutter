@@ -29,55 +29,78 @@ class _EditNicknameDialogView extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget dialogContent = Dialog(
       backgroundColor: Colors.transparent,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 400),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: AppColors.borderLight),
-          boxShadow: AppShadows.cardShadow,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: AppColors.textPrimary,
-              ),
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 380),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.canvas,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              border: Border.all(color: AppColors.borderLight, width: 1.0),
             ),
-            const SizedBox(height: 24),
-            _NicknameInputField(
-              controller: controller,
-              isGenerating: isGenerating,
-              onChanged: onChanged,
-              onGenerateRandom: onGenerateRandom,
-            ),
-            if (errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8, left: 4),
-                child: Text(
-                  errorMessage!.tr,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.ink,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                    if (!isInitialSetup)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: AppColors.ink,
+                          size: 22,
+                        ),
+                        onPressed: onCancel,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        splashRadius: 20,
+                      ),
+                  ],
                 ),
-              ),
-            const SizedBox(height: 24),
-            _NicknameDialogActions(
-              isSaving: isSaving,
-              isInitialSetup: isInitialSetup,
-              onCancel: onCancel,
-              onSave: onSave,
+                const SizedBox(height: 20),
+                _NicknameInputField(
+                  controller: controller,
+                  isGenerating: isGenerating,
+                  onChanged: onChanged,
+                  onGenerateRandom: onGenerateRandom,
+                ),
+                if (errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, left: 4),
+                    child: Text(
+                      errorMessage!.tr,
+                      style: const TextStyle(
+                        color: AppColors.danger,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                _NicknameDialogActions(
+                  isSaving: isSaving,
+                  isInitialSetup: isInitialSetup,
+                  onCancel: onCancel,
+                  onSave: onSave,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -110,34 +133,50 @@ class _NicknameInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceSecondary,
-        borderRadius: BorderRadius.circular(14),
+        color: AppColors.surfaceSoft,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderLight),
       ),
       child: TextField(
         controller: controller,
-        style: AppTypography.body,
+        style: AppTypography.body.copyWith(
+          fontWeight: FontWeight.w700,
+          color: AppColors.ink,
+        ),
+        cursorColor: AppColors.ink,
         onChanged: onChanged,
         decoration: InputDecoration(
           hintText: '새 닉네임'.tr,
+          hintStyle: AppTypography.body.copyWith(
+            color: AppColors.textSecondary.withValues(alpha: 0.6),
+            fontWeight: FontWeight.w500,
+          ),
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
           suffixIcon: isGenerating
-              ? Transform.scale(
-                  scale: 0.5,
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: AppColors.timeBlue,
+              ? const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: AppColors.ink,
+                    ),
                   ),
                 )
               : IconButton(
                   icon: const Icon(
                     Icons.refresh_rounded,
-                    color: charcoalBlack,
+                    color: AppColors.ink,
+                    size: 22,
                   ),
                   tooltip: '랜덤 닉네임 생성'.tr,
                   onPressed: onGenerateRandom,
+                  splashRadius: 20,
                 ),
         ),
       ),
@@ -170,14 +209,19 @@ class _NicknameDialogActions extends StatelessWidget {
                 onPressed: onCancel,
                 style: TextButton.styleFrom(
                   backgroundColor: AppColors.surfaceSoft,
+                  foregroundColor: AppColors.ink,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(AppRadius.button),
                     side: const BorderSide(color: AppColors.borderLight),
                   ),
                 ),
                 child: Text(
                   '취소'.tr,
-                  style: AppTypography.button.copyWith(fontSize: 15),
+                  style: AppTypography.button.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
                 ),
               ),
             ),
@@ -194,7 +238,7 @@ class _NicknameDialogActions extends StatelessWidget {
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppRadius.button),
                 ),
               ),
               child: isSaving
@@ -203,13 +247,14 @@ class _NicknameDialogActions extends StatelessWidget {
                       height: 20,
                       child: CircularProgressIndicator(
                         color: Colors.white,
-                        strokeWidth: 2,
+                        strokeWidth: 2.5,
                       ),
                     )
                   : Text(
                       '저장'.tr,
                       style: AppTypography.button.copyWith(
                         fontSize: 15,
+                        fontWeight: FontWeight.w800,
                         color: Colors.white,
                       ),
                     ),
@@ -220,3 +265,4 @@ class _NicknameDialogActions extends StatelessWidget {
     );
   }
 }
+

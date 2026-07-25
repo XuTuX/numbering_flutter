@@ -10,10 +10,11 @@ OverlayEntry? _currentOverlay;
 void showAppSnackBar({
   required String message,
   String? title,
-  Color backgroundColor = const Color(0xFFFFFBEB),
-  Color textColor = const Color(0xFF1A1A1A),
-  Color borderColor = const Color(0xFF1A1A1A),
+  Color backgroundColor = const Color(0xFF171716),
+  Color textColor = const Color(0xFFFFFFFF),
+  Color borderColor = const Color(0x33FFFFFF),
   IconData icon = Icons.info_outline_rounded,
+  Color? iconColor,
   Duration duration = const Duration(seconds: 3),
 }) {
   _currentOverlay?.remove();
@@ -34,6 +35,7 @@ void showAppSnackBar({
       textColor: textColor,
       borderColor: borderColor,
       icon: icon,
+      iconColor: iconColor,
       duration: duration,
       onDismiss: () {
         entry.remove();
@@ -95,6 +97,7 @@ class _TopSnackBarWidget extends StatefulWidget {
     required this.textColor,
     required this.borderColor,
     required this.icon,
+    this.iconColor,
     required this.duration,
     required this.onDismiss,
   });
@@ -105,6 +108,7 @@ class _TopSnackBarWidget extends StatefulWidget {
   final Color textColor;
   final Color borderColor;
   final IconData icon;
+  final Color? iconColor;
   final Duration duration;
   final VoidCallback onDismiss;
 
@@ -127,7 +131,7 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
       reverseDuration: const Duration(milliseconds: 250),
     );
     _slideAnim = Tween<Offset>(
-      begin: const Offset(0, -1.0),
+      begin: const Offset(0, -0.8),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _animController,
@@ -158,6 +162,9 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
+    final effectiveIconColor = widget.iconColor ?? widget.textColor;
+    final hasTitle = widget.title != null && widget.title!.trim().isNotEmpty;
+    final isCompactInline = hasTitle && widget.message.trim().length <= 20;
 
     return Positioned(
       top: 0,
@@ -179,55 +186,108 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
               color: Colors.transparent,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(16, topPadding + 8, 16, 0),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: widget.backgroundColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: widget.borderColor.withValues(alpha: 0.32),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 380),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 10,
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        widget.icon,
-                        size: 20,
-                        color: widget.textColor.withValues(alpha: 0.7),
+                    decoration: BoxDecoration(
+                      color: widget.backgroundColor,
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        color: widget.borderColor.withValues(alpha: 0.3),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (widget.title != null &&
-                                widget.title!.trim().isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 2),
-                                child: Text(
-                                  widget.title!.tr,
-                                  style: GoogleFonts.blackHanSans(
-                                    fontSize: 14,
-                                    color: widget.textColor,
-                                    letterSpacing: -0.3,
-                                  ),
-                                ),
-                              ),
-                            Text(
-                              widget.message.tr,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: widget.textColor.withValues(alpha: 0.75),
-                                height: 1.3,
-                              ),
-                            ),
-                          ],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.18),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          widget.icon,
+                          size: 18,
+                          color: effectiveIconColor,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: isCompactInline
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      widget.title!.tr,
+                                      style: GoogleFonts.blackHanSans(
+                                        fontSize: 13.5,
+                                        color: widget.textColor,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                      ),
+                                      width: 3,
+                                      height: 3,
+                                      decoration: BoxDecoration(
+                                        color: widget.textColor
+                                            .withValues(alpha: 0.4),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: Text(
+                                        widget.message.tr,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: widget.textColor
+                                              .withValues(alpha: 0.95),
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (hasTitle)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 1),
+                                        child: Text(
+                                          widget.title!.tr,
+                                          style: GoogleFonts.blackHanSans(
+                                            fontSize: 13,
+                                            color: widget.textColor,
+                                            letterSpacing: -0.2,
+                                          ),
+                                        ),
+                                      ),
+                                    Text(
+                                      widget.message.tr,
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: widget.textColor
+                                            .withValues(alpha: 0.85),
+                                        height: 1.25,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -238,3 +298,4 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
     );
   }
 }
+

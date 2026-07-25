@@ -9,27 +9,34 @@ class SettingsHeader extends StatelessWidget {
   const SettingsHeader({
     super.key,
     this.isWide = false,
+    this.isCompactLandscape = false,
   });
 
   final bool isWide;
+  final bool isCompactLandscape;
 
   @override
   Widget build(BuildContext context) {
+    final topPadding = isCompactLandscape ? 0.0 : (isWide ? 4.0 : 12.0);
+    final bottomPadding = isCompactLandscape ? 12.0 : (isWide ? 24.0 : 16.0);
+    final buttonSize = isCompactLandscape ? 42.0 : (isWide ? 48.0 : 44.0);
+    final iconSize = isCompactLandscape ? 22.0 : (isWide ? 24.0 : 22.0);
+
     return Padding(
       padding: isWide
-          ? const EdgeInsets.fromLTRB(0, 4, 0, 32)
-          : const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          ? EdgeInsets.fromLTRB(0, topPadding, 0, bottomPadding)
+          : EdgeInsets.fromLTRB(16, topPadding, 16, bottomPadding),
       child: Row(
         children: [
           SoftIconButton(
             icon: Icons.arrow_back_rounded,
             label: '뒤로 가기',
             onPressed: Get.back,
-            size: isWide ? 52 : 46,
-            iconSize: isWide ? 27 : 24,
+            size: buttonSize,
+            iconSize: iconSize,
           ),
           if (isWide) ...[
-            const SizedBox(width: 20),
+            const SizedBox(width: 14),
             Expanded(
               child: FittedBox(
                 fit: BoxFit.scaleDown,
@@ -38,8 +45,8 @@ class SettingsHeader extends StatelessWidget {
                   'SETTINGS'.tr,
                   maxLines: 1,
                   style: AppTypography.title.copyWith(
-                    fontSize: 25,
-                    letterSpacing: 2.4,
+                    fontSize: isCompactLandscape ? 20 : 23,
+                    letterSpacing: 2.0,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -51,13 +58,13 @@ class SettingsHeader extends StatelessWidget {
                 'SETTINGS'.tr,
                 textAlign: TextAlign.center,
                 style: AppTypography.title.copyWith(
-                  fontSize: 21,
+                  fontSize: 20,
                   letterSpacing: 2.0,
                   color: AppColors.textPrimary,
                 ),
               ),
             ),
-            const SizedBox(width: 46),
+            SizedBox(width: buttonSize),
           ],
         ],
       ),

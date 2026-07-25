@@ -259,12 +259,16 @@ ValidationResult validateDailyPuzzleFormula({
 }) {
   final preservedDigits = expression.replaceAll(RegExp(r'[^0-9]'), '');
   if (preservedDigits.length != digitString.length) {
-    return const ValidationResult.failure('주어진 8개의 숫자를 모두 한 번씩 사용해야 합니다.');
+    return ValidationResult.failure(
+      '주어진 ${digitString.length}개의 숫자를 모두 한 번씩 사용해야 합니다.',
+    );
   }
   final sortedPreserved = preservedDigits.split('')..sort();
   final sortedGiven = digitString.split('')..sort();
   if (sortedPreserved.join() != sortedGiven.join()) {
-    return const ValidationResult.failure('주어진 8개의 숫자만 사용할 수 있습니다.');
+    return ValidationResult.failure(
+      '주어진 ${digitString.length}개의 숫자만 사용할 수 있습니다.',
+    );
   }
 
   for (final match in RegExp(r'[+\-×÷=]').allMatches(expression)) {

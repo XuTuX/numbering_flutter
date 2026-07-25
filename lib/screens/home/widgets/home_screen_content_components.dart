@@ -18,35 +18,27 @@ class _ArcadeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _HomeCard(
+    return SoftCard(
       color: _arcadeSurface,
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Arcade',
-                style: TextStyle(
-                  color: _homeInk,
-                  fontSize: 36,
-                  height: 0.98,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -1.6,
-                ),
-              ),
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Arcade'.tr,
+              style: AppTextStyles.hero,
             ),
-            const Align(
-              alignment: Alignment.bottomRight,
-              child: _ArrowCircle(),
-            ),
-          ],
-        ),
+          ),
+          const Align(
+            alignment: Alignment.bottomRight,
+            child: _ArrowCircle(),
+          ),
+        ],
       ),
     );
   }
@@ -61,42 +53,35 @@ class _TimeAttackCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _HomeCard(
+    return SoftCard(
       color: _challengeSurface,
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Time Attack',
-                      style: TextStyle(
-                        color: _homeInk,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.8,
-                      ),
-                    ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Time Attack'.tr,
+                    style: AppTextStyles.cardTitle,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const Align(
-              alignment: Alignment.bottomRight,
-              child: _ArrowCircle(),
-            ),
-          ],
-        ),
+          ),
+          const Align(
+            alignment: Alignment.bottomRight,
+            child: _ArrowCircle(),
+          ),
+        ],
       ),
     );
   }
@@ -117,53 +102,40 @@ class _RankingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _HomeCard(
+    return SoftCard(
       color: _rankingSurface,
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'YOUR RANK',
-                    style: TextStyle(
-                      color: Color(0x8F171716),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.2,
-                    ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'YOUR RANK'.tr,
+                  style: AppTextStyles.labelSmall,
+                ),
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    rank == null ? '#—' : '#$rank',
+                    style: AppTextStyles.cardTitle,
                   ),
-                  const SizedBox(height: 2),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      rank == null ? '#—' : '#$rank',
-                      style: const TextStyle(
-                        color: _homeInk,
-                        fontSize: 24,
-                        height: 1,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -1.2,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const Align(
-              alignment: Alignment.bottomRight,
-              child: _ArrowCircle(),
-            ),
-          ],
-        ),
+          ),
+          const Align(
+            alignment: Alignment.bottomRight,
+            child: _ArrowCircle(),
+          ),
+        ],
       ),
     );
   }
@@ -185,38 +157,6 @@ class _ArrowCircle extends StatelessWidget {
         Icons.arrow_forward_rounded,
         color: _homeInk,
         size: 16,
-      ),
-    );
-  }
-}
-
-class _HomeCard extends StatelessWidget {
-  const _HomeCard({
-    required this.color,
-    required this.onTap,
-    required this.child,
-  });
-
-  final Color color;
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(24);
-    return Material(
-      color: color,
-      shape: RoundedRectangleBorder(
-        borderRadius: radius,
-        side: const BorderSide(color: _homeBorder),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: radius,
-        splashColor: _homeInk.withValues(alpha: 0.04),
-        highlightColor: _homeInk.withValues(alpha: 0.025),
-        child: child,
       ),
     );
   }
@@ -251,8 +191,14 @@ class _HomeHeader extends StatelessWidget {
           ),
           const _HomeHeaderHintBadge(),
           const SizedBox(width: 10),
+          Obx(() => _HeaderIconButton(
+            tooltip: 'Simulation Mode'.tr,
+            icon: SimulationMode.isEnabled.value ? Icons.bug_report : Icons.bug_report_outlined,
+            onTap: SimulationMode.toggle,
+          )),
+          const SizedBox(width: 10),
           _HeaderIconButton(
-            tooltip: 'Settings',
+            tooltip: 'Settings'.tr,
             icon: Icons.tune_rounded,
             onTap: onSettingsTap,
           ),
@@ -265,18 +211,33 @@ class _HomeHeader extends StatelessWidget {
 class _HomeHeaderHintBadge extends StatelessWidget {
   const _HomeHeaderHintBadge();
 
+  void _triggerAttendanceBonusToast() {
+    showAppSnackBar(
+      title: '출석 보상',
+      message: '힌트 +3',
+      icon: Icons.lightbulb_rounded,
+      iconColor: const Color(0xFFFFB800),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!Get.isRegistered<HintService>()) {
-      return const _HintBadge(hints: 20);
+      return _HintBadge(
+        hints: 20,
+        onTap: _triggerAttendanceBonusToast,
+      );
     }
     final hintService = Get.find<HintService>();
     return Obx(
       () => _HintBadge(
         hints: hintService.hints.value,
-        onTap: Get.isRegistered<HintPurchaseService>()
-            ? () => Get.to(() => const HintStoreScreen())
-            : null,
+        onTap: () {
+          _triggerAttendanceBonusToast();
+          if (Get.isRegistered<HintPurchaseService>()) {
+            Get.to(() => const HintStoreScreen());
+          }
+        },
       ),
     );
   }

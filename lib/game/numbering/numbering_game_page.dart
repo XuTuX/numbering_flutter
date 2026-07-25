@@ -26,6 +26,7 @@ import 'package:numbering/services/hint_purchase_service.dart';
 
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/time_attack_score_service.dart';
+import 'package:numbering/simulation_mode.dart';
 
 part 'views/level_play_view.dart';
 part 'views/daily_play_view.dart';

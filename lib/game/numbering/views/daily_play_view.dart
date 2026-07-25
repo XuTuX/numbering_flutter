@@ -186,8 +186,9 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
                 FilledButton(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    widget.onShowLevels();
                     Get.to(
-                      () => const RankingScreen(),
+                      () => const RankingScreen(showCloseButton: true),
                       transition: Transition.zoom,
                       duration: const Duration(milliseconds: 250),
                     );

@@ -148,9 +148,8 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     if (!widget.allowDigitReordering || fromIndex == toIndex) return;
     _saveSnapshot();
     setState(() {
-      final sourceDigit = _digits[fromIndex];
-      _digits[fromIndex] = _digits[toIndex];
-      _digits[toIndex] = sourceDigit;
+      final movedDigit = _digits.removeAt(fromIndex);
+      _digits.insert(toIndex, movedDigit);
 
       _selectedDigitIndex = null;
       _parenthesisMode = false;
@@ -161,10 +160,11 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   }
 
   void _handleDigitTap(int index) {
-    if (!_parenthesisMode) return;
-
     if (_selectedDigitIndex == null) {
-      setState(() => _selectedDigitIndex = index);
+      setState(() {
+        _selectedDigitIndex = index;
+        _message = null;
+      });
       return;
     }
     if (_selectedDigitIndex == index) {
@@ -190,6 +190,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
         _message = null;
       });
       _notifyProgressChanged();
+      _previewValidation();
       return;
     }
     final validation = validateParenthesisRange(
@@ -212,10 +213,13 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       _message = null;
     });
     _notifyProgressChanged();
+    _previewValidation();
   }
 
   void _previewValidation() {
-    if (widget.requiresEquals && !_operators.contains(InlineOperator.equals)) {
+    if (widget.requiresEquals &&
+        (!_operators.contains(InlineOperator.equals) ||
+            _operators.contains(null))) {
       if (mounted && _message != null) setState(() => _message = null);
       return;
     }

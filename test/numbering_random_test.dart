@@ -72,7 +72,7 @@ void main() {
       );
 
       expect(result.valid, isFalse);
-      expect(result.message, '주어진 8개의 숫자만 사용할 수 있습니다.');
+      expect(result.message, '주어진 6개의 숫자만 사용할 수 있습니다.');
     });
   });
 
@@ -85,6 +85,18 @@ void main() {
           expect(isSolvableTimeAttackPuzzle(puzzle), isTrue,
               reason: 'Generated $digitCount-digit puzzle $puzzle must be solvable');
         }
+      }
+    });
+
+    test('avoids generating puzzles present in recentDigitSets', () {
+      final recent = <String>{};
+      for (var i = 0; i < 15; i++) {
+        final puzzle = generateTimeAttackPuzzle(4, null, recent);
+        final sortedKey = (puzzle.split('')..sort()).join();
+        expect(recent.contains(puzzle), isFalse);
+        expect(recent.contains(sortedKey), isFalse);
+        recent.add(puzzle);
+        recent.add(sortedKey);
       }
     });
   });

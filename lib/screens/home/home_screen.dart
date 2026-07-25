@@ -49,8 +49,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           hintService.justReceivedAttendanceBonus.value = false;
           showAppSnackBar(
             title: '출석 보상',
-            message: '오늘의 출석 보상! 힌트 +3개가 추가되었습니다. 💡',
+            message: '힌트 +3',
             icon: Icons.lightbulb_rounded,
+            iconColor: const Color(0xFFFFB800),
           );
         }
       }
@@ -78,8 +79,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               hintService.justReceivedAttendanceBonus.value = false;
               showAppSnackBar(
                 title: '출석 보상',
-                message: '오늘의 출석 보상! 힌트 +3개가 추가되었습니다. 💡',
+                message: '힌트 +3',
                 icon: Icons.lightbulb_rounded,
+                iconColor: const Color(0xFFFFB800),
               );
             }
           });

@@ -5,7 +5,6 @@ import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/theme/app_typography.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_radius.dart';
-import 'package:numbering/theme/app_shadows.dart';
 
 class LanguagePickerDialog extends StatelessWidget {
   const LanguagePickerDialog({super.key});
@@ -26,8 +25,7 @@ class LanguagePickerDialog extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.canvas,
           borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: AppColors.borderLight),
-          boxShadow: AppShadows.cardShadow,
+          border: Border.all(color: AppColors.hairline),
         ),
         child: Material(
           color: Colors.transparent,

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:numbering/theme/app_typography.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_radius.dart';
-import 'package:numbering/theme/app_shadows.dart';
 
 class SettingsCard extends StatelessWidget {
   const SettingsCard({
@@ -18,10 +17,9 @@ class SettingsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.88),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.borderLight),
-        boxShadow: AppShadows.cardShadow,
+        border: Border.all(color: AppColors.hairline, width: 1.0),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.card - 1),
@@ -42,15 +40,16 @@ class SettingsSectionLabel extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        left: 4,
-        bottom: isWide ? 14 : 10,
+        left: 6,
+        bottom: isWide ? 12 : 8,
       ),
       child: Text(
-        label.tr,
+        label.tr.toUpperCase(),
         style: AppTypography.bodySmall.copyWith(
-          fontSize: isWide ? 16 : 14,
-          fontWeight: FontWeight.w900,
-          letterSpacing: -0.2,
+          fontSize: isWide ? 13 : 12,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textSecondary,
+          letterSpacing: 1.2,
         ),
       ),
     );
@@ -65,9 +64,9 @@ class SettingsDivider extends StatelessWidget {
     return const Divider(
       height: 1,
       thickness: 1,
-      indent: 67,
-      endIndent: 24,
-      color: AppColors.borderLight,
+      indent: 20,
+      endIndent: 20,
+      color: AppColors.hairlineSoft,
     );
   }
 }
