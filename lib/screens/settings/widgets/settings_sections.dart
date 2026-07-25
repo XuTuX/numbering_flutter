@@ -183,11 +183,13 @@ class SettingsAccountSection extends StatelessWidget {
     required this.isLoggedIn,
     required this.onLogout,
     required this.onLogin,
+    required this.onDeleteAccount,
   });
 
   final bool isLoggedIn;
   final VoidCallback onLogout;
   final VoidCallback onLogin;
+  final VoidCallback onDeleteAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -197,9 +199,19 @@ class SettingsAccountSection extends StatelessWidget {
         SettingsSectionLabel('계정'.tr),
         if (isLoggedIn)
           SettingsCard(
-            child: SettingsTapRow(
-              title: '로그아웃'.tr,
-              onTap: onLogout,
+            child: Column(
+              children: [
+                SettingsTapRow(
+                  title: '로그아웃'.tr,
+                  onTap: onLogout,
+                ),
+                const SettingsDivider(),
+                SettingsTapRow(
+                  title: '계정 삭제'.tr,
+                  titleColor: AppColors.danger,
+                  onTap: onDeleteAccount,
+                ),
+              ],
             ),
           )
         else

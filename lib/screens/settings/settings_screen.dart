@@ -9,7 +9,10 @@ import 'package:numbering/widgets/dialogs/how_to_play_dialog.dart';
 import 'package:numbering/game/game_module.dart';
 import 'package:numbering/screens/home/home_screen_flows.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
+import 'package:numbering/widgets/dialogs/animated_game_dialog.dart';
+import 'package:numbering/utils/app_snackbar.dart';
 import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_typography.dart';
 
 import 'widgets/settings_components.dart';
 
@@ -216,9 +219,79 @@ class _SettingsScreenState extends State<SettingsScreen> {
               isScrollControlled: true,
             );
           },
+          onDeleteAccount: _confirmDeleteAccount,
         ),
       ),
     ];
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await Get.dialog<bool>(
+      AnimatedGameDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              size: 36,
+              color: AppColors.danger,
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'NEOREO GAMES 계정을\n삭제할까요?'.tr,
+              textAlign: TextAlign.center,
+              style: AppTypography.title.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'NEOREO GAMES와 관련된 계정인\nOverlap, Fill Your Area, NUMBERING 등의\n'
+                      '게임 데이터가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.'
+                  .tr,
+              textAlign: TextAlign.center,
+              style: AppTypography.caption.copyWith(height: 1.5),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back<bool>(result: false),
+            child: Text('취소'.tr),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () => Get.back<bool>(result: true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            child: Text('삭제'.tr),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+
+    if (confirmed != true) return;
+
+    final error = await widget.authService.deleteAccount();
+
+    if (error != null) {
+      showAppSnackBar(
+        title: '삭제 실패'.tr,
+        message: error,
+        backgroundColor: AppColors.danger,
+        icon: Icons.error_outline_rounded,
+      );
+      return;
+    }
+
+    // The auth gate in main.dart swaps to the login screen on the next frame,
+    // which unmounts this screen. Pop the stale settings route only while it is
+    // still mounted, but report the result through the global overlay either
+    // way so the confirmation never depends on that frame timing.
+    if (mounted) Get.back();
+    showAppSnackBar(
+      title: '삭제 완료'.tr,
+      message: 'NEOREO GAMES 계정이 삭제되었습니다.'.tr,
+      icon: Icons.check_circle_outline_rounded,
+    );
   }
 
   void _selectSection(SettingsSection section) {

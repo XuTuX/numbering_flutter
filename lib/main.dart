@@ -13,7 +13,6 @@ import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/hint_purchase_service.dart';
 import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/services/audio_service.dart';
-import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/services/time_attack_score_service.dart';
 import 'package:numbering/utils/app_snackbar.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
@@ -121,7 +120,6 @@ class AppBinding extends Bindings {
     Get.put(NumberingScoreService(supabase: authClient), permanent: true);
     Get.put(TimeAttackScoreService(), permanent: true);
     Get.put(ScoreController(), permanent: true);
-    Get.put(DailyPuzzleController(), permanent: true);
     Get.put<SettingsService>(settingsService, permanent: true);
     Get.put<LevelProgressService>(levelProgressService, permanent: true);
     Get.put<HintService>(hintService, permanent: true);

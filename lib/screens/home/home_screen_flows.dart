@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:numbering/game/game_module.dart';
-import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/screens/game_screen.dart';
 import 'package:numbering/screens/ranking/ranking_screen.dart';
 import 'package:numbering/screens/settings/settings_screen.dart';
 import 'package:numbering/services/auth_service.dart';
-import 'package:numbering/services/numbering_score_service.dart';
-import 'package:numbering/utils/app_snackbar.dart';
-import 'package:numbering/utils/kst_clock.dart';
 import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
 
@@ -24,64 +20,6 @@ void openGameScreen(
     transition: Transition.zoom,
     duration: const Duration(milliseconds: 250),
   );
-}
-
-Future<void> openDailyChallenge(AuthService authService) async {
-  if (authService.user.value == null) {
-    showLoginSheet(
-      authService,
-      initialError: '로그인이 필요합니다.'.tr,
-    );
-    return;
-  }
-
-  final scoreService = Get.find<NumberingScoreService>();
-  try {
-    var challenge = await scoreService.getDailyChallenge();
-    if (challenge.myScore != null) {
-      showAppSnackBar(
-        title: '이번 퍼즐 완료',
-        message: '이번 12시간 퍼즐 점수는 ${challenge.myScore}점입니다.',
-      );
-      showDailyRankingSheet(dateKey: challenge.dateKey);
-      return;
-    }
-    if (!challenge.hasUsedEntry) {
-      challenge = await scoreService.claimDailyChallenge();
-    }
-    openGameScreen(
-      GameSessionConfig(
-        mode: GameMode.dailyOfficial,
-        gameId: NumberingGame.formulaWorkshop.id,
-        seed: challenge.seed,
-        dateKey: challenge.dateKey,
-        isOfficialScoreSubmission: true,
-      ),
-    );
-  } on NumberingServiceException catch (error) {
-    showAppSnackBar(title: '오늘의 게임', message: error.userMessage);
-  }
-}
-
-Future<void> openDailyChallengeTest() async {
-  final dateKey = KstClock.currentChallengePeriodKey();
-  final seed = KstClock.seedForPeriodKey(dateKey);
-  showAppSnackBar(
-    title: '테스트 모드'.tr,
-    message: '공식 기록 없이 오늘의 퍼즐을 테스트합니다.'.tr,
-  );
-  openGameScreen(
-    GameSessionConfig(
-      mode: GameMode.dailyPractice,
-      gameId: _dailyGame(seed).id,
-      seed: seed,
-      dateKey: dateKey,
-    ),
-  );
-}
-
-NumberingGame _dailyGame(int seed) {
-  return NumberingGame.values[seed.abs() % NumberingGame.values.length];
 }
 
 void showLoginSheet(
@@ -116,14 +54,6 @@ void showSettingsScreen(AuthService authService) {
 }
 
 void showRankingSheet() {
-  Get.to(
-    () => const RankingScreen(),
-    transition: Transition.zoom,
-    duration: const Duration(milliseconds: 250),
-  );
-}
-
-void showDailyRankingSheet({String? dateKey}) {
   Get.to(
     () => const RankingScreen(),
     transition: Transition.zoom,

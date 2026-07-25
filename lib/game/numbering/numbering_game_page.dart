@@ -10,7 +10,6 @@ import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/numbering_visuals.dart';
 
 import 'views/level_play_view.dart';
-import 'views/daily_play_view.dart';
 import 'views/time_attack_play_view.dart';
 
 class NumberingGamePage extends StatefulWidget {
@@ -44,7 +43,7 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     } else {
       _selectedLevelId = _progress.highestUnlockedLevel;
     }
-    if (!widget.session.isDailyMode && !widget.session.isTimeAttackMode) {
+    if (!widget.session.isTimeAttackMode) {
       unawaited(_progress.rememberLevel(_selectedLevelId));
     }
   }
@@ -56,18 +55,6 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
         duration: const Duration(milliseconds: 240),
         child: TimeAttackPlayView(
           key: const ValueKey('time-attack-play'),
-          session: widget.session,
-          accent: widget.game.visuals.accent,
-          onShowLevels: widget.callbacks.onExit,
-        ),
-      );
-    }
-
-    if (widget.session.isDailyMode) {
-      return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 240),
-        child: DailyPlayView(
-          key: const ValueKey('daily-puzzle'),
           session: widget.session,
           accent: widget.game.visuals.accent,
           onShowLevels: widget.callbacks.onExit,

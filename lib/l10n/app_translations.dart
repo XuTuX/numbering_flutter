@@ -179,6 +179,8 @@ class AppTranslations extends Translations {
     '로그인': 'Log In',
     '로그인 후 시작할 수 있어요': 'Log in to get started',
     'NUMBERING을 이용하려면 먼저 로그인해 주세요.': 'Please log in before using NUMBERING.',
+    'Google로 계속하기': 'Continue with Google',
+    'Apple로 계속하기': 'Continue with Apple',
     '아직 수식이 완성되지 않았어요. 모든 빈칸에 연산자를 놓아 주세요.':
         'The equation is not complete yet. Place an operator in every blank.',
     '등호(=)를 하나 넣어 양쪽 값이 같도록 완성해 주세요.':
@@ -447,6 +449,8 @@ class AppTranslations extends Translations {
     '로그인': 'ログイン',
     '로그인 후 시작할 수 있어요': 'ログインして始めましょう',
     'NUMBERING을 이용하려면 먼저 로그인해 주세요.': 'NUMBERINGを利用するには、まずログインしてください。',
+    'Google로 계속하기': 'Googleで続ける',
+    'Apple로 계속하기': 'Appleで続ける',
     '아직 수식이 완성되지 않았어요. 모든 빈칸에 연산자를 놓아 주세요.': '式はまだ完成していません。すべての空欄に演算子を置いてください。',
     '등호(=)를 하나 넣어 양쪽 값이 같도록 완성해 주세요.': '等号（=）を1つ入れて、両辺が同じ値になるように完成させてください。',
     '닉네임 설정 필요': 'ニックネーム未設定',
@@ -690,6 +694,8 @@ class AppTranslations extends Translations {
     '로그인': '登录',
     '로그인 후 시작할 수 있어요': '登录后即可开始',
     'NUMBERING을 이용하려면 먼저 로그인해 주세요.': '使用 NUMBERING 前请先登录。',
+    'Google로 계속하기': '使用 Google 继续',
+    'Apple로 계속하기': '使用 Apple 继续',
     '아직 수식이 완성되지 않았어요. 모든 빈칸에 연산자를 놓아 주세요.': '算式还没有完成，请在每个空格中放入运算符。',
     '등호(=)를 하나 넣어 양쪽 값이 같도록 완성해 주세요.': '请加入一个等号（=），使两边的值相等。',
     '닉네임 설정 필요': '需要设置昵称',
@@ -927,6 +933,8 @@ class AppTranslations extends Translations {
     '로그인 후 시작할 수 있어요': 'शुरू करने के लिए लॉग इन करें',
     'NUMBERING을 이용하려면 먼저 로그인해 주세요.':
         'NUMBERING का उपयोग करने से पहले लॉग इन करें।',
+    'Google로 계속하기': 'Google से जारी रखें',
+    'Apple로 계속하기': 'Apple से जारी रखें',
     '아직 수식이 완성되지 않았어요. 모든 빈칸에 연산자를 놓아 주세요.':
         'समीकरण अभी पूरा नहीं है। हर खाली जगह में एक ऑपरेटर रखें।',
     '등호(=)를 하나 넣어 양쪽 값이 같도록 완성해 주세요.':

@@ -59,62 +59,74 @@ class _RequiredLoginScreenState extends State<RequiredLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final isLandscape = size.width > size.height;
-    final horizontalPadding = (size.width * 0.055).clamp(20.0, 36.0);
-
-    final authPanel = _LoginAuthPanel(
-      pendingProvider: _pendingProvider,
-      errorMessage: _errorMessage,
-      showAppleButton: GetPlatform.isIOS,
-      fillHeight: isLandscape,
-      onGoogleTap: () => _handleSignIn('google', widget.onGoogleSignIn),
-      onAppleTap: () => _handleSignIn('apple', widget.onAppleSignIn),
-    );
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
-          padding:
-              EdgeInsets.fromLTRB(horizontalPadding, 12, horizontalPadding, 16),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 960),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const _LoginWordmark(),
-                  const SizedBox(height: 14),
-                  Expanded(
-                    child: isLandscape
-                        ? Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const Expanded(child: _LoginBrandCard()),
-                              const SizedBox(width: 14),
-                              SizedBox(width: 300, child: authPanel),
-                            ],
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const Expanded(child: _LoginBrandCard()),
-                              const SizedBox(height: 14),
-                              authPanel,
-                            ],
-                          ),
-                  ),
-                  const SizedBox(height: 6),
-                  _LoginLegalLinks(
-                    onOpenTerms: () => _openUrl(AppConfig.termsOfServiceUrl),
-                    onOpenPrivacy: () => _openUrl(AppConfig.privacyPolicyUrl),
-                    compactLandscape: true,
-                  ),
-                ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isLandscape = constraints.maxWidth > constraints.maxHeight;
+            final horizontalPadding =
+                (constraints.maxWidth * 0.055).clamp(20.0, 36.0);
+            final contentWidth =
+                (constraints.maxWidth - horizontalPadding * 2).clamp(0.0, 960.0);
+            final panelWidth = (contentWidth * 0.42).clamp(240.0, 320.0);
+
+            final authPanel = _LoginAuthPanel(
+              pendingProvider: _pendingProvider,
+              errorMessage: _errorMessage,
+              showAppleButton: GetPlatform.isIOS,
+              fillHeight: isLandscape,
+              onGoogleTap: () => _handleSignIn('google', widget.onGoogleSignIn),
+              onAppleTap: () => _handleSignIn('apple', widget.onAppleSignIn),
+            );
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                12,
+                horizontalPadding,
+                16,
               ),
-            ),
-          ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 960),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const _LoginWordmark(),
+                      const SizedBox(height: 14),
+                      Expanded(
+                        child: isLandscape
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  const Expanded(child: _LoginBrandCard()),
+                                  const SizedBox(width: 14),
+                                  SizedBox(width: panelWidth, child: authPanel),
+                                ],
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  const Expanded(child: _LoginBrandCard()),
+                                  const SizedBox(height: 14),
+                                  authPanel,
+                                ],
+                              ),
+                      ),
+                      const SizedBox(height: 6),
+                      _LoginLegalLinks(
+                        onOpenTerms: () => _openUrl(AppConfig.termsOfServiceUrl),
+                        onOpenPrivacy: () =>
+                            _openUrl(AppConfig.privacyPolicyUrl),
+                        compactLandscape: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -161,7 +173,7 @@ class _LoginBrandCard extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Flexible(
             child: FittedBox(

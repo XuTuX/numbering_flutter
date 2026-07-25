@@ -62,6 +62,8 @@ class AuthService extends GetxController {
 
   Future<void> signOut() => _signOut(this);
 
+  Future<String?> deleteAccount() => _deleteAccount(this);
+
   int _beginProfileLoadRequest() => ++_profileLoadRequestId;
 
   void _invalidateProfileLoadRequests() {

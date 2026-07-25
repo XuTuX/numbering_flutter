@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-/// Launch modes supplied by the unchanged home, daily, and settings flows.
-enum GameMode {
-  normal,
-  timeAttack,
-  dailyPractice,
-  dailyOfficial,
-  replay,
-  tutorial
-}
+/// Launch modes supplied by the home and settings flows.
+enum GameMode { normal, timeAttack, replay, tutorial }
 
 @immutable
 class GameSessionConfig {
@@ -51,14 +44,10 @@ class GameSessionConfig {
 
   bool get isTutorialMode => mode == GameMode.tutorial;
   bool get isTimeAttackMode => mode == GameMode.timeAttack;
-  bool get isDailyMode =>
-      mode == GameMode.dailyPractice || mode == GameMode.dailyOfficial;
 
   String get modeLabel => switch (mode) {
         GameMode.normal => '일반 모드'.tr,
         GameMode.timeAttack => 'Time Attack'.tr,
-        GameMode.dailyPractice => '오늘의 퍼즐 연습'.tr,
-        GameMode.dailyOfficial => '오늘의 퍼즐'.tr,
         GameMode.replay => '리플레이'.tr,
         GameMode.tutorial => '튜토리얼'.tr,
       };
