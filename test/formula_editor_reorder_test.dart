@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/widgets/formula_editor.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_radius.dart';
 
 void main() {
   testWidgets('time attack swaps the dragged and target digits',
@@ -43,6 +45,65 @@ void main() {
     expect(_digitAt(tester, 2), '1');
     expect(_digitAt(tester, 3), '4');
     expect(_digitAt(tester, 4), '5');
+  });
+
+  testWidgets('wrong equality flashes without showing an error message',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(667, 375));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: FormulaEditor(
+            digits: const ['1', '2'],
+            availableOperators: const {'='},
+            accent: Colors.blue,
+            isLandscape: true,
+            visibleHints: const [],
+            requiresEquals: true,
+            validateExpression: (_) => const ValidationResult.failure('wrong'),
+            onValidSubmission: (_, __) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final equals = find.byKey(const ValueKey('operator-drag-='));
+    final rightDigit = find.byKey(const ValueKey('formula-digit-1'));
+    final gesture = await tester.startGesture(tester.getCenter(equals));
+    await tester.pump();
+    await gesture.moveTo(
+      tester.getCenter(rightDigit) + const Offset(0, 44.2),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+
+    expect(find.text('='), findsNWidgets(2));
+    final flash = tester.widget<FadeTransition>(
+      find.byKey(const ValueKey('wrong-answer-flash')),
+    );
+    expect(flash.opacity.value, greaterThan(0));
+    final decoration = tester
+        .widget<DecoratedBox>(
+          find.descendant(
+            of: find.byKey(const ValueKey('wrong-answer-flash')),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
+    expect(decoration.color, isNull);
+    expect(decoration.borderRadius, BorderRadius.circular(AppRadius.large));
+    expect((decoration.border! as Border).top.width, 4);
+    expect((decoration.border! as Border).top.color, AppColors.red);
+    expect(find.text('정답이 아닙니다.'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(flash.opacity.value, 0);
+    expect(tester.takeException(), isNull);
   });
 }
 

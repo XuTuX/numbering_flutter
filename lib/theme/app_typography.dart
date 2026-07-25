@@ -3,55 +3,9 @@ import 'package:numbering/theme/app_colors.dart';
 
 /// Unified typography system for NUMBERING and the shared app shell.
 ///
-/// Hierarchy:
-///   display  (64) → Hero title only ("AREA")
-///   headline (32) → Secondary hero ("FILL YOUR"), medium scores
-///   title    (24) → Screen / dialog titles
-///   subtitle (20) → Section headers, appbar titles
-///   body     (16) → Primary body text, descriptions
-///   bodySmall(14) → Secondary text, emails, hints
-///   label    (12) → Uppercase labels ("BEST SCORE", "MY BEST")
-///   caption  (11) → Small informational text
-///   tiny      (9) → Micro badges ("ME")
-///
-/// Scores:
-///   scoreDisplay (48) → Large score numbers
-///   scoreMedium  (32) → Score bar numbers
-///
-/// Buttons:
-///   button      (16) → Standard button text
-///   buttonLarge (24) → Primary button (use with BlackHanSans)
-///   buttonSmall (18) → Secondary button (use with BlackHanSans)
-///
-/// Weights (only 4 in use):
-///   w900 → Titles and scores (maximum impact)
-///   w800 → Labels and buttons (emphasis)
-///   w600 → Body text (readability)
-///   w500 → Secondary/subdued body text
-///
-/// Letter spacing rules:
-///   Negative → Large display text (tighter at big sizes)
-///   Zero     → Body and score text
-///   Positive → Uppercase labels (aids ALL-CAPS readability)
+/// Shared typography for the active NUMBERING screens.
 class AppTypography {
   AppTypography._(); // prevent instantiation
-
-  // ─── Display ───────────────────────────────────────────
-  static const display = TextStyle(
-    fontSize: 64,
-    fontWeight: FontWeight.w900,
-    letterSpacing: -2.0,
-    height: 1.0,
-    color: AppColors.ink,
-  );
-
-  static const headline = TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.w900,
-    letterSpacing: -1.0,
-    height: 1.2,
-    color: AppColors.ink,
-  );
 
   // ─── Titles ────────────────────────────────────────────
   static const title = TextStyle(
@@ -59,13 +13,6 @@ class AppTypography {
     fontWeight: FontWeight.w900,
     letterSpacing: -0.5,
     height: 1.2,
-    color: AppColors.ink,
-  );
-
-  static const subtitle = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w900,
-    letterSpacing: -0.3,
     color: AppColors.ink,
   );
 
@@ -84,14 +31,6 @@ class AppTypography {
     color: AppColors.ink,
   );
 
-  // ─── Labels (UPPERCASE) ────────────────────────────────
-  static const label = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w800,
-    letterSpacing: 1.5,
-    color: AppColors.ink,
-  );
-
   // ─── Buttons ───────────────────────────────────────────
   static const button = TextStyle(
     fontSize: 16,
@@ -100,31 +39,10 @@ class AppTypography {
     color: AppColors.ink,
   );
 
-  // ─── Scores ────────────────────────────────────────────
-  static const scoreDisplay = TextStyle(
-    fontSize: 48,
-    fontWeight: FontWeight.w900,
-    height: 1.0,
-    color: AppColors.ink,
-  );
-
-  static const scoreMedium = TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.w900,
-    height: 1.0,
-    color: AppColors.ink,
-  );
-
   // ─── Small ─────────────────────────────────────────────
   static const caption = TextStyle(
     fontSize: 11,
     fontWeight: FontWeight.w700,
-    color: AppColors.ink,
-  );
-
-  static const tiny = TextStyle(
-    fontSize: 9,
-    fontWeight: FontWeight.w800,
     color: AppColors.ink,
   );
 }

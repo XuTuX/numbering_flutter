@@ -46,8 +46,6 @@ void main() {
                 mode: GameMode.timeAttack,
               ),
               callbacks: GameCallbacks(
-                onScoreChanged: (_) {},
-                onFinished: (_) {},
                 onExit: () {},
               ),
             ),

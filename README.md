@@ -1,34 +1,30 @@
 # NUMBERING
 
-NUMBERING is a Flutter number-puzzle collection with three continuously
-playable solo games with shared authentication, settings, audio, and a unified
-visual design.
+NUMBERING is a Flutter equation puzzle with Arcade progression and a
+server-verified Time Attack ranking.
 
 ## Highlights
 
-- Formula Workshop: preserve digit order and build a valid equation
-- Sequence Detective: infer the unique ordered starting pair
-- Number Vault: reorder and combine every number to reach a target
-- EASY / NORMAL / HARD progression across continuous rounds
-- Server-seeded official Numbering daily challenge
-- Supabase-verified all-time, weekly, and daily rankings
-- Responsive Flutter UI for iPhone and iPad
+- Arcade levels with local progress
+- Server-verified Time Attack sessions and rankings
+- Purchasable and daily bonus hints
+- Google and Apple login
+- Settings for language, audio, haptics, and account management
 - Korean, English, Japanese, Simplified Chinese, and Hindi localization
 
 ## How to Play
 
-Tap Play, select one of the three games, and solve rounds in order. Formula
-Workshop and Number Vault advance as soon as the expression becomes valid;
-Sequence Detective counts submitted attempts. Reset restores only the current
-editor while preserving the problem and session progress.
+Keep the digits in their original order. Place arithmetic operators and one
+equals sign so both sides of the equation have the same value. Parentheses can
+be added by selecting two consecutive digits.
 
 ## Technology
 
 - Flutter / Dart
-- Supabase Auth for Google / Apple login only; no Realtime multiplayer server
+- Supabase Auth, server-verified Time Attack, and hint balances
 - GetX state and dependency management
 - Shared Preferences for local progress and settings
-- Google / Apple sign-in, share sheets, audio, haptics, and mobile ads
+- Google / Apple sign-in, in-app purchases, audio, and haptics
 
 ## Runtime Configuration
 
@@ -69,10 +65,10 @@ If signing values are missing, Gradle can still produce an unsigned release arti
 
 ## Supabase Scope
 
-When Supabase configuration is supplied, Numbering uses Supabase Auth plus
-server-verified RPCs for normal best scores, the official daily challenge,
-all-time rankings, daily rankings, and weekly best scores. The client submits
-the completed expression rather than writing a trusted score directly. See
+When Supabase configuration is supplied, Numbering uses Supabase Auth, hint
+balances, purchase verification, and server-verified Time Attack RPCs. The
+client submits completed expressions instead of writing trusted ranking scores
+directly. Arcade progress remains local and never affects rankings. See
 [`docs/numbering_supabase.md`](docs/numbering_supabase.md) for the validation and
 retry rules.
 
@@ -84,13 +80,9 @@ flutter test
 flutter build web --release
 ```
 
-The NAN 2026 preparation audit on 2026-07-14 completed all three checks
-successfully. The web build reports only Flutter's informational WebAssembly
-compatibility note for GetX's current `dart:html` implementation.
-
 ## Source and Asset Notice
 
 Source code is provided for review. Third-party packages remain under their
 respective licenses. Before redistributing the project media independently,
 confirm the authorship or license records for the files in `assets/icons/` and
-`assets/bgm/`. The NAN 2026 asset checklist tracks the remaining evidence.
+`assets/bgm/`.

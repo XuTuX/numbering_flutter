@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:numbering/constant.dart';
 import 'package:numbering/config/app_config.dart';
-import 'package:numbering/controllers/score_controller.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/l10n/app_translations.dart';
 import 'package:numbering/screens/home/home_screen.dart';
@@ -119,7 +118,6 @@ class AppBinding extends Bindings {
   void dependencies() {
     Get.put(AuthService(supabase: authClient), permanent: true);
     Get.put(TimeAttackScoreService(supabase: authClient), permanent: true);
-    Get.put(ScoreController(), permanent: true);
     Get.put<SettingsService>(settingsService, permanent: true);
     Get.put<LevelProgressService>(levelProgressService, permanent: true);
     Get.put<HintService>(hintService, permanent: true);

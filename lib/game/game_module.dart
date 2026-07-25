@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 /// Launch modes supplied by the home and settings flows.
-enum GameMode { normal, timeAttack, replay, tutorial }
+enum GameMode { normal, timeAttack, tutorial }
 
 @immutable
 class GameSessionConfig {
@@ -28,37 +27,13 @@ class GameSessionConfig {
 
   bool get isTutorialMode => mode == GameMode.tutorial;
   bool get isTimeAttackMode => mode == GameMode.timeAttack;
-
-  String get modeLabel => switch (mode) {
-        GameMode.normal => '일반 모드'.tr,
-        GameMode.timeAttack => 'Time Attack'.tr,
-        GameMode.replay => '리플레이'.tr,
-        GameMode.tutorial => '튜토리얼'.tr,
-      };
-}
-
-@immutable
-class GameResult {
-  const GameResult({
-    required this.score,
-    this.detailLabel,
-    this.detailValue,
-  });
-
-  final int score;
-  final String? detailLabel;
-  final String? detailValue;
 }
 
 class GameCallbacks {
   const GameCallbacks({
-    required this.onScoreChanged,
-    required this.onFinished,
     required this.onExit,
   });
 
-  final ValueChanged<int> onScoreChanged;
-  final ValueChanged<GameResult> onFinished;
   final VoidCallback onExit;
 }
 

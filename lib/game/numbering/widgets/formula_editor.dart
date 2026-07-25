@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_radius.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';
 import 'package:numbering/game/numbering/widgets/drag_drop_editor.dart';
@@ -41,9 +42,12 @@ class _EditorSnapshot {
   final List<ParenthesisRange> parentheses;
 }
 
-class FormulaEditorState extends State<FormulaEditor> {
+class FormulaEditorState extends State<FormulaEditor>
+    with SingleTickerProviderStateMixin {
   late List<String> _digits;
   late List<InlineOperator?> _operators;
+  late final AnimationController _wrongAnswerController;
+  late final Animation<double> _wrongAnswerOpacity;
   final List<ParenthesisRange> _parentheses = [];
   final List<_EditorSnapshot> _history = [];
   int? _selectedDigitIndex;
@@ -61,7 +65,31 @@ class FormulaEditorState extends State<FormulaEditor> {
     super.initState();
     _digits = List.of(widget.digits);
     _operators = List.filled(widget.digits.length - 1, null);
+    _wrongAnswerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+    );
+    _wrongAnswerOpacity = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(begin: 0.0, end: 0.9).chain(
+          CurveTween(curve: Curves.easeOut),
+        ),
+        weight: 35,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: 0.9, end: 0.0).chain(
+          CurveTween(curve: Curves.easeIn),
+        ),
+        weight: 65,
+      ),
+    ]).animate(_wrongAnswerController);
     _message = null;
+  }
+
+  @override
+  void dispose() {
+    _wrongAnswerController.dispose();
+    super.dispose();
   }
 
   @override
@@ -69,7 +97,7 @@ class FormulaEditorState extends State<FormulaEditor> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxHeight < 470;
-        return Column(
+        final editor = Column(
           children: [
             SizedBox(height: compact ? 18 : 32),
             Expanded(
@@ -108,6 +136,27 @@ class FormulaEditorState extends State<FormulaEditor> {
                     ),
             ),
             SizedBox(height: compact ? 4 : 10),
+          ],
+        );
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            editor,
+            IgnorePointer(
+              child: FadeTransition(
+                key: const ValueKey('wrong-answer-flash'),
+                opacity: _wrongAnswerOpacity,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.red,
+                      width: 4,
+                    ),
+                    borderRadius: BorderRadius.circular(AppRadius.large),
+                  ),
+                ),
+              ),
+            ),
           ],
         );
       },
@@ -211,7 +260,8 @@ class FormulaEditorState extends State<FormulaEditor> {
     final result = widget.validateExpression(expression);
 
     if (!result.valid && mounted) {
-      setState(() => _message = '정답이 아닙니다.');
+      if (_message != null) setState(() => _message = null);
+      _wrongAnswerController.forward(from: 0);
     } else if (result.valid) {
       AppHaptics.success();
       setState(() => _message = '정답입니다!');

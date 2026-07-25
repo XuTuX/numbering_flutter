@@ -45,8 +45,6 @@ void main() {
                   startLevelId: 1,
                 ),
                 callbacks: GameCallbacks(
-                  onScoreChanged: (_) {},
-                  onFinished: (_) {},
                   onExit: () {},
                 ),
               ),
@@ -117,8 +115,6 @@ void main() {
                   startLevelId: 1,
                 ),
                 callbacks: GameCallbacks(
-                  onScoreChanged: (_) {},
-                  onFinished: (_) {},
                   onExit: () {},
                 ),
               ),

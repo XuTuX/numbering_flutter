@@ -81,8 +81,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       context,
                       widget.sessionConfig,
                       GameCallbacks(
-                        onScoreChanged: (_) {},
-                        onFinished: (_) {},
                         onExit: _exitGame,
                       ),
                     ),
