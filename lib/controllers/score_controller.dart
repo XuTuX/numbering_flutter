@@ -11,7 +11,6 @@ import 'score/score_merge_service.dart';
 part 'score/score_auth.dart';
 part 'score/score_gameplay.dart';
 part 'score/score_persistence.dart';
-part 'score/score_sync.dart';
 
 class ScoreController extends GetxController {
   final score = 0.obs;
@@ -84,9 +83,5 @@ class ScoreController extends GetxController {
 
   void checkHighScore() {
     _checkHighScore(this);
-  }
-
-  Future<void> syncScoreForRanking() {
-    return _syncScoreForRanking(this);
   }
 }

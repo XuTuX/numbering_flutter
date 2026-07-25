@@ -11,7 +11,6 @@ import 'package:numbering/services/hint_purchase_service.dart';
 import 'package:numbering/services/time_attack_score_service.dart';
 import 'package:numbering/utils/app_snackbar.dart';
 import 'package:numbering/widgets/common/soft_card.dart';
-import 'package:numbering/simulation_mode.dart';
 
 part 'home_screen_content_components.dart';
 

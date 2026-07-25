@@ -385,7 +385,6 @@ class AppTranslations extends Translations {
     'Arcade': 'Arcade',
     'Time Attack': 'Time Attack',
     'YOUR RANK': 'YOUR RANK',
-    'Simulation Mode': 'Simulation Mode',
     'Settings': 'Settings',
     '등식 완성하기': 'Complete the Equation',
     '숫자 순서를 바꾸지 않고 등호(=)를 하나 넣어 양쪽 값이 같도록 수식을 완성하세요.':
@@ -620,7 +619,6 @@ class AppTranslations extends Translations {
     'Arcade': 'アーケード',
     'Time Attack': 'タイムアタック',
     'YOUR RANK': 'あなたの順位',
-    'Simulation Mode': 'シミュレーションモード',
     'SETTINGS': '設定',
     '게임을 다시 시작할까요?': 'ゲームを再開しますか？',
     '현재 점수와 진행 내용은 사라집니다.': '現在のスコアと進行状況は失われます。',
@@ -866,7 +864,6 @@ class AppTranslations extends Translations {
     'Arcade': '街机',
     'Time Attack': '限时挑战',
     'YOUR RANK': '你的排名',
-    'Simulation Mode': '模拟模式',
     'Settings': '设置',
     '등식 완성하기': '完成等式',
     '숫자 순서를 바꾸지 않고 등호(=)를 하나 넣어 양쪽 값이 같도록 수식을 완성하세요.':
@@ -1134,7 +1131,6 @@ class AppTranslations extends Translations {
     'Arcade': 'आर्केड',
     'Time Attack': 'टाइम अटैक',
     'YOUR RANK': 'आपकी रैंक',
-    'Simulation Mode': 'सिमुलेशन मोड',
     'Settings': 'सेटिंग्स',
     '등식 완성하기': 'समीकरण पूरा करें',
     '숫자 순서를 바꾸지 않고 등호(=)를 하나 넣어 양쪽 값이 같도록 수식을 완성하세요.':

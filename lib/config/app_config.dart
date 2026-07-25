@@ -17,7 +17,6 @@ class AppConfig {
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
   static bool get isIos =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
-  static bool get supportsAds => isAndroid || isIos;
   static bool get hasSupabaseConfig =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 

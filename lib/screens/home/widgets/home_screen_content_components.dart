@@ -197,14 +197,6 @@ class _HomeHeader extends StatelessWidget {
           ),
           const _HomeHeaderHintBadge(),
           const SizedBox(width: 10),
-          Obx(() => _HeaderIconButton(
-                tooltip: 'Simulation Mode'.tr,
-                icon: SimulationMode.isEnabled.value
-                    ? Icons.bug_report
-                    : Icons.bug_report_outlined,
-                onTap: SimulationMode.toggle,
-              )),
-          const SizedBox(width: 10),
           _HeaderIconButton(
             tooltip: 'Settings'.tr,
             icon: Icons.tune_rounded,

@@ -280,7 +280,7 @@ class _DailyPlayViewState extends State<DailyPlayView> {
               : FormulaEditor(
                   key: _editorKey,
                   digits: _digits.split(''),
-                  availableOperators: const {'+', '-', '×', '^', '='},
+                  availableOperators: const {'+', '-', '×', '÷', '='},
                   accent: widget.accent,
                   isLandscape: isLandscape,
                   visibleHints: const [],

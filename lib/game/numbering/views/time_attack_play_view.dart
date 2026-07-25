@@ -7,7 +7,6 @@ import 'package:numbering/game/game_module.dart';
 import 'package:numbering/game/numbering/numbering_random.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/time_attack_score_service.dart';
-import 'package:numbering/simulation_mode.dart';
 import 'package:numbering/screens/ranking/ranking_screen.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';
 import 'package:numbering/widgets/dialogs/animated_game_dialog.dart';
@@ -69,20 +68,6 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
     super.initState();
     _digits = _generateUniquePuzzle(_getDigitCountForSolves(0));
     _startTimer();
-    
-    if (SimulationMode.isEnabled.value) {
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (!mounted) return;
-        _timer?.cancel();
-        setState(() {
-          _secondsRemaining = 0;
-          _highestNumber = 999;
-          _totalScore = 12345;
-          _isFinished = true;
-        });
-        unawaited(_handleTimeExpired());
-      });
-    }
   }
 
   void _startTimer() {

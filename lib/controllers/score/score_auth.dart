@@ -83,12 +83,6 @@ Future<void> _onUserLogin(
     }
 
     controller.highscore.value = bestLocalScore;
-    await _syncWithOnlineScore(
-      controller,
-      bestLocalScore,
-      expectedUserId: userId,
-      expectedAuthSyncGeneration: generation,
-    );
   } catch (e) {
     debugPrint('🔴 [ScoreController] _onUserLogin failed: $e');
   } finally {

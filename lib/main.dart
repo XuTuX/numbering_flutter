@@ -12,7 +12,6 @@ import 'package:numbering/services/numbering_score_service.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/hint_purchase_service.dart';
 import 'package:numbering/services/settings_service.dart';
-import 'package:numbering/services/ad_service.dart';
 import 'package:numbering/services/audio_service.dart';
 import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/services/time_attack_score_service.dart';
@@ -25,7 +24,6 @@ import 'package:numbering/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,16 +43,6 @@ void main() async {
   );
   try {
     AppConfig.validateRequired();
-
-    if (AppConfig.supportsAds) {
-      try {
-        await _configureFamilySafeAds();
-        await MobileAds.instance.initialize();
-      } catch (error, stackTrace) {
-        debugPrint('Ads unavailable; continuing without ads: $error');
-        debugPrintStack(stackTrace: stackTrace);
-      }
-    }
 
     SupabaseClient? authClient;
     if (AppConfig.hasSupabaseConfig) {
@@ -98,16 +86,6 @@ void main() async {
   }
 }
 
-Future<void> _configureFamilySafeAds() {
-  return MobileAds.instance.updateRequestConfiguration(
-    RequestConfiguration(
-      maxAdContentRating: MaxAdContentRating.g,
-      tagForChildDirectedTreatment: TagForChildDirectedTreatment.yes,
-      tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.yes,
-    ),
-  );
-}
-
 void _installGlobalErrorHandlers() {
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
@@ -144,9 +122,6 @@ class AppBinding extends Bindings {
     Get.put(TimeAttackScoreService(), permanent: true);
     Get.put(ScoreController(), permanent: true);
     Get.put(DailyPuzzleController(), permanent: true);
-    if (AppConfig.supportsAds) {
-      Get.put(AdService(), permanent: true);
-    }
     Get.put<SettingsService>(settingsService, permanent: true);
     Get.put<LevelProgressService>(levelProgressService, permanent: true);
     Get.put<HintService>(hintService, permanent: true);

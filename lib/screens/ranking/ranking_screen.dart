@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/time_attack_score_service.dart';
 import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/simulation_mode.dart';
 
 class RankingScreen extends StatelessWidget {
   const RankingScreen({
@@ -13,20 +12,6 @@ class RankingScreen extends StatelessWidget {
   });
 
   final bool showCloseButton;
-
-  List<TimeAttackRecord> _getMockRecords() {
-    final now = DateTime.now();
-    return List.generate(10, (index) {
-      return TimeAttackRecord(
-        id: 'mock_${index + 1}',
-        nickname: 'Player${index + 1}',
-        highestNumber: 1000 - (index * 50),
-        totalScore: 15000 - (index * 1000),
-        achievedAt: now.subtract(Duration(minutes: index * 10)),
-        playedAt: now.subtract(Duration(minutes: index * 10)),
-      );
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,19 +54,10 @@ class RankingScreen extends StatelessWidget {
                     maxWidth: isLandscape ? (mediaSize.width * 0.82).clamp(500.0, 640.0) : 600.0,
                   ),
                   child: Obx(() {
-                    final records = SimulationMode.isEnabled.value ? _getMockRecords() : scoreService.records;
+                    final records = scoreService.records;
                     final nickname = authService.userNickname.value ?? 'Player';
-                    final myRank = SimulationMode.isEnabled.value ? 112 : scoreService.getMyRank(nickname);
-                    final myBestRecord = SimulationMode.isEnabled.value
-                        ? TimeAttackRecord(
-                            id: 'mock_my_best',
-                            nickname: nickname,
-                            highestNumber: 800,
-                            totalScore: 11000,
-                            achievedAt: DateTime.now(),
-                            playedAt: DateTime.now(),
-                          )
-                        : scoreService.personalBest;
+                    final myRank = scoreService.getMyRank(nickname);
+                    final myBestRecord = scoreService.personalBest;
 
                     if (records.isEmpty) {
                       return const Center(
