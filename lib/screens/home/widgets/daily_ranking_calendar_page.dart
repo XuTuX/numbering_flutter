@@ -144,11 +144,11 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
     final isLandscape = mediaSize.width > mediaSize.height;
     final sw = mediaSize.width;
     final sh = mediaSize.height;
-    final horizontalPadding = (sw * 0.06).clamp(24.0, 40.0);
-    final maxWidth = isLandscape ? sw * 0.95 : 480.0;
+    final horizontalPadding = (sw * 0.06).clamp(20.0, 36.0);
+    final maxWidth = isLandscape ? sw * 0.95 : 600.0;
     final myId = widget.authService.user.value?.id;
-    final topPad = (sh * 0.02).clamp(8.0, 20.0);
-    final bottomPad = (sh * 0.02).clamp(8.0, 20.0);
+    const topPad = 12.0;
+    const bottomPad = 24.0;
     final sectionGap = (sh * 0.02).clamp(8.0, 16.0);
 
     return Padding(

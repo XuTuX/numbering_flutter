@@ -23,10 +23,10 @@ class HintStoreScreen extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 900),
             child: Padding(
               padding: EdgeInsets.fromLTRB(
-                isLandscape ? 32 : 20,
-                14,
-                isLandscape ? 32 : 20,
-                18,
+                isLandscape ? 24 : 20,
+                12,
+                isLandscape ? 24 : 20,
+                24,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

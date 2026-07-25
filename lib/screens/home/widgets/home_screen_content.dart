@@ -70,19 +70,19 @@ class HomeScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
-    final horizontalPadding = (mediaSize.width * 0.055).clamp(22.0, 48.0);
+    final horizontalPadding = (mediaSize.width * 0.055).clamp(20.0, 36.0);
 
     return Scaffold(
       backgroundColor: _homeBackground,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          padding:
+              EdgeInsets.fromLTRB(horizontalPadding, 12, horizontalPadding, 24),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 960),
               child: Column(
                 children: [
-                  const SizedBox(height: 12),
                   _HomeHeader(
                     nickname: nickname,
                     onNicknameTap: onNicknameTap,
@@ -128,7 +128,6 @@ class HomeScreenContent extends StatelessWidget {
                       },
                     ),
                   ),
-                  const SizedBox(height: 14),
                 ],
               ),
             ),

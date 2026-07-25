@@ -65,11 +65,16 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
             final records = Map<int, LevelProgress>.of(progress.progress);
 
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: isLandscape ? hPad : 0),
+              padding: EdgeInsets.fromLTRB(
+                isLandscape ? hPad : 20.0,
+                8,
+                isLandscape ? hPad : 20.0,
+                24,
+              ),
               child: Center(
                 child: ConstrainedBox(
                   constraints:
-                      BoxConstraints(maxWidth: isLandscape ? sw * 0.95 : 480.0),
+                      BoxConstraints(maxWidth: isLandscape ? sw * 0.95 : 600.0),
                   child: Column(
                     children: [
                       Expanded(
@@ -163,7 +168,6 @@ class _ArcadeScreenState extends State<ArcadeScreen> {
                       const SizedBox(height: 16),
                       _ContinueBar(
                           currentLevel: current, onPressed: widget.onStartGame),
-                      const SizedBox(height: 32),
                     ],
                   ),
                 ),

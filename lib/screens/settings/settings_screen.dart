@@ -86,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     20,
                                     4,
                                     20,
-                                    40,
+                                    24,
                                   ),
                                   children: sections,
                                 ),

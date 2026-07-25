@@ -78,9 +78,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                   child: Padding(
                     padding: MediaQuery.sizeOf(context).width >
                             MediaQuery.sizeOf(context).height
-                        ? const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 8)
-                        : const EdgeInsets.all(16),
+                        ? const EdgeInsets.fromLTRB(24, 8, 24, 16)
+                        : const EdgeInsets.fromLTRB(20, 12, 20, 24),
                     child: module.build(
                       context,
                       widget.sessionConfig,

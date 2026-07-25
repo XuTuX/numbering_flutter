@@ -25,7 +25,7 @@ class SettingsHeader extends StatelessWidget {
     return Padding(
       padding: isWide
           ? EdgeInsets.fromLTRB(0, topPadding, 0, bottomPadding)
-          : EdgeInsets.fromLTRB(16, topPadding, 16, bottomPadding),
+          : EdgeInsets.fromLTRB(20, topPadding, 20, bottomPadding),
       child: Row(
         children: [
           SoftIconButton(

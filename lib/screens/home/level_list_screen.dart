@@ -56,7 +56,7 @@ class LevelListScreen extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final horizontalPadding =
-                (constraints.maxWidth * 0.045).clamp(24.0, 44.0);
+                (constraints.maxWidth * 0.045).clamp(20.0, 36.0);
 
             return Center(
               child: ConstrainedBox(
@@ -66,7 +66,7 @@ class LevelListScreen extends StatelessWidget {
                     horizontalPadding,
                     12,
                     horizontalPadding,
-                    10,
+                    24,
                   ),
                   child: Obx(() {
                     final current = progress.highestUnlockedLevel;

@@ -64,9 +64,11 @@ class _RequiredLoginScreenState extends State<RequiredLoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: isLandscape ? 40 : 28,
-              vertical: isLandscape ? 20 : 36,
+            padding: EdgeInsets.fromLTRB(
+              isLandscape ? 24 : 20,
+              12,
+              isLandscape ? 24 : 20,
+              24,
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 520),
