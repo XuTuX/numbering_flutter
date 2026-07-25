@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:numbering/game/numbering/level_models.dart';
-import 'package:numbering/screens/home/level_list_screen.dart';
+import 'package:numbering/screens/home/level_list/level_grid.dart';
 import 'package:numbering/screens/home/widgets/home_screen_content.dart';
 import 'package:numbering/theme/app_colors.dart';
 

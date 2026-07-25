@@ -1,7 +1,20 @@
-part of '../numbering_game_page.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_spacing.dart';
+import 'package:numbering/game/game_module.dart';
+import 'package:numbering/game/numbering/numbering_random.dart';
+import 'package:numbering/services/numbering_score_service.dart';
+import 'package:numbering/controllers/daily_puzzle_controller.dart';
+import 'package:numbering/game/numbering/expression_engine.dart';
+import 'package:numbering/screens/ranking/ranking_screen.dart';
+import 'package:numbering/widgets/dialogs/animated_game_dialog.dart';
+import '../widgets/game_header.dart';
+import '../widgets/formula_editor.dart';
 
-class _DailyPlayView extends StatefulWidget {
-  const _DailyPlayView({
+class DailyPlayView extends StatefulWidget {
+  const DailyPlayView({
     super.key,
     required this.session,
     required this.accent,
@@ -13,12 +26,12 @@ class _DailyPlayView extends StatefulWidget {
   final VoidCallback onShowLevels;
 
   @override
-  State<_DailyPlayView> createState() => _DailyPlayViewState();
+  State<DailyPlayView> createState() => _DailyPlayViewState();
 }
 
-class _DailyPlayViewState extends State<_DailyPlayView> {
+class _DailyPlayViewState extends State<DailyPlayView> {
   late final String _digits;
-  final _editorKey = GlobalKey<_FormulaEditorState>();
+  final _editorKey = GlobalKey<FormulaEditorState>();
   DailyPuzzleProgress? _restoredProgress;
   DailyPuzzleProgress? _pendingProgress;
   Timer? _progressSaveTimer;
@@ -139,71 +152,76 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
         context: context,
         barrierDismissible: !widget.session.isOfficialScoreSubmission,
         builder: (context) {
-          return AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            title: const Text(
-              '성공!',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.w900),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '점수: $score',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: widget.accent,
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            insetPadding: const EdgeInsets.all(24),
+            child: AnimatedGameDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    '성공!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22, color: AppColors.textPrimary),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  widget.session.isOfficialScoreSubmission
-                      ? '점수가 저장되었습니다. 참가자들의 순위를 확인해 보세요.'
-                      : '연습 기록은 공식 랭킹에 반영되지 않습니다.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
+                  const SizedBox(height: 16),
+                  Text(
+                    '점수: $score',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      color: widget.accent,
+                    ),
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.session.isOfficialScoreSubmission
+                        ? '점수가 저장되었습니다. 참가자들의 순위를 확인해 보세요.'
+                        : '연습 기록은 공식 랭킹에 반영되지 않습니다.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                GameDialogButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    unawaited(_handleExit());
+                  },
+                  icon: Icons.close_rounded,
                 ),
+                if (!widget.session.isOfficialScoreSubmission)
+                  GameDialogButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _editorKey.currentState?.reset();
+                    },
+                    icon: Icons.refresh_rounded,
+                    backgroundColor: widget.accent,
+                    iconColor: Colors.white,
+                  ),
+                if (widget.session.isOfficialScoreSubmission)
+                  GameDialogButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      widget.onShowLevels();
+                      Get.to(
+                        () => const RankingScreen(showCloseButton: true),
+                        transition: Transition.zoom,
+                        duration: const Duration(milliseconds: 250),
+                      );
+                    },
+                    icon: Icons.bar_chart_rounded,
+                    backgroundColor: widget.accent,
+                    iconColor: Colors.white,
+                  ),
               ],
             ),
-            actionsAlignment: MainAxisAlignment.center,
-            actions: [
-              if (!widget.session.isOfficialScoreSubmission)
-                FilledButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _editorKey.currentState?.reset();
-                  },
-                  style: FilledButton.styleFrom(backgroundColor: widget.accent),
-                  child: const Text('계속하기'),
-                ),
-              if (widget.session.isOfficialScoreSubmission)
-                FilledButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    widget.onShowLevels();
-                    Get.to(
-                      () => const RankingScreen(showCloseButton: true),
-                      transition: Transition.zoom,
-                      duration: const Duration(milliseconds: 250),
-                    );
-                  },
-                  style: FilledButton.styleFrom(backgroundColor: widget.accent),
-                  child: const Text('참가자 순위 보기'),
-                ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  unawaited(_handleExit());
-                },
-                child: const Text('나가기'),
-              )
-            ],
           );
         });
   }
@@ -215,7 +233,7 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
     return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
-        _GameHeader(
+        GameHeader(
           title: '오늘의 퍼즐',
           backLabel: '나가기',
           onBack: () => unawaited(_handleExit()),
@@ -259,7 +277,7 @@ class _DailyPlayViewState extends State<_DailyPlayView> {
         Expanded(
           child: _isLoadingProgress
               ? const Center(child: CircularProgressIndicator())
-              : _FormulaEditor(
+              : FormulaEditor(
                   key: _editorKey,
                   digits: _digits.split(''),
                   availableOperators: const {'+', '-', '×', '^', '='},

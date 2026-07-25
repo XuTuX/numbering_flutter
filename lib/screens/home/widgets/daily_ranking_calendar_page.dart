@@ -1,17 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:numbering/constant.dart';
-import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/theme/app_shadows.dart';
 import 'package:numbering/services/auth_service.dart';
-import 'package:numbering/theme/app_typography.dart';
 import 'package:numbering/utils/kst_clock.dart';
 import 'package:numbering/utils/mock_data.dart';
-import 'package:numbering/widgets/home_screen/components/weekly_ranking_preview.dart';
 
-part 'daily_ranking_calendar_components.dart';
+import 'package:numbering/screens/home/widgets/daily_ranking/calendar_header.dart';
+import 'package:numbering/screens/home/widgets/daily_ranking/daily_play_button.dart';
+import 'package:numbering/screens/home/widgets/daily_ranking/inline_daily_ranking_panel.dart';
+import 'package:numbering/screens/home/widgets/daily_ranking/monthly_calendar.dart';
 
 class DailyRankingCalendarPage extends StatefulWidget {
   const DailyRankingCalendarPage({
@@ -39,7 +36,7 @@ class DailyRankingCalendarPage extends StatefulWidget {
 class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
     with AutomaticKeepAliveClientMixin {
   late final Set<String> _selectableDateKeys;
-  late final List<_CalendarCellData> _calendarCells;
+  late final List<CalendarCellData> _calendarCells;
   late String _selectedDateKey;
   late final Worker _authWorker;
   bool _isRankLoading = false;
@@ -175,9 +172,9 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  const _CalendarHeader(),
+                                  const CalendarHeader(),
                                   SizedBox(height: sectionGap * 0.5),
-                                  _MonthlyCalendar(
+                                  MonthlyCalendar(
                                     cells: _calendarCells,
                                     selectableDateKeys: _selectableDateKeys,
                                     selectedDateKey: _selectedDateKey,
@@ -197,7 +194,7 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  _InlineDailyRankingPanel(
+                                  InlineDailyRankingPanel(
                                     dateKey: _selectedDateKey,
                                     scores: _selectedScores,
                                     myId: myId,
@@ -209,13 +206,13 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
                                         .onShowDailyRanking(_selectedDateKey),
                                   ),
                                   SizedBox(height: sectionGap),
-                                  _DailyPlayButton(
+                                  DailyPlayButton(
                                     isLoading: _isLaunching,
                                     onPressed: _handleStartDaily,
                                   ),
                                   if (kDebugMode) ...[
                                     const SizedBox(height: 8),
-                                    _DailyTestButton(
+                                    DailyTestButton(
                                       isLoading: _isLaunchingTest,
                                       onPressed: _handleStartDailyTest,
                                     ),
@@ -232,9 +229,9 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const _CalendarHeader(),
+                            const CalendarHeader(),
                             SizedBox(height: sectionGap * 0.5),
-                            _MonthlyCalendar(
+                            MonthlyCalendar(
                               cells: _calendarCells,
                               selectableDateKeys: _selectableDateKeys,
                               selectedDateKey: _selectedDateKey,
@@ -243,7 +240,7 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
                               onDateSelected: _selectDate,
                             ),
                             SizedBox(height: sectionGap),
-                            _InlineDailyRankingPanel(
+                            InlineDailyRankingPanel(
                               dateKey: _selectedDateKey,
                               scores: _selectedScores,
                               myId: myId,
@@ -261,13 +258,13 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
               // 가로 모드에서는 버튼이 우측 패널 안에 이미 포함됨
               if (!isLandscape) ...[
                 SizedBox(height: sectionGap * 0.6),
-                _DailyPlayButton(
+                DailyPlayButton(
                   isLoading: _isLaunching,
                   onPressed: _handleStartDaily,
                 ),
                 if (kDebugMode) ...[
                   const SizedBox(height: 8),
-                  _DailyTestButton(
+                  DailyTestButton(
                     isLoading: _isLaunchingTest,
                     onPressed: _handleStartDailyTest,
                   ),
@@ -310,24 +307,23 @@ class _DailyRankingCalendarPageState extends State<DailyRankingCalendarPage>
     }
   }
 
-  List<_CalendarCellData> _buildCurrentMonthCells() {
+  List<CalendarCellData> _buildCurrentMonthCells() {
     final today = KstClock.nowInKst();
     final firstDay = DateTime(today.year, today.month);
     final daysInMonth = DateTime(today.year, today.month + 1, 0).day;
     final leadingEmptyCells = firstDay.weekday % 7;
-    final cells = <_CalendarCellData>[
+    final cells = <CalendarCellData>[
       for (var index = 0; index < leadingEmptyCells; index++)
-        const _CalendarCellData.empty(),
+        const CalendarCellData.empty(),
     ];
 
     for (var day = 1; day <= daysInMonth; day++) {
       final date = DateTime(today.year, today.month, day);
-      cells
-          .add(_CalendarCellData(dateKey: KstClock.dateKeyFor(date), day: day));
+      cells.add(CalendarCellData(dateKey: KstClock.dateKeyFor(date), day: day));
     }
 
     while (cells.length % 7 != 0) {
-      cells.add(const _CalendarCellData.empty());
+      cells.add(const CalendarCellData.empty());
     }
 
     return cells;

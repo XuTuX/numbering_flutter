@@ -1,9 +1,15 @@
-part of '../numbering_game_page.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/game/numbering/numbering_models.dart';
+import 'package:numbering/game/numbering/expression_engine.dart';
+import 'package:numbering/services/numbering_score_service.dart';
+import 'package:numbering/game/numbering/widgets/drag_drop_editor.dart';
 
 // ─── 수식 편집기 ────────────────────────────────────────────
 
-class _FormulaEditor extends StatefulWidget {
-  const _FormulaEditor({
+class FormulaEditor extends StatefulWidget {
+  const FormulaEditor({
     super.key,
     required this.digits,
     required this.availableOperators,
@@ -31,7 +37,7 @@ class _FormulaEditor extends StatefulWidget {
   final void Function(String expression, int score) onValidSubmission;
 
   @override
-  State<_FormulaEditor> createState() => _FormulaEditorState();
+  State<FormulaEditor> createState() => FormulaEditorState();
 }
 
 class _EditorSnapshot {
@@ -40,7 +46,7 @@ class _EditorSnapshot {
   final List<ParenthesisRange> parentheses;
 }
 
-class _FormulaEditorState extends State<_FormulaEditor> {
+class FormulaEditorState extends State<FormulaEditor> {
   late List<String> _digits;
   late List<InlineOperator?> _operators;
   final List<ParenthesisRange> _parentheses = [];
@@ -87,7 +93,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
           children: [
             SizedBox(height: compact ? 18 : 32),
             Expanded(
-              child: _DragDropEditor(
+              child: DragDropEditor(
                 digits: _digits,
                 operators: _operators,
                 parentheses: _parentheses,

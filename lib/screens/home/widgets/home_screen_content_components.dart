@@ -7,6 +7,42 @@ const _arcadeSurface = AppColors.blockLilac;
 const _rankingSurface = AppColors.blockMint;
 const _homeBorder = AppColors.hairline;
 
+class _HomeMenuCard extends StatelessWidget {
+  const _HomeMenuCard({
+    required this.color,
+    required this.onTap,
+    this.padding = const EdgeInsets.all(12),
+    required this.child,
+  });
+
+  final Color color;
+  final VoidCallback onTap;
+  final EdgeInsetsGeometry padding;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SoftCard(
+      color: color,
+      onTap: onTap,
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: child,
+          ),
+          const Align(
+            alignment: Alignment.bottomRight,
+            child: _ArrowCircle(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ArcadeCard extends StatelessWidget {
   const _ArcadeCard({
     required this.roundLabel,
@@ -18,27 +54,20 @@ class _ArcadeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SoftCard(
+    return _HomeMenuCard(
       color: _arcadeSurface,
       onTap: onTap,
       padding: const EdgeInsets.all(22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Arcade'.tr,
-              style: AppTextStyles.hero,
-            ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Arcade'.tr,
+            style: AppTextStyles.hero,
           ),
-          const Align(
-            alignment: Alignment.bottomRight,
-            child: _ArrowCircle(),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -53,33 +82,20 @@ class _TimeAttackCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SoftCard(
+    return _HomeMenuCard(
       color: _challengeSurface,
       onTap: onTap,
-      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Time Attack'.tr,
-                    style: AppTextStyles.cardTitle,
-                  ),
-                ),
-              ],
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Time Attack'.tr,
+              style: AppTextStyles.cardTitle,
             ),
-          ),
-          const Align(
-            alignment: Alignment.bottomRight,
-            child: _ArrowCircle(),
           ),
         ],
       ),
@@ -102,38 +118,25 @@ class _RankingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SoftCard(
+    return _HomeMenuCard(
       color: _rankingSurface,
       onTap: onTap,
-      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'YOUR RANK'.tr,
-                  style: AppTextStyles.labelSmall,
-                ),
-                const SizedBox(height: 2),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    rank == null ? '#—' : '#$rank',
-                    style: AppTextStyles.cardTitle,
-                  ),
-                ),
-              ],
-            ),
+          Text(
+            'YOUR RANK'.tr,
+            style: AppTextStyles.labelSmall,
           ),
-          const Align(
-            alignment: Alignment.bottomRight,
-            child: _ArrowCircle(),
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              rank == null ? '#—' : '#$rank',
+              style: AppTextStyles.cardTitle,
+            ),
           ),
         ],
       ),

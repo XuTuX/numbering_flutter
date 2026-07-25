@@ -1,7 +1,11 @@
-part of '../numbering_game_page.dart';
+import 'package:flutter/material.dart';
+import 'package:numbering/game/numbering/expression_engine.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/game/numbering/widgets/operator_palette.dart';
 
-class _DragDropEditor extends StatefulWidget {
-  const _DragDropEditor({
+class DragDropEditor extends StatefulWidget {
+  const DragDropEditor({
+    super.key,
     required this.digits,
     required this.operators,
     required this.parentheses,
@@ -34,10 +38,10 @@ class _DragDropEditor extends StatefulWidget {
   final bool allowDigitReordering;
 
   @override
-  State<_DragDropEditor> createState() => _DragDropEditorState();
+  State<DragDropEditor> createState() => _DragDropEditorState();
 }
 
-class _DragDropEditorState extends State<_DragDropEditor> {
+class _DragDropEditorState extends State<DragDropEditor> {
   final GlobalKey _formulaRowKey = GlobalKey();
   late List<GlobalKey> _slotKeys;
   int? _hoveredSlotIndex;
@@ -50,7 +54,7 @@ class _DragDropEditorState extends State<_DragDropEditor> {
   }
 
   @override
-  void didUpdateWidget(covariant _DragDropEditor oldWidget) {
+  void didUpdateWidget(covariant DragDropEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
     final slotCount = widget.digits.length - 1;
     if (_slotKeys.length != slotCount) {
@@ -215,7 +219,7 @@ class _DragDropEditorState extends State<_DragDropEditor> {
 
           final slotIndex = digitIndex - 1;
 
-          return _InlineOperatorTarget(
+          return InlineOperatorTarget(
             key: _slotKeys[slotIndex],
             current: widget.operators[slotIndex],
             digit: digit,
@@ -308,7 +312,7 @@ class _DragDropEditorState extends State<_DragDropEditor> {
                     ),
             ),
             const Spacer(),
-            _OperatorPalette(
+            OperatorPalette(
               availableOperators: widget.availableOperators,
               compact: compact,
               parenthesisMode: widget.parenthesisMode,
@@ -372,10 +376,8 @@ class _DragDropEditorState extends State<_DragDropEditor> {
   }
 }
 
-// ─── 인라인 연산자 타겟 ─────────────────────────────────────
-
-class _InlineOperatorTarget extends StatelessWidget {
-  const _InlineOperatorTarget({
+class InlineOperatorTarget extends StatelessWidget {
+  const InlineOperatorTarget({
     super.key,
     required this.current,
     required this.digit,
@@ -432,143 +434,6 @@ class _InlineOperatorTarget extends StatelessWidget {
           ),
         digit,
       ],
-    );
-  }
-}
-
-// ─── 연산자 팔레트 ─────────────────────────────────────────
-
-class _OperatorPalette extends StatefulWidget {
-  const _OperatorPalette({
-    required this.availableOperators,
-    required this.compact,
-    required this.parenthesisMode,
-    required this.onParenthesisModeToggled,
-    required this.onDragUpdate,
-    required this.onDragEnd,
-  });
-
-  final Set<String> availableOperators;
-  final bool compact;
-  final bool parenthesisMode;
-  final VoidCallback onParenthesisModeToggled;
-  final ValueChanged<Offset> onDragUpdate;
-  final void Function(InlineOperator operator, Offset feedbackCenter) onDragEnd;
-
-  @override
-  State<_OperatorPalette> createState() => _OperatorPaletteState();
-}
-
-class _OperatorPaletteState extends State<_OperatorPalette> {
-  InlineOperator? _dragging;
-
-  @override
-  Widget build(BuildContext context) {
-    final operators = InlineOperator.values
-        .where((operator) => widget.availableOperators.contains(operator.symbol))
-        .toList();
-    final isLandscape =
-        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
-    final size = widget.compact ? (isLandscape ? 52.0 : 44.0) : 58.0;
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: widget.compact ? 14 : 22,
-        vertical: widget.compact ? 10 : 14,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var index = 0; index < operators.length; index++) ...[
-            if (index > 0) const SizedBox(width: 8),
-            Draggable<InlineOperator>(
-              key: ValueKey('operator-drag-${operators[index].symbol}'),
-              data: operators[index],
-              onDragStarted: () => setState(() => _dragging = operators[index]),
-              dragAnchorStrategy: (_, __, ___) => Offset(size / 2, size * 1.35),
-              onDragUpdate: (details) {
-                const feedbackCenterFactor = 0.5;
-                final anchor = Offset(size / 2, size * 1.35);
-                final feedbackTopLeft = details.globalPosition - anchor;
-                widget.onDragUpdate(
-                  feedbackTopLeft +
-                      Offset(
-                        size * feedbackCenterFactor,
-                        size * feedbackCenterFactor,
-                      ),
-                );
-              },
-              onDragEnd: (details) {
-                setState(() => _dragging = null);
-                widget.onDragEnd(
-                  operators[index],
-                  details.offset + Offset(size / 2, size / 2),
-                );
-              },
-              feedback: Material(
-                color: Colors.transparent,
-                child: _OperatorButton(
-                  operator: operators[index],
-                  size: size,
-                  active: true,
-                ),
-              ),
-              childWhenDragging: Opacity(
-                opacity: 0.3,
-                child: _OperatorButton(
-                  operator: operators[index],
-                  size: size,
-                  active: false,
-                ),
-              ),
-              child: _OperatorButton(
-                operator: operators[index],
-                size: size,
-                active: _dragging == operators[index],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-// ─── 연산자 버튼 ─────────────────────────────────────────
-
-class _OperatorButton extends StatelessWidget {
-  const _OperatorButton({
-    required this.operator,
-    required this.size,
-    required this.active,
-  });
-
-  final InlineOperator operator;
-  final double size;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: active ? AppColors.blockCream : AppColors.surfaceSecondary,
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        operator.symbol,
-        style: TextStyle(
-          fontSize: size * 0.42,
-          color: const Color(0xFF253044),
-          fontWeight: FontWeight.w700,
-        ),
-      ),
     );
   }
 }

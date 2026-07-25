@@ -1,38 +1,17 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/theme/app_radius.dart';
-import 'package:numbering/theme/app_spacing.dart';
-import 'package:numbering/widgets/common/soft_icon_button.dart';
 import 'package:numbering/game/game_module.dart';
-import 'package:numbering/game/numbering/expression_engine.dart';
 import 'package:numbering/game/numbering/level_catalog.dart';
-import 'package:numbering/game/numbering/level_models.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
-import 'package:numbering/controllers/daily_puzzle_controller.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
-import 'package:numbering/game/numbering/numbering_random.dart';
 import 'package:numbering/game/numbering/numbering_visuals.dart';
-import 'package:numbering/services/hint_service.dart';
-import 'package:numbering/services/numbering_score_service.dart';
-import 'package:numbering/utils/app_snackbar.dart';
-import 'package:numbering/screens/ranking/ranking_screen.dart';
-import 'package:numbering/screens/hints/hint_store_screen.dart';
-import 'package:numbering/services/hint_purchase_service.dart';
 
-import 'package:numbering/services/auth_service.dart';
-import 'package:numbering/services/time_attack_score_service.dart';
-import 'package:numbering/simulation_mode.dart';
-
-part 'views/level_play_view.dart';
-part 'views/daily_play_view.dart';
-part 'views/time_attack_play_view.dart';
-part 'widgets/formula_editor.dart';
-part 'widgets/formula_editor_components.dart';
+import 'views/level_play_view.dart';
+import 'views/daily_play_view.dart';
+import 'views/time_attack_play_view.dart';
 
 class NumberingGamePage extends StatefulWidget {
   const NumberingGamePage({
@@ -75,7 +54,7 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     if (widget.session.isTimeAttackMode) {
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 240),
-        child: _TimeAttackPlayView(
+        child: TimeAttackPlayView(
           key: const ValueKey('time-attack-play'),
           session: widget.session,
           accent: widget.game.visuals.accent,
@@ -87,7 +66,7 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
     if (widget.session.isDailyMode) {
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 240),
-        child: _DailyPlayView(
+        child: DailyPlayView(
           key: const ValueKey('daily-puzzle'),
           session: widget.session,
           accent: widget.game.visuals.accent,
@@ -98,7 +77,7 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 240),
-      child: _LevelPlayView(
+      child: LevelPlayView(
         key: ValueKey('level-$_selectedLevelId'),
         level: LevelCatalog.byId(_selectedLevelId),
         progress: _progress,

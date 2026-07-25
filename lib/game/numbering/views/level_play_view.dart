@@ -1,9 +1,23 @@
-part of '../numbering_game_page.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_spacing.dart';
+import 'package:numbering/game/numbering/level_models.dart';
+import 'package:numbering/game/numbering/level_progress_service.dart';
+import 'package:numbering/game/numbering/level_catalog.dart';
+import 'package:numbering/game/numbering/expression_engine.dart';
+import 'package:numbering/services/hint_service.dart';
+import 'package:numbering/services/hint_purchase_service.dart';
+import 'package:numbering/utils/app_snackbar.dart';
+import 'package:numbering/screens/hints/hint_store_screen.dart';
+import 'package:numbering/widgets/dialogs/animated_game_dialog.dart';
+import 'package:numbering/game/numbering/widgets/game_header.dart';
+import 'package:numbering/game/numbering/widgets/formula_editor.dart';
 
 // ─── 레벨 플레이 뷰 ─────────────────────────────────────────
 
-class _LevelPlayView extends StatefulWidget {
-  const _LevelPlayView({
+class LevelPlayView extends StatefulWidget {
+  const LevelPlayView({
     super.key,
     required this.level,
     required this.progress,
@@ -19,11 +33,11 @@ class _LevelPlayView extends StatefulWidget {
   final ValueChanged<int> onNext;
 
   @override
-  State<_LevelPlayView> createState() => _LevelPlayViewState();
+  State<LevelPlayView> createState() => _LevelPlayViewState();
 }
 
-class _LevelPlayViewState extends State<_LevelPlayView> {
-  final _editorKey = GlobalKey<_FormulaEditorState>();
+class _LevelPlayViewState extends State<LevelPlayView> {
+  final _editorKey = GlobalKey<FormulaEditorState>();
   int _usedHints = 0;
   _CompletedAttempt? _completed;
   OverlayEntry? _resultOverlay;
@@ -42,7 +56,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
     return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
-        _GameHeader(
+        GameHeader(
           title: 'LEVEL ${widget.level.id}',
           backLabel: '레벨 목록',
           onBack: widget.onShowLevels,
@@ -50,7 +64,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
             final remaining = Get.isRegistered<HintService>()
                 ? Get.find<HintService>().hints.value
                 : (3 - _usedHints);
-            return _HintButton(
+            return HintButton(
               remainingHints: remaining,
               accent: widget.accent,
               onPressed: _showHint,
@@ -59,7 +73,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
         ),
         const SizedBox(height: AppSpacing.lg),
         Expanded(
-          child: _FormulaEditor(
+          child: FormulaEditor(
             key: _editorKey,
             digits: widget.level.digits,
             availableOperators: widget.level.availableOperators,
@@ -178,139 +192,7 @@ class _LevelPlayViewState extends State<_LevelPlayView> {
   }
 }
 
-// ─── 레벨 헤더 ────────────────────────────────────────────
 
-class _GameHeader extends StatelessWidget {
-  const _GameHeader({
-    required this.title,
-    this.backLabel = '',
-    this.onBack,
-    required this.trailing,
-    this.leading,
-    this.titleWidget,
-  });
-
-  final String title;
-  final String backLabel;
-  final VoidCallback? onBack;
-  final Widget trailing;
-  final Widget? leading;
-  final Widget? titleWidget;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        leading ??
-            IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
-              tooltip: backLabel.isNotEmpty ? backLabel : '뒤로가기',
-              onPressed: onBack ?? () {},
-            ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: titleWidget ??
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 44),
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: trailing,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _HintButton extends StatelessWidget {
-  const _HintButton({
-    required this.remainingHints,
-    required this.accent,
-    required this.onPressed,
-  });
-
-  final int remainingHints;
-  final Color accent;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: '힌트, $remainingHints회 남음',
-      child: SizedBox(
-        key: const ValueKey('level-hint-button'),
-        width: 44,
-        height: 44,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fill(
-              child: Material(
-                color: AppColors.surface,
-                shape: const CircleBorder(
-                  side: BorderSide(color: AppColors.borderLight),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: onPressed,
-                  child: const Icon(
-                    Icons.lightbulb_outline_rounded,
-                    size: 20,
-                    color: AppColors.ink,
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: -3,
-              right: -3,
-              child: Container(
-                width: 18,
-                height: 18,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: remainingHints == 0 ? AppColors.surfaceSoft : accent,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.background, width: 2),
-                ),
-                child: Text(
-                  '$remainingHints',
-                  style: TextStyle(
-                    color: remainingHints == 0
-                        ? AppColors.textSecondary
-                        : AppColors.onPrimary,
-                    fontSize: 9,
-                    height: 1,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // ─── 완료 시도 데이터 ────────────────────────────────────────
 
@@ -351,100 +233,44 @@ class _LevelResultOverlay extends StatelessWidget {
         Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0.9, end: 1.0),
-              duration: const Duration(milliseconds: 200),
-              builder: (context, scale, child) {
-                return Transform.scale(
-                  scale: scale,
-                  child: Opacity(
-                    opacity: (scale - 0.9) / 0.1 + 0.0,
-                    child: child,
-                  ),
-                );
-              },
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 260),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(3, (index) {
-                        final isLit = index < evaluation.stars;
-                        final size = index == 1 ? 48.0 : 36.0;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          child: Icon(
-                            isLit
-                                ? Icons.star_rounded
-                                : Icons.star_border_rounded,
-                            size: size,
-                            color: isLit
-                                ? const Color(0xFFFFB800)
-                                : AppColors.borderLight,
-                          ),
-                        );
-                      }),
+            child: AnimatedGameDialog(
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  final isLit = index < evaluation.stars;
+                  final size = index == 1 ? 48.0 : 36.0;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Icon(
+                      isLit
+                          ? Icons.star_rounded
+                          : Icons.star_border_rounded,
+                      size: size,
+                      color: isLit
+                          ? const Color(0xFFFFB800)
+                          : AppColors.borderLight,
                     ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: onReplay,
-                          icon: const Icon(
-                            Icons.replay_rounded,
-                            size: 22,
-                            color: AppColors.textPrimary,
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: const Color(0xFFF3F4F6),
-                            padding: const EdgeInsets.all(12),
-                            shape: const CircleBorder(),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        IconButton(
-                          onPressed: onShowLevels,
-                          icon: const Icon(
-                            Icons.grid_view_rounded,
-                            size: 22,
-                            color: AppColors.textPrimary,
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: const Color(0xFFF3F4F6),
-                            padding: const EdgeInsets.all(12),
-                            shape: const CircleBorder(),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        IconButton(
-                          onPressed: onNext,
-                          icon: Icon(
-                            onNext == null
-                                ? Icons.check_rounded
-                                : Icons.arrow_forward_rounded,
-                            size: 22,
-                            color: Colors.white,
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: const Color(0xFF0095FF),
-                            padding: const EdgeInsets.all(12),
-                            shape: const CircleBorder(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  );
+                }),
               ),
+              actions: [
+                GameDialogButton(
+                  onPressed: onReplay,
+                  icon: Icons.replay_rounded,
+                ),
+                GameDialogButton(
+                  onPressed: onShowLevels,
+                  icon: Icons.grid_view_rounded,
+                ),
+                GameDialogButton(
+                  onPressed: onNext,
+                  icon: onNext == null
+                      ? Icons.check_rounded
+                      : Icons.arrow_forward_rounded,
+                  backgroundColor: const Color(0xFF0095FF),
+                  iconColor: Colors.white,
+                ),
+              ],
             ),
           ),
         ),

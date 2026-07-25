@@ -1,7 +1,21 @@
-part of '../numbering_game_page.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:numbering/theme/app_colors.dart';
+import 'package:numbering/theme/app_spacing.dart';
+import 'package:numbering/game/game_module.dart';
+import 'package:numbering/game/numbering/numbering_random.dart';
+import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/time_attack_score_service.dart';
+import 'package:numbering/simulation_mode.dart';
+import 'package:numbering/screens/ranking/ranking_screen.dart';
+import 'package:numbering/game/numbering/expression_engine.dart';
+import 'package:numbering/widgets/dialogs/animated_game_dialog.dart';
+import '../widgets/game_header.dart';
+import '../widgets/formula_editor.dart';
 
-class _TimeAttackPlayView extends StatefulWidget {
-  const _TimeAttackPlayView({
+class TimeAttackPlayView extends StatefulWidget {
+  const TimeAttackPlayView({
     super.key,
     required this.session,
     required this.accent,
@@ -13,15 +27,15 @@ class _TimeAttackPlayView extends StatefulWidget {
   final VoidCallback onShowLevels;
 
   @override
-  State<_TimeAttackPlayView> createState() => _TimeAttackPlayViewState();
+  State<TimeAttackPlayView> createState() => _TimeAttackPlayViewState();
 }
 
-class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
+class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
   static const int _initialTimeSeconds = 180; // 3 minutes
 
   late String _digits;
   final Set<String> _recentDigitSets = {};
-  final _editorKey = GlobalKey<_FormulaEditorState>();
+  final _editorKey = GlobalKey<FormulaEditorState>();
   Timer? _timer;
   int _secondsRemaining = _initialTimeSeconds;
   int _solvesCount = 0;
@@ -146,134 +160,84 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           insetPadding: const EdgeInsets.all(24),
-          child: TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 0.9, end: 1.0),
-            duration: const Duration(milliseconds: 200),
-            builder: (context, scale, child) {
-              return Transform.scale(
-                scale: scale,
-                child: Opacity(
-                  opacity: ((scale - 0.9) / 0.1).clamp(0.0, 1.0),
-                  child: child,
-                ),
-              );
-            },
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 260),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.emoji_events_rounded,
+          child: AnimatedGameDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.emoji_events_rounded,
+                      color: widget.accent,
+                      size: 32,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '$_highestNumber',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
                         color: widget.accent,
-                        size: 32,
+                        height: 1,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '$_highestNumber',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w900,
-                          color: widget.accent,
-                          height: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 20,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.star_rounded,
+                      size: 20,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '$_totalScore',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.textSecondary,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '$_totalScore',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          widget.onShowLevels();
-                        },
-                        icon: const Icon(
-                          Icons.close_rounded,
-                          size: 22,
-                          color: AppColors.textPrimary,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: const Color(0xFFF3F4F6),
-                          padding: const EdgeInsets.all(12),
-                          shape: const CircleBorder(),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _restartGame();
-                        },
-                        icon: const Icon(
-                          Icons.refresh_rounded,
-                          size: 22,
-                          color: Colors.white,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: widget.accent,
-                          padding: const EdgeInsets.all(12),
-                          shape: const CircleBorder(),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          widget.onShowLevels();
-                          Get.to(
-                            () => const RankingScreen(showCloseButton: true),
-                            transition: Transition.zoom,
-                            duration: const Duration(milliseconds: 250),
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.bar_chart_rounded,
-                          size: 22,
-                          color: AppColors.textPrimary,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: const Color(0xFFF3F4F6),
-                          padding: const EdgeInsets.all(12),
-                          shape: const CircleBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
+            actions: [
+              GameDialogButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.onShowLevels();
+                },
+                icon: Icons.close_rounded,
+              ),
+              GameDialogButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _restartGame();
+                },
+                icon: Icons.refresh_rounded,
+                backgroundColor: widget.accent,
+                iconColor: Colors.white,
+              ),
+              GameDialogButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.onShowLevels();
+                  Get.to(
+                    () => const RankingScreen(showCloseButton: true),
+                    transition: Transition.zoom,
+                    duration: const Duration(milliseconds: 250),
+                  );
+                },
+                icon: Icons.bar_chart_rounded,
+              ),
+            ],
           ),
         );
       },
@@ -294,7 +258,7 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
     return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
-        _GameHeader(
+        GameHeader(
           title: 'BEST $_highestNumber  TOTAL $_totalScore',
           titleWidget: Text(
             'BEST $_highestNumber  TOTAL $_totalScore',
@@ -335,7 +299,7 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
         Expanded(
           child: AbsorbPointer(
             absorbing: _isFinished,
-            child: _FormulaEditor(
+            child: FormulaEditor(
               key: _editorKey,
               digits: _digits.split(''),
               availableOperators: const {'+', '-', '×', '÷', '='},

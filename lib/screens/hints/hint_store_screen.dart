@@ -119,29 +119,15 @@ class _StoreHeader extends StatelessWidget {
         ),
         const SizedBox(width: 14),
         const Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '힌트 상점',
-                style: TextStyle(
-                  color: AppColors.ink,
-                  fontSize: 25,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.8,
-                ),
-              ),
-              SizedBox(height: 5),
-              Text(
-                '막힐 때 한 개씩 사용해 보세요',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+          child: Text(
+            '힌트 상점',
+            style: TextStyle(
+              color: AppColors.ink,
+              fontSize: 25,
+              height: 1,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.8,
+            ),
           ),
         ),
         Obx(
@@ -209,49 +195,39 @@ class _HintPackCard extends StatelessWidget {
           color: isFeatured
               ? AppColors.ink.withValues(alpha: 0.3)
               : AppColors.borderLight,
+          width: isFeatured ? 1.5 : 1.0,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppColors.ink,
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-            ),
-            child: Text(
-              pack.label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
+          Expanded(
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.lightbulb_rounded,
+                    size: 28,
+                    color: AppColors.yellow,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${pack.hintCount}개',
+                    style: const TextStyle(
+                      color: AppColors.ink,
+                      fontSize: 28,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 22),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const Icon(
-                Icons.lightbulb_rounded,
-                size: 25,
-                color: AppColors.yellow,
-              ),
-              const SizedBox(width: 7),
-              Text(
-                '${pack.hintCount}개',
-                style: const TextStyle(
-                  color: AppColors.ink,
-                  fontSize: 27,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1,
-                ),
-              ),
-            ],
-          ),
-          if (isLandscape) const Spacer() else const SizedBox(height: 14),
+          if (!isLandscape) const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             height: 44,
@@ -300,18 +276,7 @@ class _StoreStatus extends StatelessWidget {
     final status = purchaseService.statusMessage.value;
     final message = error ?? status;
     if (message == null) {
-      return const Padding(
-        padding: EdgeInsets.only(top: 12),
-        child: Text(
-          '결제 금액은 App Store 또는 Google Play 계정으로 청구됩니다.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      );
+      return const SizedBox(height: 8);
     }
 
     return Padding(
@@ -320,11 +285,13 @@ class _StoreStatus extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            error == null ? Icons.check_circle_outline : Icons.error_outline,
+            error == null
+                ? Icons.check_circle_outline_rounded
+                : Icons.error_outline_rounded,
             size: 16,
             color: error == null ? AppColors.green : AppColors.danger,
           ),
-          const SizedBox(width: 7),
+          const SizedBox(width: 6),
           Flexible(
             child: Text(
               message,
@@ -332,16 +299,24 @@ class _StoreStatus extends StatelessWidget {
               style: TextStyle(
                 color:
                     error == null ? AppColors.textSecondary : AppColors.danger,
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
           if (error != null) ...[
-            const SizedBox(width: 4),
-            TextButton(
-              onPressed: purchaseService.reloadProducts,
-              child: const Text('다시 시도'),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: purchaseService.reloadProducts,
+              child: const Text(
+                '다시 시도',
+                style: TextStyle(
+                  color: AppColors.ink,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
             ),
           ],
         ],

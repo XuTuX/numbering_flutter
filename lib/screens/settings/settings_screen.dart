@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
+import 'package:numbering/widgets/dialogs/how_to_play_dialog.dart';
 import 'package:numbering/game/game_module.dart';
 import 'package:numbering/screens/home/home_screen_flows.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
@@ -240,7 +241,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showTutorialDialog(BuildContext context) {
-    openGameScreen(const GameSessionConfig(mode: GameMode.tutorial));
+    Get.dialog(
+      HowToPlayDialog(
+        onPlayTutorial: () {
+          Get.back();
+          openGameScreen(const GameSessionConfig(mode: GameMode.tutorial));
+        },
+      ),
+    );
   }
 
   void _showEditNicknameDialog(
