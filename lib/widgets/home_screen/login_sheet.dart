@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart' as apple;
@@ -13,6 +15,7 @@ import 'package:numbering/theme/app_typography.dart';
 part 'login/login_sheet_view.dart';
 part 'login/login_sheet_legal.dart';
 part 'login/login_sheet_social.dart';
+part 'login/login_number_motion.dart';
 part 'login/required_login_screen.dart';
 
 class LoginSheet extends StatefulWidget {

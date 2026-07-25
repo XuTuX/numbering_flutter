@@ -114,7 +114,9 @@ class _RequiredLoginScreenState extends State<RequiredLoginScreen> {
                           style: AppTextStyles.hero.copyWith(fontSize: 44),
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.section),
+                      const SizedBox(height: AppSpacing.xl),
+                      const _LoginNumberMotion(),
+                      const SizedBox(height: AppSpacing.xl),
                       _SocialSignInButtons(
                         pendingProvider: _pendingProvider,
                         showAppleButton: GetPlatform.isIOS,

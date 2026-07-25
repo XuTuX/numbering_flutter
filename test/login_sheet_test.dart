@@ -73,6 +73,10 @@ void main() {
     expect(find.text('NUMBERING'), findsOneWidget);
     expect(find.text('로그인하여 플레이해보세요'), findsNothing);
     expect(
+      find.byKey(const ValueKey('login-number-motion')),
+      findsOneWidget,
+    );
+    expect(
       find.byKey(const ValueKey('google-sign-in-button')),
       findsOneWidget,
     );
@@ -80,7 +84,8 @@ void main() {
     expect(find.textContaining('건너뛰'), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('google-sign-in-button')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(googleAttempts, 1);
     expect(
