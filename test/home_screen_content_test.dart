@@ -16,6 +16,7 @@ void main() {
     required Size surfaceSize,
     String? nickname,
     VoidCallback? onNicknameTap,
+    double textScaleFactor = 1,
   }) async {
     Get.testMode = true;
     SharedPreferences.setMockInitialValues({});
@@ -40,6 +41,12 @@ void main() {
 
     await tester.pumpWidget(
       GetMaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScaleFactor),
+          ),
+          child: child!,
+        ),
         home: HomeScreenContent(
           onSettingsTap: () {},
           onStartGame: () {},
@@ -91,6 +98,32 @@ void main() {
     expect(find.text('Arcade'), findsOneWidget);
     expect(find.text('Time Attack'), findsOneWidget);
     expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('stacks cards on a narrow portrait screen without overflow',
+      (tester) async {
+    await pumpHome(
+      tester,
+      surfaceSize: const Size(390, 844),
+      textScaleFactor: 1.5,
+    );
+
+    final arcade = tester.getCenter(find.text('Arcade'));
+    final timeAttack = tester.getCenter(find.text('Time Attack'));
+    final rank = tester.getCenter(find.text('YOUR RANK'));
+    expect(arcade.dy, lessThan(timeAttack.dy));
+    expect((timeAttack.dy - rank.dy).abs(), lessThan(80));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('keeps the wide card layout on an iPad portrait screen',
+      (tester) async {
+    await pumpHome(tester, surfaceSize: const Size(768, 1024));
+
+    final arcade = tester.getCenter(find.text('Arcade'));
+    final timeAttack = tester.getCenter(find.text('Time Attack'));
+    expect(arcade.dx, lessThan(timeAttack.dx));
     expect(tester.takeException(), isNull);
   });
 }

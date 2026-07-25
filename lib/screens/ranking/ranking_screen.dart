@@ -32,13 +32,17 @@ class RankingScreen extends StatelessWidget {
               )
             : null,
         iconTheme: const IconThemeData(color: AppColors.ink),
-        title: const Text(
-          'TIME ATTACK RANKING',
-          style: TextStyle(
-            color: AppColors.ink,
-            fontWeight: FontWeight.w900,
-            fontSize: 18,
-            letterSpacing: 0.5,
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'TIME ATTACK RANKING',
+            maxLines: 1,
+            style: TextStyle(
+              color: AppColors.ink,
+              fontWeight: FontWeight.w900,
+              fontSize: 18,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
         centerTitle: true,

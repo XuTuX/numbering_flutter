@@ -66,53 +66,80 @@ class HomeScreenContent extends StatelessWidget {
     return Scaffold(
       backgroundColor: _homeBackground,
       body: SafeArea(
-        child: Padding(
-          padding:
-              EdgeInsets.fromLTRB(horizontalPadding, 12, horizontalPadding, 24),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 960),
-              child: Column(
-                children: [
-                  _HomeHeader(
-                    onNicknameTap: onNicknameTap,
-                    onSettingsTap: onSettingsTap,
-                  ),
-                  const SizedBox(height: 14),
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          flex: 7,
-                          child: _ArcadeCard(
-                            onTap: () => _openArcade(onStartGame),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                child:
-                                    _TimeAttackCard(onTap: onStartTimeAttack),
-                              ),
-                              const SizedBox(height: 14),
-                              Expanded(
-                                child: _RankingCard(onTap: onRankingTap),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final useWideLayout = constraints.maxWidth >= 620;
+
+            final arcade = _ArcadeCard(
+              onTap: () => _openArcade(onStartGame),
+            );
+            final timeAttack = _TimeAttackCard(onTap: onStartTimeAttack);
+            final ranking = _RankingCard(onTap: onRankingTap);
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                12,
+                horizontalPadding,
+                24,
               ),
-            ),
-          ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 960),
+                  child: Column(
+                    children: [
+                      _HomeHeader(
+                        onNicknameTap: onNicknameTap,
+                        onSettingsTap: onSettingsTap,
+                      ),
+                      const SizedBox(height: 14),
+                      Expanded(
+                        child: useWideLayout
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(flex: 7, child: arcade),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Expanded(child: timeAttack),
+                                        const SizedBox(height: 14),
+                                        Expanded(child: ranking),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(flex: 3, child: arcade),
+                                  const SizedBox(height: 14),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Expanded(child: timeAttack),
+                                        const SizedBox(width: 14),
+                                        Expanded(child: ranking),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

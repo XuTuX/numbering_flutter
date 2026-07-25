@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/widgets/formula_editor.dart';
 import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/theme/app_radius.dart';
 
 void main() {
   testWidgets('time attack swaps the dragged and target digits',
@@ -83,26 +82,39 @@ void main() {
     await tester.pump(const Duration(milliseconds: 60));
 
     expect(find.text('='), findsNWidgets(2));
-    final flash = tester.widget<FadeTransition>(
-      find.byKey(const ValueKey('wrong-answer-flash')),
-    );
-    expect(flash.opacity.value, greaterThan(0));
-    final decoration = tester
-        .widget<DecoratedBox>(
+    expect(find.byKey(const ValueKey('wrong-answer-flash')), findsOneWidget);
+    final digitStyle = tester
+        .widget<AnimatedDefaultTextStyle>(
           find.descendant(
-            of: find.byKey(const ValueKey('wrong-answer-flash')),
-            matching: find.byType(DecoratedBox),
+            of: find.byKey(const ValueKey('formula-digit-0')),
+            matching: find.byType(AnimatedDefaultTextStyle),
           ),
         )
-        .decoration as BoxDecoration;
-    expect(decoration.color, isNull);
-    expect(decoration.borderRadius, BorderRadius.circular(AppRadius.large));
-    expect((decoration.border! as Border).top.width, 4);
-    expect((decoration.border! as Border).top.color, AppColors.red);
+        .style;
+    expect(digitStyle.color, isNot(AppColors.ink));
     expect(find.text('정답이 아닙니다.'), findsNothing);
 
+    await tester.pump(const Duration(milliseconds: 280));
+    final heldDigitStyle = tester
+        .widget<AnimatedDefaultTextStyle>(
+          find.descendant(
+            of: find.byKey(const ValueKey('formula-digit-0')),
+            matching: find.byType(AnimatedDefaultTextStyle),
+          ),
+        )
+        .style;
+    expect(heldDigitStyle.color, AppColors.red);
+
     await tester.pumpAndSettle();
-    expect(flash.opacity.value, 0);
+    final settledDigitStyle = tester
+        .widget<AnimatedDefaultTextStyle>(
+          find.descendant(
+            of: find.byKey(const ValueKey('formula-digit-0')),
+            matching: find.byType(AnimatedDefaultTextStyle),
+          ),
+        )
+        .style;
+    expect(settledDigitStyle.color, AppColors.ink);
     expect(tester.takeException(), isNull);
   });
 }

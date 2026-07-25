@@ -20,6 +20,7 @@ class DragDropEditor extends StatefulWidget {
     required this.isLandscape,
     required this.visibleHints,
     required this.allowDigitReordering,
+    required this.wrongAnswerProgress,
   });
 
   final List<String> digits;
@@ -36,6 +37,7 @@ class DragDropEditor extends StatefulWidget {
   final bool isLandscape;
   final List<String> visibleHints;
   final bool allowDigitReordering;
+  final double wrongAnswerProgress;
 
   @override
   State<DragDropEditor> createState() => _DragDropEditorState();
@@ -144,13 +146,19 @@ class _DragDropEditorState extends State<DragDropEditor> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: AnimatedDefaultTextStyle(
-                        duration: const Duration(milliseconds: 150),
+                        duration: widget.wrongAnswerProgress > 0
+                            ? Duration.zero
+                            : const Duration(milliseconds: 150),
                         style: TextStyle(
                           fontSize:
                               isFeedback ? digitFontSize * 0.7 : digitFontSize,
                           height: 1,
                           fontWeight: FontWeight.w800,
-                          color: selected ? widget.accent : AppColors.ink,
+                          color: Color.lerp(
+                            selected ? widget.accent : AppColors.ink,
+                            AppColors.red,
+                            widget.wrongAnswerProgress,
+                          ),
                         ),
                         child: Text(
                           textContent,
@@ -232,6 +240,7 @@ class _DragDropEditorState extends State<DragDropEditor> {
           children: [
             Expanded(
               child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

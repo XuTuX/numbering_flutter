@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:numbering/theme/app_colors.dart';
-import 'package:numbering/theme/app_radius.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';
 import 'package:numbering/game/numbering/widgets/drag_drop_editor.dart';
@@ -47,7 +46,7 @@ class FormulaEditorState extends State<FormulaEditor>
   late List<String> _digits;
   late List<InlineOperator?> _operators;
   late final AnimationController _wrongAnswerController;
-  late final Animation<double> _wrongAnswerOpacity;
+  late final Animation<double> _wrongAnswerProgress;
   final List<ParenthesisRange> _parentheses = [];
   final List<_EditorSnapshot> _history = [];
   int? _selectedDigitIndex;
@@ -67,20 +66,24 @@ class FormulaEditorState extends State<FormulaEditor>
     _operators = List.filled(widget.digits.length - 1, null);
     _wrongAnswerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 240),
+      duration: const Duration(milliseconds: 500),
     );
-    _wrongAnswerOpacity = TweenSequence<double>([
+    _wrongAnswerProgress = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween(begin: 0.0, end: 0.9).chain(
+        tween: Tween(begin: 0.0, end: 1.0).chain(
           CurveTween(curve: Curves.easeOut),
         ),
-        weight: 35,
+        weight: 50,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: 0.9, end: 0.0).chain(
-          CurveTween(curve: Curves.easeIn),
+        tween: ConstantTween(1.0),
+        weight: 350,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 0.0).chain(
+          CurveTween(curve: Curves.easeInOut),
         ),
-        weight: 65,
+        weight: 100,
       ),
     ]).animate(_wrongAnswerController);
     _message = null;
@@ -97,67 +100,56 @@ class FormulaEditorState extends State<FormulaEditor>
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxHeight < 470;
-        final editor = Column(
-          children: [
-            SizedBox(height: compact ? 18 : 32),
-            Expanded(
-              child: DragDropEditor(
-                digits: _digits,
-                operators: _operators,
-                parentheses: _parentheses,
-                availableOperators: widget.availableOperators,
-                accent: widget.accent,
-                selectedDigitIndex: _selectedDigitIndex,
-                parenthesisMode: _parenthesisMode,
-                isLandscape: widget.isLandscape,
-                visibleHints: widget.visibleHints,
-                allowDigitReordering: widget.allowDigitReordering,
-                onDigitTapped: _handleDigitTap,
-                onParenthesisModeToggled: _toggleParenthesisMode,
-                onDigitReordered: _reorderDigit,
-                onOperatorChanged: _changeOperator,
-              ),
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 160),
-              child: _message == null
-                  ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        _message!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+        return AnimatedBuilder(
+          animation: _wrongAnswerProgress,
+          builder: (context, _) {
+            final wrongAnswerProgress = _wrongAnswerProgress.value;
+            return KeyedSubtree(
+              key: const ValueKey('wrong-answer-flash'),
+              child: Column(
+                children: [
+                  SizedBox(height: compact ? 18 : 32),
+                  Expanded(
+                    child: DragDropEditor(
+                      digits: _digits,
+                      operators: _operators,
+                      parentheses: _parentheses,
+                      availableOperators: widget.availableOperators,
+                      accent: widget.accent,
+                      selectedDigitIndex: _selectedDigitIndex,
+                      parenthesisMode: _parenthesisMode,
+                      isLandscape: widget.isLandscape,
+                      visibleHints: widget.visibleHints,
+                      allowDigitReordering: widget.allowDigitReordering,
+                      wrongAnswerProgress: wrongAnswerProgress,
+                      onDigitTapped: _handleDigitTap,
+                      onParenthesisModeToggled: _toggleParenthesisMode,
+                      onDigitReordered: _reorderDigit,
+                      onOperatorChanged: _changeOperator,
                     ),
-            ),
-            SizedBox(height: compact ? 4 : 10),
-          ],
-        );
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            editor,
-            IgnorePointer(
-              child: FadeTransition(
-                key: const ValueKey('wrong-answer-flash'),
-                opacity: _wrongAnswerOpacity,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.red,
-                      width: 4,
-                    ),
-                    borderRadius: BorderRadius.circular(AppRadius.large),
                   ),
-                ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 160),
+                    child: _message == null
+                        ? const SizedBox.shrink()
+                        : Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              _message!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                  ),
+                  SizedBox(height: compact ? 4 : 10),
+                ],
               ),
-            ),
-          ],
+            );
+          },
         );
       },
     );

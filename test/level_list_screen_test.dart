@@ -58,4 +58,31 @@ void main() {
     expect(find.byIcon(Icons.check_rounded), findsNWidgets(5));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('uses three columns on a narrow portrait screen', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: LevelGrid(
+            pack: levelPacks.first,
+            currentLevel: 1,
+            records: const {},
+            packColor: AppColors.blockLilac,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final level1 = find.byKey(const ValueKey('level-tile-1'));
+    final level3 = find.byKey(const ValueKey('level-tile-3'));
+    final level4 = find.byKey(const ValueKey('level-tile-4'));
+    expect(tester.getCenter(level1).dy, tester.getCenter(level3).dy);
+    expect(
+        tester.getCenter(level4).dy, greaterThan(tester.getCenter(level1).dy));
+    expect(tester.takeException(), isNull);
+  });
 }

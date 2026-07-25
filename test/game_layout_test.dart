@@ -141,4 +141,42 @@ void main() {
     expect(find.text('+'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('does not overflow on a narrow screen with large text',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 568));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: AppTheme.light,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(1.5),
+          ),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: NumberingGamePage(
+                game: NumberingGame.formulaWorkshop,
+                session: const GameSessionConfig(
+                  mode: GameMode.normal,
+                  startLevelId: 1,
+                ),
+                callbacks: GameCallbacks(onExit: () {}),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('level-hint-button')), findsOneWidget);
+    expect(find.byKey(const ValueKey('operator-drag-+')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

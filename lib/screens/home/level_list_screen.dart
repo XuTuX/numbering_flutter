@@ -128,6 +128,8 @@ class _PackHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = clearedCount / pack.totalLevels;
+    final progressWidth =
+        (MediaQuery.sizeOf(context).width * 0.24).clamp(84.0, 156.0);
 
     return Row(
       children: [
@@ -164,7 +166,7 @@ class _PackHeader extends StatelessWidget {
         ),
         const SizedBox(width: 18),
         SizedBox(
-          width: 156,
+          width: progressWidth,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,

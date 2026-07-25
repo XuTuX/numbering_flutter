@@ -25,9 +25,12 @@ class LevelGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        const crossAxisCount = 5;
-        final rowCount = (pack.totalLevels / crossAxisCount).ceil();
         const spacing = 10.0;
+        final crossAxisCount =
+            ((constraints.maxWidth + spacing) / (94 + spacing))
+                .floor()
+                .clamp(3, 5);
+        final rowCount = (pack.totalLevels / crossAxisCount).ceil();
         final availableRowHeight =
             (constraints.maxHeight - (rowCount - 1) * spacing) / rowCount;
         final rowHeight = math.max(54.0, availableRowHeight);
