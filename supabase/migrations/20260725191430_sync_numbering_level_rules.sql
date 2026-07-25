@@ -1,4 +1,4 @@
--- Sync the server's canonical Numbering level rules with the shipping catalog.
+-- Keep the server's canonical Numbering rules synced with the shipping catalog.
 --
 -- The catalog grew from 160 to 200 stages and settled on + - × ÷ with
 -- parentheses (exponentiation was dropped again), while the database still held

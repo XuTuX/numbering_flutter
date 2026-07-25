@@ -7,6 +7,7 @@ import 'package:numbering/game/game_module.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/game/numbering/numbering_game_page.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
+import 'package:numbering/game/numbering/views/time_attack_play_view.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/time_attack_score_service.dart';
@@ -29,7 +30,7 @@ void main() {
   tearDown(Get.reset);
 
   testWidgets(
-      'displays time attack header without Time Attack text, timer on left, BEST TOTAL in center, refresh on right',
+      'displays time attack header with timer, total score, and actions',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(667, 375));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -62,12 +63,47 @@ void main() {
     // Verify timer text '03:00' is displayed on the left
     expect(find.text('03:00'), findsOneWidget);
 
-    // Verify BEST & TOTAL text is displayed in center
-    expect(find.text('BEST 0  TOTAL 0'), findsOneWidget);
+    // The server-verified accumulated score is the only score shown.
+    expect(find.text('SCORE 0'), findsOneWidget);
+    expect(find.textContaining('BEST'), findsNothing);
+    expect(find.textContaining('TOTAL'), findsNothing);
 
     // Verify close (exit) and refresh (restart) buttons are displayed on the right
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+  });
+
+  testWidgets('retries finish when the server still reports an active session',
+      (tester) async {
+    Get.delete<TimeAttackScoreService>(force: true);
+    final service = _RetryingFinishTimeAttackScoreService();
+    Get.put<TimeAttackScoreService>(service);
+
+    await tester.binding.setSurfaceSize(const Size(667, 375));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: TimeAttackPlayView(
+            session: const GameSessionConfig(mode: GameMode.timeAttack),
+            accent: Colors.blue,
+            onShowLevels: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    expect(service.finishCalls, 2);
+    expect(find.text('42'), findsOneWidget);
   });
 }
 
@@ -83,7 +119,41 @@ class _FakeTimeAttackScoreService extends TimeAttackScoreService {
       puzzleIndex: 0,
       highestNumber: 0,
       totalScore: 0,
-      expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 3)),
+      // The UI must use the server-provided duration, not the device clock.
+      expiresAt: DateTime.utc(2000),
+      remainingMilliseconds: 180000,
     );
+  }
+}
+
+class _RetryingFinishTimeAttackScoreService extends TimeAttackScoreService {
+  int finishCalls = 0;
+
+  @override
+  Future<void> refreshLeaderboard({int limit = 100}) async {}
+
+  @override
+  Future<TimeAttackSession> startSession() async {
+    return TimeAttackSession(
+      id: 'retry-session',
+      digits: '1233',
+      puzzleIndex: 0,
+      highestNumber: 0,
+      totalScore: 0,
+      expiresAt: DateTime.utc(2000),
+      remainingMilliseconds: 20,
+    );
+  }
+
+  @override
+  Future<TimeAttackResult> finishSession(String sessionId) async {
+    finishCalls++;
+    if (finishCalls == 1) {
+      throw const TimeAttackServiceException(
+        'session_active',
+        '게임이 아직 진행 중입니다.',
+      );
+    }
+    return const TimeAttackResult(highestNumber: 42, totalScore: 84);
   }
 }

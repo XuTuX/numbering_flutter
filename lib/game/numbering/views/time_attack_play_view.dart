@@ -320,9 +320,9 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
       children: [
         const SizedBox(height: AppSpacing.md),
         GameHeader(
-          title: 'BEST $_highestNumber  TOTAL $_totalScore',
+          title: 'SCORE $_totalScore',
           titleWidget: Text(
-            'BEST $_highestNumber  TOTAL $_totalScore',
+            'SCORE $_totalScore',
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,

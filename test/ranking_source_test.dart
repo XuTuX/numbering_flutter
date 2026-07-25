@@ -16,6 +16,9 @@ void main() {
         File('lib/screens/ranking/ranking_screen.dart').readAsStringSync();
     final scoreService =
         File('lib/services/time_attack_score_service.dart').readAsStringSync();
+    final timeAttackMigration = File(
+      'supabase/migrations/20260725203329_harden_numbering_time_attack.sql',
+    ).readAsStringSync();
 
     expect(arcade, isNot(contains('NumberingScoreService')));
     expect(scoreService, contains('start_numbering_time_attack'));
@@ -24,5 +27,18 @@ void main() {
 
     expect(homeContent, contains('TimeAttackScoreService'));
     expect(ranking, contains('TimeAttackScoreService'));
+    expect(
+      timeAttackMigration,
+      contains('total_score = total_score + v_score'),
+    );
+    expect(
+      timeAttackMigration,
+      contains(
+        RegExp(
+          r'order by\s+scores\.total_score desc,\s+'
+          r'scores\.highest_number desc',
+        ),
+      ),
+    );
   });
 }

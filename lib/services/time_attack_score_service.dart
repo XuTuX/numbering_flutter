@@ -123,6 +123,7 @@ class TimeAttackScoreService extends GetxService {
 
   final SupabaseClient? _supabase;
   StreamSubscription<AuthState>? _authSubscription;
+  int _leaderboardRequestId = 0;
 
   final RxList<TimeAttackRecord> records = <TimeAttackRecord>[].obs;
   final RxBool isLoading = false.obs;
@@ -136,6 +137,7 @@ class TimeAttackScoreService extends GetxService {
     super.onInit();
     _authSubscription = _supabase?.auth.onAuthStateChange.listen((state) {
       if (state.session == null) {
+        _leaderboardRequestId++;
         records.clear();
         myRank.value = null;
         loadError.value = null;
@@ -184,7 +186,9 @@ class TimeAttackScoreService extends GetxService {
   }
 
   Future<void> refreshLeaderboard({int limit = 100}) async {
-    if (_supabase?.auth.currentUser == null) {
+    final userId = _supabase?.auth.currentUser?.id;
+    final requestId = ++_leaderboardRequestId;
+    if (userId == null) {
       records.clear();
       myRank.value = null;
       return;
@@ -202,13 +206,26 @@ class TimeAttackScoreService extends GetxService {
           .map(_asMap)
           .map(TimeAttackRecord.fromJson)
           .toList(growable: false);
+      if (!_canApplyLeaderboard(requestId: requestId, userId: userId)) return;
       records.assignAll(loaded);
       myRank.value = personalBest?.rank;
     } on TimeAttackServiceException catch (error) {
+      if (!_canApplyLeaderboard(requestId: requestId, userId: userId)) return;
       loadError.value = error.userMessage;
     } finally {
-      isLoading.value = false;
+      if (requestId == _leaderboardRequestId) {
+        isLoading.value = false;
+      }
     }
+  }
+
+  bool _canApplyLeaderboard({
+    required int requestId,
+    required String userId,
+  }) {
+    return !isClosed &&
+        requestId == _leaderboardRequestId &&
+        _supabase?.auth.currentUser?.id == userId;
   }
 
   TimeAttackRecord? get personalBest {

@@ -146,8 +146,7 @@ $$;
 
 revoke all on function public.sync_my_numbering_hints(integer, date) from public, anon;
 revoke all on function public.consume_my_numbering_hint() from public, anon;
-revoke all on function public.add_my_numbering_hints(integer)
-from public, anon, authenticated;
+revoke all on function public.add_my_numbering_hints(integer) from public, anon;
 grant execute on function public.sync_my_numbering_hints(integer, date) to authenticated;
 grant execute on function public.consume_my_numbering_hint() to authenticated;
 

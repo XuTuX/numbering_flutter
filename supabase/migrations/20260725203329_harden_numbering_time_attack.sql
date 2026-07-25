@@ -1,4 +1,4 @@
--- Harden server-verified Time Attack against concurrent starts, client clock
+-- Harden production Time Attack against concurrent starts, client clock
 -- drift, and sessions that expire while the app is not running.
 
 create extension if not exists pg_cron with schema pg_catalog;
@@ -418,3 +418,122 @@ begin
   );
 end;
 $$;
+
+-- Rank Time Attack by the sum of every verified equation value. The highest
+-- single equation is retained as a secondary tie-break and result statistic.
+drop index if exists public.numbering_time_attack_scores_rank_idx;
+create index numbering_time_attack_scores_rank_idx
+on public.numbering_time_attack_scores
+  (total_score desc, highest_number desc, highest_achieved_at, user_id);
+
+create or replace function private._numbering_upsert_time_attack_best(
+  p_user_id uuid,
+  p_highest_number integer,
+  p_total_score bigint,
+  p_highest_achieved_at timestamptz,
+  p_achieved_at timestamptz
+)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  insert into public.numbering_time_attack_scores (
+    user_id,
+    highest_number,
+    total_score,
+    highest_achieved_at,
+    achieved_at,
+    updated_at
+  )
+  values (
+    p_user_id,
+    p_highest_number,
+    p_total_score,
+    coalesce(p_highest_achieved_at, p_achieved_at),
+    p_achieved_at,
+    clock_timestamp()
+  )
+  on conflict (user_id) do update
+  set highest_number = excluded.highest_number,
+      total_score = excluded.total_score,
+      highest_achieved_at = excluded.highest_achieved_at,
+      achieved_at = excluded.achieved_at,
+      updated_at = clock_timestamp()
+  where excluded.total_score > public.numbering_time_attack_scores.total_score
+     or (
+       excluded.total_score = public.numbering_time_attack_scores.total_score
+       and excluded.highest_number
+         > public.numbering_time_attack_scores.highest_number
+     )
+     or (
+       excluded.total_score = public.numbering_time_attack_scores.total_score
+       and excluded.highest_number
+         = public.numbering_time_attack_scores.highest_number
+       and excluded.highest_achieved_at
+         < public.numbering_time_attack_scores.highest_achieved_at
+     );
+$$;
+
+revoke all on function private._numbering_upsert_time_attack_best(
+  uuid, integer, bigint, timestamptz, timestamptz
+) from public, anon, authenticated;
+
+create or replace function public.get_numbering_time_attack_leaderboard(
+  p_limit integer default 100
+)
+returns table (
+  user_id uuid,
+  nickname text,
+  avatar_url text,
+  highest_number integer,
+  total_score bigint,
+  highest_achieved_at timestamptz,
+  achieved_at timestamptz,
+  rank bigint,
+  is_me boolean
+)
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+  with ranked as (
+    select
+      scores.user_id,
+      coalesce(profiles.nickname, 'Player') as nickname,
+      profiles.avatar_url,
+      scores.highest_number,
+      scores.total_score,
+      scores.highest_achieved_at,
+      scores.achieved_at,
+      row_number() over (
+        order by
+          scores.total_score desc,
+          scores.highest_number desc,
+          scores.highest_achieved_at,
+          scores.user_id
+      ) as rank
+    from public.numbering_time_attack_scores as scores
+    join public.profiles as profiles on profiles.id = scores.user_id
+  )
+  select
+    ranked.user_id,
+    ranked.nickname,
+    ranked.avatar_url,
+    ranked.highest_number,
+    ranked.total_score,
+    ranked.highest_achieved_at,
+    ranked.achieved_at,
+    ranked.rank,
+    ranked.user_id = auth.uid() as is_me
+  from ranked
+  where ranked.rank <= greatest(1, least(coalesce(p_limit, 100), 100))
+     or ranked.user_id = auth.uid()
+  order by ranked.rank;
+$$;
+
+revoke all on function public.get_numbering_time_attack_leaderboard(integer)
+from public, anon;
+grant execute on function public.get_numbering_time_attack_leaderboard(integer)
+to authenticated;

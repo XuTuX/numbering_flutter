@@ -5,7 +5,10 @@
 Time Attack is an authenticated, server-timed three-minute session. The client
 starts a session with `start_numbering_time_attack()`. Supabase selects each
 4-, 5-, or 6-digit puzzle from the private canonical level catalog and returns
-the server expiration time.
+the server expiration, current server time, and remaining milliseconds. The app
+counts down with a monotonic clock, so changing the device clock cannot extend
+or shorten a session. Starts are serialized per user and the database enforces
+at most one unfinished session.
 
 Every solution is sent to
 `submit_numbering_time_attack_solution(session_id, puzzle_index, expression)`.
@@ -15,9 +18,10 @@ session's highest number and total score. Puzzle indexes make retries
 idempotent. The client never sends a trusted numeric score.
 
 When the server timer expires, `finish_numbering_time_attack(session_id)`
-finalizes the session and updates the user's best record only when the ordering
-tuple improves: highest number descending, total score descending, then the
-earlier highest-number time. Rankings come from
+finalizes the session. A `pg_cron` job also finalizes expired sessions every
+minute when the app is closed or offline. The user's best record updates only
+when the ordering tuple improves: highest number descending, total score
+descending, then the earlier highest-number time. Rankings come from
 `get_numbering_time_attack_leaderboard(limit)` and include the current user's
 row even when it falls outside the requested top results.
 
