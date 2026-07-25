@@ -31,12 +31,14 @@ void main() {
   testWidgets('keeps the login sheet compact in landscape', (tester) async {
     await pumpLoginSheet(tester, surfaceSize: const Size(844, 390));
 
-    expect(find.text('로그인'), findsNothing);
+    expect(find.text('NUMBERING'), findsOneWidget);
+    expect(find.text('로그인하여 플레이해보세요'), findsOneWidget);
     expect(find.text('로그인이 필요합니다.'), findsNothing);
     expect(
-      find.text('로그인하고 랭킹 · 오늘의 도전에 참여하세요'),
+      find.byKey(const ValueKey('google-sign-in-button')),
       findsOneWidget,
     );
+    expect(find.text('Google로 계속하기'), findsNothing);
     expect(find.byIcon(Icons.error_outline_rounded), findsNothing);
     expect(find.text('이용약관'), findsOneWidget);
     expect(find.text('개인정보 처리방침'), findsOneWidget);
@@ -46,7 +48,7 @@ void main() {
   testWidgets('keeps the login sheet readable in portrait', (tester) async {
     await pumpLoginSheet(tester, surfaceSize: const Size(390, 844));
 
-    expect(find.text('로그인'), findsNothing);
+    expect(find.text('NUMBERING'), findsOneWidget);
     expect(find.byType(SingleChildScrollView), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -68,11 +70,13 @@ void main() {
       ),
     );
 
-    expect(find.text('로그인 후 시작할 수 있어요'), findsOneWidget);
+    expect(find.text('NUMBERING'), findsOneWidget);
+    expect(find.text('로그인하여 플레이해보세요'), findsNothing);
     expect(
-      find.text('NUMBERING을 이용하려면 먼저 로그인해 주세요.'),
+      find.byKey(const ValueKey('google-sign-in-button')),
       findsOneWidget,
     );
+    expect(find.text('Google'), findsOneWidget);
     expect(find.textContaining('건너뛰'), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('google-sign-in-button')));
@@ -81,6 +85,50 @@ void main() {
     expect(googleAttempts, 1);
     expect(
       find.text('로그인에 실패했어요. 다시 시도해 주세요.'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('required login screen fits compact landscape', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(667, 375));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: RequiredLoginScreen(
+          onGoogleSignIn: () async => null,
+          onAppleSignIn: () async => null,
+        ),
+      ),
+    );
+
+    expect(find.text('NUMBERING'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('google-sign-in-button')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('required login overlay supports tooltips above the navigator', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(667, 375));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        builder: (context, child) => RequiredLoginOverlay(
+          onGoogleSignIn: () async => null,
+          onAppleSignIn: () async => null,
+        ),
+        home: const SizedBox.shrink(),
+      ),
+    );
+
+    expect(
+      find.byKey(const ValueKey('google-sign-in-button')),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);

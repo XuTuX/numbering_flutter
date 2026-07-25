@@ -54,14 +54,14 @@ Bee House는 화면 상단의 컬러 바에 표시된 연속 색 구간을 확�
 
 1. Flutter SDK를 설치한다.
 2. GitHub 저장소를 clone한다.
-3. `SUPABASE_URL`, `SUPABASE_ANON_KEY`를 `--dart-define`으로 설정한다.
+3. `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`를 `--dart-define`으로 설정한다.
 4. 프로젝트 폴더에서 `flutter pub get`을 실행한다.
 5. 연결된 기기 또는 시뮬레이터에서 아래 명령으로 실행한다.
 
 ```bash
 flutter run \
   --dart-define=SUPABASE_URL=... \
-  --dart-define=SUPABASE_ANON_KEY=...
+  --dart-define=SUPABASE_PUBLISHABLE_KEY=...
 ```
 
 ## 4. 플레이 링크 또는 설치 방법

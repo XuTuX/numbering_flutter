@@ -9,37 +9,21 @@ class GameSessionConfig {
   const GameSessionConfig({
     required this.mode,
     this.gameId,
-    this.seed,
-    this.dateKey,
-    this.weekKey,
-    this.isOfficialScoreSubmission = false,
     this.startLevelId,
   });
 
   const GameSessionConfig.normal()
       : mode = GameMode.normal,
         gameId = null,
-        seed = null,
-        dateKey = null,
-        weekKey = null,
-        isOfficialScoreSubmission = false,
         startLevelId = null;
 
   const GameSessionConfig.timeAttack()
       : mode = GameMode.timeAttack,
         gameId = null,
-        seed = null,
-        dateKey = null,
-        weekKey = null,
-        isOfficialScoreSubmission = false,
         startLevelId = null;
 
   final GameMode mode;
   final String? gameId;
-  final int? seed;
-  final String? dateKey;
-  final String? weekKey;
-  final bool isOfficialScoreSubmission;
   final int? startLevelId;
 
   bool get isTutorialMode => mode == GameMode.tutorial;
@@ -92,7 +76,7 @@ abstract class GameModule {
   );
 
   /// Where "back" should take the player after a session GameScreen doesn't
-  /// already handle generically (daily/time attack always return home).
+  /// already handle generically (Time Attack always returns home).
   /// Each module owns its own post-game navigation (e.g. a level list),
   /// so adding a new game never requires editing GameScreen itself.
   void exitToModuleHome(BuildContext context, GameSessionConfig session);

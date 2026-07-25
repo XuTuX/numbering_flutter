@@ -159,18 +159,6 @@ class _PackHeader extends StatelessWidget {
                   height: 1,
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                '${pack.startLevel.toString().padLeft(2, '0')} — '
-                '${pack.endLevel.toString().padLeft(2, '0')}',
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textSecondary,
-                  letterSpacing: 1.1,
-                  height: 1,
-                ),
-              ),
             ],
           ),
         ),
@@ -230,5 +218,3 @@ class _PackHeader extends StatelessWidget {
     );
   }
 }
-
-

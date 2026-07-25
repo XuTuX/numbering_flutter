@@ -13,4 +13,3 @@ abstract final class AppSpacing {
   static const double screenMarginTop = 12.0;
   static const double screenMarginBottom = 24.0;
 }
-

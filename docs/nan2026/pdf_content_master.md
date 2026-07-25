@@ -272,7 +272,7 @@ https://apps.apple.com/kr/app/bee-house-%EB%B2%8C%EC%A7%91%EA%B2%8C%EC%9E%84/id6
 
 1. Flutter SDK를 설치한다.
 2. GitHub 저장소를 clone한다.
-3. `SUPABASE_URL`, `SUPABASE_ANON_KEY` 값을 `.env` 또는 `--dart-define`으로 설정한다.
+3. `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` 값을 `.env` 또는 `--dart-define`으로 설정한다.
 4. `flutter pub get`을 실행한다.
 5. 연결된 iOS 또는 Android 기기에서 `flutter run`을 실행한다.
 

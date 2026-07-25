@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart' as apple;
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:numbering/config/app_config.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_radius.dart';
+import 'package:numbering/theme/app_spacing.dart';
 import 'package:numbering/theme/app_text_styles.dart';
 import 'package:numbering/theme/app_typography.dart';
 
@@ -34,8 +36,10 @@ class LoginSheet extends StatefulWidget {
 }
 
 class _LoginSheetState extends State<LoginSheet> {
-  bool _isLoading = false;
+  String? _pendingProvider;
   String? _errorMessage;
+
+  bool get _isLoading => _pendingProvider != null;
 
   @override
   void initState() {
@@ -43,13 +47,16 @@ class _LoginSheetState extends State<LoginSheet> {
     _errorMessage = widget.initialError;
   }
 
-  Future<void> _handleSignIn(Future<String?> Function() signInMethod) async {
+  Future<void> _handleSignIn(
+    String provider,
+    Future<String?> Function() signInMethod,
+  ) async {
     if (_isLoading) {
       return;
     }
 
     setState(() {
-      _isLoading = true;
+      _pendingProvider = provider;
       _errorMessage = null;
     });
 
@@ -68,19 +75,19 @@ class _LoginSheetState extends State<LoginSheet> {
 
       if (error == 'cancelled') {
         setState(() {
-          _isLoading = false;
+          _pendingProvider = null;
         });
         return;
       }
 
       setState(() {
-        _isLoading = false;
+        _pendingProvider = null;
         _errorMessage = error;
       });
     } catch (e) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          _pendingProvider = null;
           _errorMessage = '로그인에 실패했어요. 다시 시도해 주세요.'.tr;
         });
       }
@@ -105,15 +112,13 @@ class _LoginSheetState extends State<LoginSheet> {
             : _errorMessage;
 
     return _LoginSheetView(
-      title: widget.isRankingAction ? '랭킹 참여'.tr : '',
-      description: widget.isRankingAction
-          ? '로그인하면 랭킹에 참여할 수 있어요'.tr
-          : '로그인하고 랭킹 · 오늘의 도전에 참여하세요'.tr,
-      isLoading: _isLoading,
+      title: 'NUMBERING',
+      description: '로그인하여 플레이해보세요'.tr,
+      pendingProvider: _pendingProvider,
       errorMessage: visibleErrorMessage,
       showAppleButton: GetPlatform.isIOS,
-      onGoogleTap: () => _handleSignIn(widget.onGoogleSignIn),
-      onAppleTap: () => _handleSignIn(widget.onAppleSignIn),
+      onGoogleTap: () => _handleSignIn('google', widget.onGoogleSignIn),
+      onAppleTap: () => _handleSignIn('apple', widget.onAppleSignIn),
       onOpenTerms: () => _openUrl(AppConfig.termsOfServiceUrl),
       onOpenPrivacy: () => _openUrl(AppConfig.privacyPolicyUrl),
     );

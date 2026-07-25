@@ -4,7 +4,7 @@ class _LoginSheetView extends StatelessWidget {
   const _LoginSheetView({
     required this.title,
     required this.description,
-    required this.isLoading,
+    required this.pendingProvider,
     required this.errorMessage,
     required this.showAppleButton,
     required this.onGoogleTap,
@@ -15,7 +15,7 @@ class _LoginSheetView extends StatelessWidget {
 
   final String title;
   final String description;
-  final bool isLoading;
+  final String? pendingProvider;
   final String? errorMessage;
   final bool showAppleButton;
   final VoidCallback onGoogleTap;
@@ -33,10 +33,15 @@ class _LoginSheetView extends StatelessWidget {
         maxHeight: isLandscape ? Get.height * 0.82 : Get.height * 0.85,
       ),
       decoration: const BoxDecoration(
-        color: Color(0xFFFCFCFB),
+        color: AppColors.surface,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
+          topLeft: Radius.circular(AppRadius.card),
+          topRight: Radius.circular(AppRadius.card),
+        ),
+        border: Border(
+          top: BorderSide(color: AppColors.hairline),
+          left: BorderSide(color: AppColors.hairline),
+          right: BorderSide(color: AppColors.hairline),
         ),
       ),
       child: SafeArea(
@@ -51,12 +56,17 @@ class _LoginSheetView extends StatelessWidget {
                   ),
                   child: isLandscape
                       ? Padding(
-                          padding: const EdgeInsets.fromLTRB(28, 0, 28, 12),
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.xxl,
+                            0,
+                            AppSpacing.xxl,
+                            AppSpacing.md,
+                          ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const _SheetHandle(),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: AppSpacing.lg),
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
@@ -78,16 +88,19 @@ class _LoginSheetView extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: 40),
-                                  _SocialSignInRow(
-                                    isLoading: isLoading,
-                                    showAppleButton: showAppleButton,
-                                    onGoogleTap: onGoogleTap,
-                                    onAppleTap: onAppleTap,
+                                  const SizedBox(width: AppSpacing.xxl),
+                                  SizedBox(
+                                    width: 280,
+                                    child: _SocialSignInButtons(
+                                      pendingProvider: pendingProvider,
+                                      showAppleButton: showAppleButton,
+                                      onGoogleTap: onGoogleTap,
+                                      onAppleTap: onAppleTap,
+                                    ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: AppSpacing.lg),
                               _LoginLegalLinks(
                                 onOpenTerms: onOpenTerms,
                                 onOpenPrivacy: onOpenPrivacy,
@@ -101,20 +114,25 @@ class _LoginSheetView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const _SheetHandle(),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: AppSpacing.xxl),
                             _LoginSheetHeader(
                               title: title,
                               description: description,
                             ),
                             _LoginStatusMessage(errorMessage: errorMessage),
-                            const SizedBox(height: 28),
-                            _SocialSignInRow(
-                              isLoading: isLoading,
-                              showAppleButton: showAppleButton,
-                              onGoogleTap: onGoogleTap,
-                              onAppleTap: onAppleTap,
+                            const SizedBox(height: AppSpacing.xxl),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xxl,
+                              ),
+                              child: _SocialSignInButtons(
+                                pendingProvider: pendingProvider,
+                                showAppleButton: showAppleButton,
+                                onGoogleTap: onGoogleTap,
+                                onAppleTap: onAppleTap,
+                              ),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: AppSpacing.xl),
                             _LoginLegalLinks(
                               onOpenTerms: onOpenTerms,
                               onOpenPrivacy: onOpenPrivacy,
@@ -143,7 +161,7 @@ class _SheetHandle extends StatelessWidget {
           width: 36,
           height: 4,
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color: AppColors.hairline,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -172,33 +190,22 @@ class _LoginSheetHeader extends StatelessWidget {
             ? CrossAxisAlignment.start
             : CrossAxisAlignment.center,
         children: [
-          if (title.isNotEmpty) ...[
-            Text(
-              title,
-              textAlign: compactLandscape ? TextAlign.left : TextAlign.center,
-              style: AppTypography.body.copyWith(
-                fontSize: compactLandscape ? 22 : 24,
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.3,
-                height: 1.2,
-              ),
+          Text(
+            title,
+            textAlign: compactLandscape ? TextAlign.left : TextAlign.center,
+            style: AppTextStyles.screenTitle.copyWith(
+              fontSize: compactLandscape ? 22 : 24,
+              letterSpacing: -0.6,
             ),
-            const SizedBox(height: 8),
-          ],
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment:
-                compactLandscape ? Alignment.centerLeft : Alignment.center,
-            child: Text(
-              description,
-              maxLines: 1,
-              softWrap: false,
-              textAlign: compactLandscape ? TextAlign.left : TextAlign.center,
-              style: AppTypography.bodySmall.copyWith(
-                fontSize: 14,
-                color: Colors.grey[500],
-                height: 1.5,
-              ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            description,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: compactLandscape ? TextAlign.left : TextAlign.center,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -231,8 +238,8 @@ class _LoginStatusMessage extends StatelessWidget {
               child: Text(
                 errorMessage!.tr,
                 textAlign: compactLandscape ? TextAlign.left : TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey[500],
+                style: const TextStyle(
+                  color: AppColors.danger,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   height: 1.4,

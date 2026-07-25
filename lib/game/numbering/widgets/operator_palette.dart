@@ -31,7 +31,8 @@ class _OperatorPaletteState extends State<OperatorPalette> {
   @override
   Widget build(BuildContext context) {
     final operators = InlineOperator.values
-        .where((operator) => widget.availableOperators.contains(operator.symbol))
+        .where(
+            (operator) => widget.availableOperators.contains(operator.symbol))
         .toList();
     final isLandscape =
         MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;

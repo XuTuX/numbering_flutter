@@ -137,8 +137,7 @@ ValidationResult evaluateIntegerExpression(String source) {
     return ValidationResult.success(values.last);
   }
 
-  int precedence(String operator) =>
-      operator == '×' || operator == '÷' ? 2 : 1;
+  int precedence(String operator) => operator == '×' || operator == '÷' ? 2 : 1;
 
   while (index < source.length) {
     final character = source[index];
@@ -253,7 +252,7 @@ ValidationResult validateLevelFormula({
   return ValidationResult.success(left.value!);
 }
 
-ValidationResult validateDailyPuzzleFormula({
+ValidationResult validateReorderableEquality({
   required String digitString,
   required String expression,
 }) {

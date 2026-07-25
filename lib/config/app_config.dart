@@ -5,8 +5,15 @@ class AppConfig {
 
   static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
 
-  static const String supabaseAnonKey =
+  static const String supabasePublishableKey =
+      String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
+
+  static const String legacySupabaseAnonKey =
       String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  static String get supabaseKey => supabasePublishableKey.isNotEmpty
+      ? supabasePublishableKey
+      : legacySupabaseAnonKey;
 
   static const String termsOfServiceUrl = 'https://www.neoreo.org/terms';
   static const String privacyPolicyUrl =
@@ -18,19 +25,19 @@ class AppConfig {
   static bool get isIos =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
   static bool get hasSupabaseConfig =>
-      supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
+      supabaseUrl.isNotEmpty && supabaseKey.isNotEmpty;
 
   static void validateRequired() {
     final missing = <String>[
       if (supabaseUrl.isEmpty) 'SUPABASE_URL',
-      if (supabaseAnonKey.isEmpty) 'SUPABASE_ANON_KEY',
+      if (supabaseKey.isEmpty) 'SUPABASE_PUBLISHABLE_KEY',
     ];
 
     if (missing.isNotEmpty) {
       throw StateError(
         'Missing required values: ${missing.join(', ')}. '
-        'Login is required, so both SUPABASE_URL and SUPABASE_ANON_KEY '
-        'must be provided.',
+        'Login is required, so SUPABASE_URL and '
+        'SUPABASE_PUBLISHABLE_KEY must be provided.',
       );
     }
   }

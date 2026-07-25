@@ -51,18 +51,20 @@ class RankingScreen extends StatelessWidget {
               child: Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: isLandscape ? (mediaSize.width * 0.82).clamp(500.0, 640.0) : 600.0,
+                    maxWidth: isLandscape
+                        ? (mediaSize.width * 0.82).clamp(500.0, 640.0)
+                        : 600.0,
                   ),
                   child: Obx(() {
                     final records = scoreService.records;
                     final nickname = authService.userNickname.value ?? 'Player';
-                    final myRank = scoreService.getMyRank(nickname);
+                    final myRank = scoreService.myRank.value;
                     final myBestRecord = scoreService.personalBest;
 
                     if (records.isEmpty) {
                       return const Center(
                         child: Text(
-                          '아직 기록이 없습니다.\nTime Attack을 플레이해 첫 기록을 달성해 보세요!',
+                          '기록 없음',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: AppColors.textSecondary,
@@ -88,11 +90,13 @@ class RankingScreen extends StatelessWidget {
                       },
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          return _MyRankBar(
-                            nickname: nickname,
-                            rank: myRank,
-                            bestNumber: myBestRecord?.highestNumber,
-                            totalScore: myBestRecord?.totalScore,
+                          return FractionallySizedBox(
+                            widthFactor: 2 / 3,
+                            child: _MyRankBar(
+                              nickname: nickname,
+                              rank: myRank,
+                              totalScore: myBestRecord?.totalScore,
+                            ),
                           );
                         }
                         final item = displayItems[index - 1];
@@ -123,11 +127,12 @@ class RankingScreen extends StatelessWidget {
   }) {
     final items = <_RankDisplayItem>[];
     bool meIncluded = false;
+    final includedUserIds = <String>{};
 
-    for (int i = 0; i < records.length; i++) {
-      final record = records[i];
-      final rank = i + 1;
-      final isMe = (myRank != null && rank == myRank);
+    for (final record in records) {
+      if (!includedUserIds.add(record.userId)) continue;
+      final rank = record.rank;
+      final isMe = record.isMe || (myRank != null && rank == myRank);
       if (isMe) meIncluded = true;
       items.add(_RankDisplayItem(rank: rank, record: record, isMe: isMe));
     }
@@ -185,13 +190,11 @@ class _MyRankBar extends StatelessWidget {
   const _MyRankBar({
     required this.nickname,
     required this.rank,
-    required this.bestNumber,
     required this.totalScore,
   });
 
   final String nickname;
   final int? rank;
-  final int? bestNumber;
   final int? totalScore;
 
   @override
@@ -205,15 +208,19 @@ class _MyRankBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(
-            nickname,
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 15,
-              color: AppColors.ink,
+          Expanded(
+            child: Text(
+              nickname,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 15,
+                color: AppColors.ink,
+              ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 12),
           Text(
             rank == null ? '기록 없음' : '${totalScore ?? 0}',
             style: const TextStyle(
@@ -244,7 +251,9 @@ class _TimeAttackRankListItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: isMe ? AppColors.blockLilac.withValues(alpha: 0.6) : Colors.transparent,
+        color: isMe
+            ? AppColors.blockLilac.withValues(alpha: 0.6)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -256,7 +265,9 @@ class _TimeAttackRankListItem extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 15,
-                color: isMe ? AppColors.ink : AppColors.ink.withValues(alpha: 0.75),
+                color: isMe
+                    ? AppColors.ink
+                    : AppColors.ink.withValues(alpha: 0.75),
               ),
             ),
           ),

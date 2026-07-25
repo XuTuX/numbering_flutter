@@ -15,10 +15,12 @@ void main() {
     final ranking =
         File('lib/screens/ranking/ranking_screen.dart').readAsStringSync();
     final scoreService =
-        File('lib/services/numbering_score_service.dart').readAsStringSync();
+        File('lib/services/time_attack_score_service.dart').readAsStringSync();
 
     expect(arcade, isNot(contains('NumberingScoreService')));
-    expect(scoreService, isNot(contains('submitNormalResult')));
+    expect(scoreService, contains('start_numbering_time_attack'));
+    expect(scoreService, contains('submit_numbering_time_attack_solution'));
+    expect(scoreService, contains('finish_numbering_time_attack'));
 
     expect(homeContent, contains('TimeAttackScoreService'));
     expect(ranking, contains('TimeAttackScoreService'));

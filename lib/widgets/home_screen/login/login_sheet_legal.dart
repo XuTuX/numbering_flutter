@@ -15,8 +15,8 @@ class _LoginLegalLinks extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        bottom: compactLandscape ? 4 : 24,
-        top: compactLandscape ? 0 : 4,
+        bottom: compactLandscape ? AppSpacing.xs : AppSpacing.xxl,
+        top: compactLandscape ? 0 : AppSpacing.xs,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -25,12 +25,12 @@ class _LoginLegalLinks extends StatelessWidget {
             label: '이용약관'.tr,
             onTap: onOpenTerms,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               '·',
               style: TextStyle(
-                color: Colors.grey[400],
+                color: AppColors.textSecondary,
                 fontSize: 12,
               ),
             ),
@@ -56,16 +56,21 @@ class _LegalLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Text(
-        label.tr,
-        style: TextStyle(
-          color: Colors.grey[400],
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          decoration: TextDecoration.underline,
-          decorationColor: Colors.grey[400],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.small),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Text(
+            label.tr,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );

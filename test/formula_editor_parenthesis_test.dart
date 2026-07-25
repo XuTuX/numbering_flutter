@@ -24,7 +24,8 @@ void main() {
 
   tearDown(Get.reset);
 
-  testWidgets('tapping two digits adds parentheses and tapping again removes them',
+  testWidgets(
+      'tapping two digits adds parentheses and tapping again removes them',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(667, 375));
     addTearDown(() => tester.binding.setSurfaceSize(null));

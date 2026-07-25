@@ -1,5 +1,35 @@
 part of 'package:numbering/widgets/home_screen/login_sheet.dart';
 
+/// Hosts the required sign-in screen in its own overlay.
+///
+/// [GetMaterialApp.builder] is built above the app navigator, so replacing its
+/// child directly also removes the navigator's overlay. Tooltips on the sign-in
+/// buttons need an overlay ancestor.
+class RequiredLoginOverlay extends StatelessWidget {
+  const RequiredLoginOverlay({
+    super.key,
+    required this.onGoogleSignIn,
+    required this.onAppleSignIn,
+  });
+
+  final Future<String?> Function() onGoogleSignIn;
+  final Future<String?> Function() onAppleSignIn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Overlay(
+      initialEntries: [
+        OverlayEntry(
+          builder: (context) => RequiredLoginScreen(
+            onGoogleSignIn: onGoogleSignIn,
+            onAppleSignIn: onAppleSignIn,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class RequiredLoginScreen extends StatefulWidget {
   const RequiredLoginScreen({
     super.key,
@@ -64,59 +94,48 @@ class _RequiredLoginScreenState extends State<RequiredLoginScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isLandscape = constraints.maxWidth > constraints.maxHeight;
-            final horizontalPadding =
-                (constraints.maxWidth * 0.055).clamp(20.0, 36.0);
-            final contentWidth =
-                (constraints.maxWidth - horizontalPadding * 2).clamp(0.0, 960.0);
-            final panelWidth = (contentWidth * 0.42).clamp(240.0, 320.0);
+            final stackButtons = constraints.maxWidth < 540;
 
-            final authPanel = _LoginAuthPanel(
-              pendingProvider: _pendingProvider,
-              errorMessage: _errorMessage,
-              showAppleButton: GetPlatform.isIOS,
-              fillHeight: isLandscape,
-              onGoogleTap: () => _handleSignIn('google', widget.onGoogleSignIn),
-              onAppleTap: () => _handleSignIn('apple', widget.onAppleSignIn),
-            );
-
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                12,
-                horizontalPadding,
-                16,
-              ),
-              child: Center(
+            return Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.xxl,
+                ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 960),
+                  constraints: const BoxConstraints(maxWidth: 620),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const _LoginWordmark(),
-                      const SizedBox(height: 14),
-                      Expanded(
-                        child: isLandscape
-                            ? Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  const Expanded(child: _LoginBrandCard()),
-                                  const SizedBox(width: 14),
-                                  SizedBox(width: panelWidth, child: authPanel),
-                                ],
-                              )
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  const Expanded(child: _LoginBrandCard()),
-                                  const SizedBox(height: 14),
-                                  authPanel,
-                                ],
-                              ),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'NUMBERING',
+                          style: AppTextStyles.hero.copyWith(fontSize: 44),
+                        ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: AppSpacing.section),
+                      _SocialSignInButtons(
+                        pendingProvider: _pendingProvider,
+                        showAppleButton: GetPlatform.isIOS,
+                        showLabels: true,
+                        stackButtons: stackButtons,
+                        onGoogleTap: () => _handleSignIn(
+                          'google',
+                          widget.onGoogleSignIn,
+                        ),
+                        onAppleTap: () => _handleSignIn(
+                          'apple',
+                          widget.onAppleSignIn,
+                        ),
+                      ),
+                      _LoginStatusMessage(
+                        errorMessage: _errorMessage,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
                       _LoginLegalLinks(
-                        onOpenTerms: () => _openUrl(AppConfig.termsOfServiceUrl),
+                        onOpenTerms: () =>
+                            _openUrl(AppConfig.termsOfServiceUrl),
                         onOpenPrivacy: () =>
                             _openUrl(AppConfig.privacyPolicyUrl),
                         compactLandscape: true,
@@ -133,25 +152,74 @@ class _RequiredLoginScreenState extends State<RequiredLoginScreen> {
   }
 }
 
-class _LoginWordmark extends StatelessWidget {
-  const _LoginWordmark();
+class _GoogleSignInButton extends StatelessWidget {
+  const _GoogleSignInButton({
+    super.key,
+    required this.isBusy,
+    required this.isEnabled,
+    this.showLabel = false,
+    required this.onTap,
+  });
+
+  final bool isBusy;
+  final bool isEnabled;
+  final bool showLabel;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 44,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          'NUMBERING',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: AppColors.ink,
-            fontSize: 22,
-            height: 1,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
+    final label = 'Google로 계속하기'.tr;
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        button: true,
+        label: label,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 150),
+          opacity: !isEnabled && !isBusy ? 0.4 : 1,
+          child: Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.button),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: isEnabled ? onTap : null,
+              child: Container(
+                width: showLabel ? 220 : 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadius.button),
+                  border: Border.all(color: const Color(0xFF747775)),
+                ),
+                alignment: Alignment.center,
+                child: isBusy
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF1F1F1F),
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/icons/google_logo.png',
+                            width: 22,
+                            height: 22,
+                            fit: BoxFit.contain,
+                          ),
+                          if (showLabel) ...[
+                            const SizedBox(width: AppSpacing.md),
+                            const Text(
+                              'Google',
+                              style: AppTextStyles.buttonLabel,
+                            ),
+                          ],
+                        ],
+                      ),
+              ),
+            ),
           ),
         ),
       ),
@@ -159,196 +227,77 @@ class _LoginWordmark extends StatelessWidget {
   }
 }
 
-class _LoginBrandCard extends StatelessWidget {
-  const _LoginBrandCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.blockLilac,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.hairline),
-      ),
-      padding: const EdgeInsets.all(22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                '로그인 후 시작할 수 있어요'.tr,
-                style: AppTextStyles.hero.copyWith(height: 1.1),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'NUMBERING을 이용하려면 먼저 로그인해 주세요.'.tr,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.45,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LoginAuthPanel extends StatelessWidget {
-  const _LoginAuthPanel({
-    required this.pendingProvider,
-    required this.errorMessage,
-    required this.showAppleButton,
-    required this.fillHeight,
-    required this.onGoogleTap,
-    required this.onAppleTap,
-  });
-
-  final String? pendingProvider;
-  final String? errorMessage;
-  final bool showAppleButton;
-  final bool fillHeight;
-  final VoidCallback onGoogleTap;
-  final VoidCallback onAppleTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isLoading = pendingProvider != null;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.hairline),
-      ),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        mainAxisSize: fillHeight ? MainAxisSize.max : MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _LoginProviderButton(
-            key: const ValueKey('google-sign-in-button'),
-            label: 'Google로 계속하기'.tr,
-            icon: Image.asset(
-              'assets/icons/google_logo.png',
-              width: 20,
-              height: 20,
-              fit: BoxFit.contain,
-            ),
-            foregroundColor: AppColors.ink,
-            backgroundColor: AppColors.surfaceSoft,
-            bordered: true,
-            isBusy: pendingProvider == 'google',
-            onTap: isLoading ? null : onGoogleTap,
-          ),
-          if (showAppleButton) ...[
-            const SizedBox(height: 10),
-            _LoginProviderButton(
-              key: const ValueKey('apple-sign-in-button'),
-              label: 'Apple로 계속하기'.tr,
-              icon: const Icon(
-                Icons.apple,
-                size: 22,
-                color: AppColors.onPrimary,
-              ),
-              foregroundColor: AppColors.onPrimary,
-              backgroundColor: AppColors.ink,
-              bordered: false,
-              isBusy: pendingProvider == 'apple',
-              onTap: isLoading ? null : onAppleTap,
-            ),
-          ],
-          _LoginStatusMessage(
-            errorMessage: errorMessage,
-            compactLandscape: true,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LoginProviderButton extends StatelessWidget {
-  const _LoginProviderButton({
+class _AppleSignInButton extends StatelessWidget {
+  const _AppleSignInButton({
     super.key,
-    required this.label,
-    required this.icon,
-    required this.foregroundColor,
-    required this.backgroundColor,
-    required this.bordered,
     required this.isBusy,
+    required this.isEnabled,
+    this.showLabel = false,
     required this.onTap,
   });
 
-  final String label;
-  final Widget icon;
-  final Color foregroundColor;
-  final Color backgroundColor;
-  final bool bordered;
   final bool isBusy;
-  final VoidCallback? onTap;
+  final bool isEnabled;
+  final bool showLabel;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 150),
-      opacity: onTap == null && !isBusy ? 0.4 : 1,
-      child: Material(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(AppRadius.button),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            height: 52,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.button),
-              border: bordered
-                  ? Border.all(color: AppColors.hairline)
-                  : const Border.fromBorderSide(BorderSide.none),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: Center(
-                    child: isBusy
-                        ? SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: foregroundColor,
+    final label = 'Apple로 계속하기'.tr;
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        button: true,
+        label: label,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 150),
+          opacity: !isEnabled && !isBusy ? 0.4 : 1,
+          child: Material(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(AppRadius.button),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: isEnabled ? onTap : null,
+              child: SizedBox(
+                width: showLabel ? 220 : 52,
+                height: 52,
+                child: Center(
+                  child: isBusy
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 20,
+                              height: 24,
+                              child: CustomPaint(
+                                painter: apple.AppleLogoPainter(
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                          )
-                        : icon,
-                  ),
+                            if (showLabel) ...[
+                              const SizedBox(width: AppSpacing.md),
+                              const Text(
+                                'Apple',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                 ),
-                const SizedBox(width: 10),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.button.copyWith(
-                      fontSize: 15,
-                      letterSpacing: -0.2,
-                      color: foregroundColor,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

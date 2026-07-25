@@ -100,7 +100,8 @@ class LevelEvaluation {
   final bool perfect;
 }
 
-LevelEvaluation evaluateLevelScore(LevelData level, int score, {int usedHints = 0}) {
+LevelEvaluation evaluateLevelScore(LevelData level, int score,
+    {int usedHints = 0}) {
   bool cleared = true;
   int stars = 1;
   bool perfect = false;

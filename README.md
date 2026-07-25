@@ -37,7 +37,7 @@ This app now expects runtime values through `--dart-define`.
 Required authentication values:
 
 - `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
+- `SUPABASE_PUBLISHABLE_KEY` (`SUPABASE_ANON_KEY` is accepted temporarily)
 
 The app requires a valid login before any gameplay or other screen is shown.
 Omitting either value is treated as a configuration error; offline guest mode
@@ -48,7 +48,7 @@ Example:
 ```bash
 flutter run \
   --dart-define=SUPABASE_URL=... \
-  --dart-define=SUPABASE_ANON_KEY=...
+  --dart-define=SUPABASE_PUBLISHABLE_KEY=...
 ```
 
 ## Google Sign-In Configuration

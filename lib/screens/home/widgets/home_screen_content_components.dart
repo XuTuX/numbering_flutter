@@ -121,8 +121,7 @@ class _RankingCard extends StatelessWidget {
         final nickname = authService.user.value == null
             ? null
             : authService.userNickname.value;
-        final rank =
-            nickname == null ? null : timeAttackService?.getMyRank(nickname);
+        final rank = nickname == null ? null : timeAttackService?.myRank.value;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,

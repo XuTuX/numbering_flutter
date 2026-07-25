@@ -37,59 +37,59 @@ class StatsScreen extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 600),
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildStatRow('총 플레이', '1,243'),
-              const Divider(height: 32, color: AppColors.borderLight),
-              _buildStatRow('총 승리', '$totalCleared'),
-              const Divider(height: 32, color: AppColors.borderLight),
-              _buildStatRow('평균 점수', '23,124'),
-              const Divider(height: 32, color: AppColors.borderLight),
-              _buildStatRow('최고 점수', '$highScore'),
-              const Divider(height: 32, color: AppColors.borderLight),
-              _buildStatRow('오늘의 퍼즐', '72승'),
-              const Divider(height: 32, color: AppColors.borderLight),
-              _buildStatRow('Arcade', 'Level $highestUnlocked'),
-              const SizedBox(height: 48),
-              const Text(
-                '최근 30일',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildStatRow('총 플레이', '1,243'),
+                  const Divider(height: 32, color: AppColors.borderLight),
+                  _buildStatRow('총 승리', '$totalCleared'),
+                  const Divider(height: 32, color: AppColors.borderLight),
+                  _buildStatRow('평균 점수', '23,124'),
+                  const Divider(height: 32, color: AppColors.borderLight),
+                  _buildStatRow('최고 점수', '$highScore'),
+                  const Divider(height: 32, color: AppColors.borderLight),
+                  _buildStatRow('Time Attack', '$highScore'),
+                  const Divider(height: 32, color: AppColors.borderLight),
+                  _buildStatRow('Arcade', 'Level $highestUnlocked'),
+                  const SizedBox(height: 48),
+                  const Text(
+                    '최근 30일',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Placeholder for a bar chart
+                  SizedBox(
+                    height: 120,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(30, (index) {
+                        final height = 20.0 + (index * 7 % 100);
+                        return Container(
+                          width: 6,
+                          height: height,
+                          decoration: BoxDecoration(
+                            color: AppColors.ink.withValues(
+                              alpha: index % 3 == 0 ? 0.18 : 0.72,
+                            ),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(4)),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              // Placeholder for a bar chart
-              SizedBox(
-                height: 120,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(30, (index) {
-                    final height = 20.0 + (index * 7 % 100);
-                    return Container(
-                      width: 6,
-                      height: height,
-                      decoration: BoxDecoration(
-                        color: AppColors.ink.withValues(
-                          alpha: index % 3 == 0 ? 0.18 : 0.72,
-                        ),
-                        borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(4)),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 
   Widget _buildStatRow(String label, String value) {

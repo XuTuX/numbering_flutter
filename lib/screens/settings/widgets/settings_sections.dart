@@ -23,8 +23,9 @@ class SettingsProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final avatarLetter =
-        nickname.trim().isNotEmpty ? nickname.trim().characters.first.toUpperCase() : '?';
+    final avatarLetter = nickname.trim().isNotEmpty
+        ? nickname.trim().characters.first.toUpperCase()
+        : '?';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

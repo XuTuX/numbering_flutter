@@ -1,12 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';
-import 'package:numbering/services/numbering_score_service.dart';
 import 'package:numbering/game/numbering/widgets/drag_drop_editor.dart';
 import 'package:numbering/services/app_haptics.dart';
-
 
 // ─── 수식 편집기 ────────────────────────────────────────────
 
@@ -20,8 +17,6 @@ class FormulaEditor extends StatefulWidget {
     required this.visibleHints,
     required this.requiresEquals,
     this.allowDigitReordering = false,
-    this.initialProgress,
-    this.onProgressChanged,
     required this.validateExpression,
     required this.onValidSubmission,
   });
@@ -33,8 +28,6 @@ class FormulaEditor extends StatefulWidget {
   final List<String> visibleHints;
   final bool requiresEquals;
   final bool allowDigitReordering;
-  final DailyPuzzleProgress? initialProgress;
-  final ValueChanged<DailyPuzzleProgress>? onProgressChanged;
   final ValidationResult Function(String expression) validateExpression;
   final void Function(String expression, int score) onValidSubmission;
 
@@ -66,23 +59,8 @@ class FormulaEditorState extends State<FormulaEditor> {
   @override
   void initState() {
     super.initState();
-    final restored = _validatedProgress(widget.initialProgress);
-    _digits =
-        restored == null ? List.of(widget.digits) : List.of(restored.digits);
-    _operators = restored == null
-        ? List.filled(widget.digits.length - 1, null)
-        : restored.operators.map(_operatorForSymbol).toList(growable: false);
-    if (restored != null) {
-      _parentheses.addAll(
-        restored.parentheses.map(
-          (range) => ParenthesisRange(
-            id: '${range.start}:${range.end}',
-            startDigitIndex: range.start,
-            endDigitIndex: range.end,
-          ),
-        ),
-      );
-    }
+    _digits = List.of(widget.digits);
+    _operators = List.filled(widget.digits.length - 1, null);
     _message = null;
   }
 
@@ -149,7 +127,6 @@ class FormulaEditorState extends State<FormulaEditor> {
       _selectedDigitIndex = null;
       _message = null;
     });
-    _notifyProgressChanged();
     _previewValidation();
   }
 
@@ -158,14 +135,14 @@ class FormulaEditorState extends State<FormulaEditor> {
     AppHaptics.selection();
     _saveSnapshot();
     setState(() {
-      final movedDigit = _digits.removeAt(fromIndex);
-      _digits.insert(toIndex, movedDigit);
+      final sourceDigit = _digits[fromIndex];
+      _digits[fromIndex] = _digits[toIndex];
+      _digits[toIndex] = sourceDigit;
 
       _selectedDigitIndex = null;
       _parenthesisMode = false;
       _message = null;
     });
-    _notifyProgressChanged();
     _previewValidation();
   }
 
@@ -199,7 +176,6 @@ class FormulaEditorState extends State<FormulaEditor> {
         _parenthesisMode = false;
         _message = null;
       });
-      _notifyProgressChanged();
       _previewValidation();
       return;
     }
@@ -222,14 +198,11 @@ class FormulaEditorState extends State<FormulaEditor> {
       _parenthesisMode = false;
       _message = null;
     });
-    _notifyProgressChanged();
     _previewValidation();
   }
 
   void _previewValidation() {
-    if (widget.requiresEquals &&
-        (!_operators.contains(InlineOperator.equals) ||
-            _operators.contains(null))) {
+    if (widget.requiresEquals && !_operators.contains(InlineOperator.equals)) {
       if (mounted && _message != null) setState(() => _message = null);
       return;
     }
@@ -260,7 +233,6 @@ class FormulaEditorState extends State<FormulaEditor> {
       _parenthesisMode = false;
       _message = null;
     });
-    _notifyProgressChanged();
   }
 
   void showMessage(String message) => setState(() => _message = message);
@@ -271,68 +243,5 @@ class FormulaEditorState extends State<FormulaEditor> {
       _selectedDigitIndex = null;
       _message = null;
     });
-  }
-
-  DailyPuzzleProgress? _validatedProgress(DailyPuzzleProgress? progress) {
-    if (progress == null || !widget.allowDigitReordering) return null;
-    if (progress.digits.length != widget.digits.length ||
-        progress.operators.length != widget.digits.length - 1) {
-      return null;
-    }
-    final expectedDigits = List.of(widget.digits)..sort();
-    final restoredDigits = List.of(progress.digits)..sort();
-    if (!listEquals(expectedDigits, restoredDigits)) return null;
-    if (progress.operators.any(
-      (symbol) => symbol != null && _operatorForSymbol(symbol) == null,
-    )) {
-      return null;
-    }
-
-    final acceptedRanges = <ParenthesisRange>[];
-    for (final range in progress.parentheses) {
-      final candidate = ParenthesisRange(
-        id: '${range.start}:${range.end}',
-        startDigitIndex: range.start,
-        endDigitIndex: range.end,
-      ).normalized();
-      final validation = validateParenthesisRange(
-        digitCount: progress.digits.length,
-        candidate: candidate,
-        existing: acceptedRanges,
-      );
-      if (!validation.valid) return null;
-      acceptedRanges.add(candidate);
-    }
-    return progress;
-  }
-
-  InlineOperator? _operatorForSymbol(String? symbol) {
-    for (final operator in InlineOperator.values) {
-      if (operator.symbol == symbol) return operator;
-    }
-    return null;
-  }
-
-  void _notifyProgressChanged() {
-    widget.onProgressChanged?.call(
-      DailyPuzzleProgress(
-        digits: List.unmodifiable(_digits),
-        operators: List.unmodifiable(
-          _operators.map((operator) => operator?.symbol),
-        ),
-        parentheses: List.unmodifiable(
-          _parentheses.map(
-            (range) {
-              final normalized = range.normalized();
-              return DailyPuzzleParenthesis(
-                start: normalized.startDigitIndex,
-                end: normalized.endDigitIndex,
-              );
-            },
-          ),
-        ),
-        liftedIndices: const [],
-      ),
-    );
   }
 }

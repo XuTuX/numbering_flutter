@@ -8,7 +8,6 @@ import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/l10n/app_translations.dart';
 import 'package:numbering/screens/home/home_screen.dart';
 import 'package:numbering/services/auth_service.dart';
-import 'package:numbering/services/numbering_score_service.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/hint_purchase_service.dart';
 import 'package:numbering/services/settings_service.dart';
@@ -48,7 +47,9 @@ void main() async {
       try {
         await Supabase.initialize(
           url: AppConfig.supabaseUrl,
-          anonKey: AppConfig.supabaseAnonKey,
+          // supabase_flutter 2.12 names this argument anonKey, but it accepts
+          // the current sb_publishable_ key format as the client API key.
+          anonKey: AppConfig.supabaseKey,
         );
         authClient = Supabase.instance.client;
       } catch (error, stackTrace) {
@@ -117,8 +118,7 @@ class AppBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(AuthService(supabase: authClient), permanent: true);
-    Get.put(NumberingScoreService(supabase: authClient), permanent: true);
-    Get.put(TimeAttackScoreService(), permanent: true);
+    Get.put(TimeAttackScoreService(supabase: authClient), permanent: true);
     Get.put(ScoreController(), permanent: true);
     Get.put<SettingsService>(settingsService, permanent: true);
     Get.put<LevelProgressService>(levelProgressService, permanent: true);
@@ -183,7 +183,7 @@ class _AuthenticationGate extends StatelessWidget {
         return child;
       }
 
-      return RequiredLoginScreen(
+      return RequiredLoginOverlay(
         onGoogleSignIn: authService.signInWithGoogle,
         onAppleSignIn: authService.signInWithApple,
       );

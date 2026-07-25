@@ -1,5 +1,3 @@
-import 'package:get/get.dart';
-
 class KstClock {
   const KstClock._();
 
@@ -13,74 +11,7 @@ class KstClock {
 
   static String currentDateKey() => dateKeyFor(nowInKst());
 
-  static String currentChallengePeriodKey() =>
-      challengePeriodKeyFor(nowInKst());
-
   static String currentWeekKey() => isoWeekKeyFor(nowInKst());
-
-  /// Derives a stable numeric seed from a KST date or challenge-period key
-  /// (e.g. `2026-07-26` or `2026-07-26-00`). This is the single source of
-  /// truth for turning a period key into a seed, so every daily-challenge
-  /// call site stays in sync instead of re-deriving it ad hoc.
-  static int seedForPeriodKey(String periodKey) =>
-      int.tryParse(periodKey.replaceAll('-', '')) ?? 0;
-
-  static List<String> recentDateKeys({int days = 30}) {
-    final totalDays = days < 1 ? 1 : days;
-    final today = nowInKst();
-    return List<String>.generate(
-      totalDays,
-      (index) => dateKeyFor(today.subtract(Duration(days: index))),
-    );
-  }
-
-  static String compactDateLabel(String dateKey) {
-    final parts = dateKey.split('-');
-    if (parts.length < 3) {
-      return dateKey;
-    }
-    final slotLabel = parts.length >= 4
-        ? switch (parts[3]) {
-            '00' => ' 오전',
-            '12' => ' 오후',
-            _ => '',
-          }
-        : '';
-    return '${parts[1]}.${parts[2]}$slotLabel';
-  }
-
-  static String weekdayLabel(String dateKey) {
-    final parsed = DateTime.tryParse(dateKey);
-    if (parsed == null) {
-      return '';
-    }
-    return switch (parsed.weekday) {
-      DateTime.monday => '월'.tr,
-      DateTime.tuesday => '화'.tr,
-      DateTime.wednesday => '수'.tr,
-      DateTime.thursday => '목'.tr,
-      DateTime.friday => '금'.tr,
-      DateTime.saturday => '토'.tr,
-      DateTime.sunday => '일'.tr,
-      _ => '',
-    };
-  }
-
-  static DateTime? parseDateKey(String dateKey) {
-    final parts = dateKey.split('-');
-    if (parts.length != 3) {
-      return null;
-    }
-
-    final year = int.tryParse(parts[0]);
-    final month = int.tryParse(parts[1]);
-    final day = int.tryParse(parts[2]);
-    if (year == null || month == null || day == null) {
-      return null;
-    }
-
-    return DateTime(year, month, day);
-  }
 
   static String dateKeyFor(DateTime kstTime) {
     final value = kstTime;
@@ -88,11 +19,6 @@ class KstClock {
     final month = value.month.toString().padLeft(2, '0');
     final day = value.day.toString().padLeft(2, '0');
     return '$year-$month-$day';
-  }
-
-  static String challengePeriodKeyFor(DateTime kstTime) {
-    final slot = kstTime.hour < 12 ? '00' : '12';
-    return '${dateKeyFor(kstTime)}-$slot';
   }
 
   static String isoWeekKeyFor(DateTime kstTime) {

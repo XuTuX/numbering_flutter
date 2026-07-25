@@ -53,7 +53,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('uses a side navigation on mobile landscape screens', (tester) async {
+  testWidgets('uses a side navigation on mobile landscape screens',
+      (tester) async {
     await pumpSettings(tester, surfaceSize: const Size(844, 390));
 
     expect(

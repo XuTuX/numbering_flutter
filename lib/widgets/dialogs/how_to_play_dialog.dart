@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_typography.dart';
+
 class HowToPlayDialog extends StatelessWidget {
   const HowToPlayDialog({
     super.key,
@@ -58,7 +59,8 @@ class HowToPlayDialog extends StatelessWidget {
             const Divider(height: 1, color: AppColors.borderLight),
             Flexible(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                 shrinkWrap: true,
                 children: [
                   _RuleItem(

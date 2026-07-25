@@ -41,8 +41,12 @@ class SoftCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(radius),
-          splashColor: onTap != null ? AppColors.ink.withValues(alpha: 0.04) : Colors.transparent,
-          highlightColor: onTap != null ? AppColors.ink.withValues(alpha: 0.025) : Colors.transparent,
+          splashColor: onTap != null
+              ? AppColors.ink.withValues(alpha: 0.04)
+              : Colors.transparent,
+          highlightColor: onTap != null
+              ? AppColors.ink.withValues(alpha: 0.025)
+              : Colors.transparent,
           child: Padding(
             padding: padding ?? EdgeInsets.zero,
             child: child,

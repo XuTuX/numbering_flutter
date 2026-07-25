@@ -146,14 +146,11 @@ class _DragDropEditorState extends State<DragDropEditor> {
                       child: AnimatedDefaultTextStyle(
                         duration: const Duration(milliseconds: 150),
                         style: TextStyle(
-                          fontSize: isFeedback
-                              ? digitFontSize * 0.7
-                              : digitFontSize,
+                          fontSize:
+                              isFeedback ? digitFontSize * 0.7 : digitFontSize,
                           height: 1,
                           fontWeight: FontWeight.w800,
-                          color: selected
-                              ? widget.accent
-                              : AppColors.ink,
+                          color: selected ? widget.accent : AppColors.ink,
                         ),
                         child: Text(
                           textContent,
@@ -258,7 +255,8 @@ class _DragDropEditorState extends State<DragDropEditor> {
                           : Padding(
                               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                               child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 520),
+                                constraints:
+                                    const BoxConstraints(maxWidth: 520),
                                 child: Column(
                                   key: const ValueKey('inline-level-hint'),
                                   mainAxisSize: MainAxisSize.min,
@@ -410,9 +408,7 @@ class InlineOperatorTarget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final opticalVerticalOffset = switch (current) {
-      InlineOperator.add ||
-      InlineOperator.subtract =>
-        -operatorFontSize * 0.15,
+      InlineOperator.add || InlineOperator.subtract => -operatorFontSize * 0.15,
       _ => 0.0,
     };
 

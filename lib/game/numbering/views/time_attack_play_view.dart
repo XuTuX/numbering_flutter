@@ -1,17 +1,18 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'package:numbering/game/game_module.dart';
+import 'package:numbering/game/numbering/expression_engine.dart';
+import 'package:numbering/screens/ranking/ranking_screen.dart';
+import 'package:numbering/services/time_attack_score_service.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_spacing.dart';
-import 'package:numbering/game/game_module.dart';
-import 'package:numbering/game/numbering/numbering_random.dart';
-import 'package:numbering/services/auth_service.dart';
-import 'package:numbering/services/time_attack_score_service.dart';
-import 'package:numbering/screens/ranking/ranking_screen.dart';
-import 'package:numbering/game/numbering/expression_engine.dart';
 import 'package:numbering/widgets/dialogs/animated_game_dialog.dart';
-import '../widgets/game_header.dart';
+
 import '../widgets/formula_editor.dart';
+import '../widgets/game_header.dart';
 
 class TimeAttackPlayView extends StatefulWidget {
   const TimeAttackPlayView({
@@ -30,113 +31,178 @@ class TimeAttackPlayView extends StatefulWidget {
 }
 
 class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
-  static const int _initialTimeSeconds = 180; // 3 minutes
-
-  late String _digits;
-  final Set<String> _recentDigitSets = {};
+  String _digits = '';
   final _editorKey = GlobalKey<FormulaEditorState>();
   Timer? _timer;
-  int _secondsRemaining = _initialTimeSeconds;
-  int _solvesCount = 0;
+  Timer? _finishRetryTimer;
+  final Stopwatch _countdownStopwatch = Stopwatch();
+  TimeAttackSession? _session;
+  int _secondsRemaining = 180;
   int _highestNumber = 0;
   int _totalScore = 0;
-  DateTime? _highestNumberAchievedAt;
+  bool _isStarting = true;
+  bool _isSubmitting = false;
+  bool _isFinishing = false;
   bool _isFinished = false;
-
-  int _getDigitCountForSolves(int solves) {
-    if (solves < 2) return 4;
-    if (solves < 4) return 5;
-    return 6;
-  }
-
-  String _generateUniquePuzzle(int digitCount) {
-    final puzzle = generateTimeAttackPuzzle(
-      digitCount,
-      null,
-      _recentDigitSets,
-    );
-    _recentDigitSets.add(puzzle);
-    _recentDigitSets.add((puzzle.split('')..sort()).join());
-    if (_recentDigitSets.length > 40) {
-      _recentDigitSets.removeAll(_recentDigitSets.take(20).toList());
-    }
-    return puzzle;
-  }
+  String? _startError;
+  int _startRequestId = 0;
+  int _finishRetryAttempt = 0;
 
   @override
   void initState() {
     super.initState();
-    _digits = _generateUniquePuzzle(_getDigitCountForSolves(0));
-    _startTimer();
+    unawaited(_startNewSession());
   }
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) return;
-      if (_secondsRemaining <= 1) {
-        timer.cancel();
-        setState(() {
-          _secondsRemaining = 0;
-          _isFinished = true;
-        });
-        unawaited(_handleTimeExpired());
-      } else {
-        setState(() => _secondsRemaining--);
-      }
-    });
-  }
-
-  void _restartGame() {
+  Future<void> _startNewSession() async {
+    final requestId = ++_startRequestId;
     _timer?.cancel();
+    _finishRetryTimer?.cancel();
+    _countdownStopwatch
+      ..stop()
+      ..reset();
     setState(() {
-      _secondsRemaining = _initialTimeSeconds;
-      _solvesCount = 0;
+      _session = null;
+      _isStarting = true;
+      _isSubmitting = false;
+      _isFinishing = false;
+      _isFinished = false;
+      _secondsRemaining = 180;
       _highestNumber = 0;
       _totalScore = 0;
-      _highestNumberAchievedAt = null;
-      _isFinished = false;
-      _digits = _generateUniquePuzzle(_getDigitCountForSolves(0));
+      _startError = null;
+      _digits = '';
+      _finishRetryAttempt = 0;
     });
-    _editorKey.currentState?.reset();
-    _startTimer();
+
+    try {
+      final session = await Get.find<TimeAttackScoreService>().startSession();
+      if (!mounted || requestId != _startRequestId) return;
+      setState(() {
+        _session = session;
+        _digits = session.digits;
+        _highestNumber = session.highestNumber;
+        _totalScore = session.totalScore;
+        _isStarting = false;
+      });
+      _startTimer(session.remainingMilliseconds);
+    } on TimeAttackServiceException catch (error) {
+      if (!mounted || requestId != _startRequestId) return;
+      setState(() {
+        _isStarting = false;
+        _startError = error.userMessage;
+      });
+    }
   }
 
-  void _nextPuzzle() {
-    setState(() {
-      _digits = _generateUniquePuzzle(_getDigitCountForSolves(_solvesCount));
-    });
-    _editorKey.currentState?.reset();
+  void _startTimer(int remainingMilliseconds) {
+    _timer?.cancel();
+    _countdownStopwatch
+      ..reset()
+      ..start();
+    final countdownMilliseconds = remainingMilliseconds.clamp(0, 180000);
+
+    void syncRemaining() {
+      final milliseconds =
+          countdownMilliseconds - _countdownStopwatch.elapsedMilliseconds;
+      final remaining = milliseconds <= 0 ? 0 : (milliseconds / 1000).ceil();
+      if (!mounted) return;
+      if (_secondsRemaining != remaining) {
+        setState(() => _secondsRemaining = remaining);
+      }
+      if (remaining == 0) {
+        _timer?.cancel();
+        _countdownStopwatch.stop();
+        if (!_isFinished) {
+          setState(() => _isFinished = true);
+          unawaited(_handleTimeExpired());
+        }
+      }
+    }
+
+    syncRemaining();
+    _timer = Timer.periodic(
+      const Duration(milliseconds: 250),
+      (_) => syncRemaining(),
+    );
   }
 
   Future<void> _handleValidSubmission(String expression, int score) async {
-    if (_isFinished) return;
+    final session = _session;
+    if (_isFinished || _isSubmitting || session == null) return;
 
-    setState(() {
-      _totalScore += score;
-      if (score > _highestNumber) {
-        _highestNumber = score;
-        _highestNumberAchievedAt = DateTime.now();
+    setState(() => _isSubmitting = true);
+    try {
+      final updated = await Get.find<TimeAttackScoreService>().submitSolution(
+        sessionId: session.id,
+        puzzleIndex: session.puzzleIndex,
+        expression: expression,
+      );
+      if (!mounted) return;
+      setState(() {
+        _session = updated;
+        _digits = updated.digits;
+        _highestNumber = updated.highestNumber;
+        _totalScore = updated.totalScore;
+      });
+      _startTimer(updated.remainingMilliseconds);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _editorKey.currentState?.reset();
+      });
+    } on TimeAttackServiceException catch (error) {
+      if (!mounted) return;
+      if (error.code == 'session_expired') {
+        _timer?.cancel();
+        _countdownStopwatch.stop();
+        setState(() => _isFinished = true);
+        unawaited(_handleTimeExpired());
+      } else {
+        _editorKey.currentState?.showMessage(error.userMessage);
       }
-      _solvesCount++;
-    });
-
-    _nextPuzzle();
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   Future<void> _handleTimeExpired() async {
-    final authService = Get.find<AuthService>();
-    final nickname = authService.userNickname.value ?? 'Player';
-    final scoreService = Get.find<TimeAttackScoreService>();
+    final session = _session;
+    if (session == null || _isFinishing) return;
+    _finishRetryTimer?.cancel();
+    _isFinishing = true;
 
-    await scoreService.submitRecord(
-      nickname: nickname,
-      highestNumber: _highestNumber,
-      totalScore: _totalScore,
-      achievedAt: _highestNumberAchievedAt ?? DateTime.now(),
-    );
+    try {
+      final result =
+          await Get.find<TimeAttackScoreService>().finishSession(session.id);
+      _highestNumber = result.highestNumber;
+      _totalScore = result.totalScore;
+      _finishRetryAttempt = 0;
+    } on TimeAttackServiceException catch (error) {
+      _isFinishing = false;
+      if (!mounted) return;
+      if (error.code == 'session_active' ||
+          error.code == 'network_error' ||
+          error.code == 'server_error') {
+        const retryDelays = <Duration>[
+          Duration(milliseconds: 250),
+          Duration(milliseconds: 500),
+          Duration(seconds: 1),
+          Duration(seconds: 2),
+          Duration(seconds: 5),
+        ];
+        final retryIndex = _finishRetryAttempt.clamp(0, retryDelays.length - 1);
+        _finishRetryAttempt++;
+        _finishRetryTimer = Timer(
+          retryDelays[retryIndex],
+          () => unawaited(_handleTimeExpired()),
+        );
+        return;
+      }
+      _editorKey.currentState?.showMessage(error.userMessage);
+      return;
+    }
 
     if (!mounted) return;
-
+    _isFinishing = false;
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -151,7 +217,6 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
               children: [
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.emoji_events_rounded,
@@ -173,7 +238,6 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
                 const SizedBox(height: 12),
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(
                       Icons.star_rounded,
@@ -204,7 +268,7 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
               GameDialogButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  _restartGame();
+                  unawaited(_startNewSession());
                 },
                 icon: Icons.refresh_rounded,
                 backgroundColor: widget.accent,
@@ -237,9 +301,21 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isStarting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_startError != null || _digits.isEmpty) {
+      return Center(
+        child: IconButton(
+          icon: const Icon(Icons.refresh_rounded),
+          tooltip: _startError,
+          onPressed: () => unawaited(_startNewSession()),
+        ),
+      );
+    }
+
     final isLandscape =
         MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
-
     return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
@@ -254,7 +330,7 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
             ),
           ),
           leading: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
+            padding: const EdgeInsets.only(left: 8),
             child: Text(
               _formatTimer(_secondsRemaining),
               style: const TextStyle(
@@ -270,12 +346,12 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
               IconButton(
                 icon: const Icon(Icons.close_rounded),
                 tooltip: '나가기',
-                onPressed: () => widget.onShowLevels(),
+                onPressed: widget.onShowLevels,
               ),
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
                 tooltip: '다시하기',
-                onPressed: _restartGame,
+                onPressed: () => unawaited(_startNewSession()),
               ),
             ],
           ),
@@ -283,7 +359,7 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
         const SizedBox(height: AppSpacing.lg),
         Expanded(
           child: AbsorbPointer(
-            absorbing: _isFinished,
+            absorbing: _isFinished || _isSubmitting,
             child: FormulaEditor(
               key: _editorKey,
               digits: _digits.split(''),
@@ -293,12 +369,12 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
               visibleHints: const [],
               requiresEquals: true,
               allowDigitReordering: true,
-              validateExpression: (expression) => validateDailyPuzzleFormula(
+              validateExpression: (expression) => validateReorderableEquality(
                 digitString: _digits,
                 expression: expression,
               ),
-              onValidSubmission: (expr, score) =>
-                  unawaited(_handleValidSubmission(expr, score)),
+              onValidSubmission: (expression, score) =>
+                  unawaited(_handleValidSubmission(expression, score)),
             ),
           ),
         ),
@@ -308,7 +384,10 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
 
   @override
   void dispose() {
+    _startRequestId++;
     _timer?.cancel();
+    _finishRetryTimer?.cancel();
+    _countdownStopwatch.stop();
     super.dispose();
   }
 }

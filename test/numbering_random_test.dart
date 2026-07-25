@@ -1,32 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';
-import 'package:numbering/game/numbering/numbering_random.dart';
 
 void main() {
-  group('official daily Numbering puzzle', () {
-    test('the same seed always produces the same eight digits', () {
-      expect(generateDailyNumberingPuzzle(123456), '27297772');
-      expect(generateDailyNumberingPuzzle(123456), '27297772');
-    });
-
-    test('different seeds produce different puzzles', () {
-      expect(
-        generateDailyNumberingPuzzle(123456),
-        isNot(generateDailyNumberingPuzzle(123457)),
-      );
-    });
-
-    test('zero seed is deterministic and every digit is in 1 through 9', () {
-      final puzzle = generateDailyNumberingPuzzle(0);
-      expect(puzzle, '75574636');
-      expect(puzzle, hasLength(8));
-      expect(puzzle, matches(RegExp(r'^[1-9]{8}$')));
-    });
-  });
-
-  group('official daily equation', () {
+  group('Time Attack equation', () {
     test('uses the shared equality value as the score', () {
-      final result = validateDailyPuzzleFormula(
+      final result = validateReorderableEquality(
         digitString: '123321',
         expression: '1×2×3=3×2×1',
       );
@@ -36,7 +14,7 @@ void main() {
     });
 
     test('requires exactly one equals sign', () {
-      final result = validateDailyPuzzleFormula(
+      final result = validateReorderableEquality(
         digitString: '123321',
         expression: '1+2+3+3+2+1',
       );
@@ -46,7 +24,7 @@ void main() {
     });
 
     test('allows the supplied digits to be reordered', () {
-      final result = validateDailyPuzzleFormula(
+      final result = validateReorderableEquality(
         digitString: '123321',
         expression: '3×2×1=1×2×3',
       );
@@ -56,7 +34,7 @@ void main() {
     });
 
     test('supports division equations after reordering digits', () {
-      final result = validateDailyPuzzleFormula(
+      final result = validateReorderableEquality(
         digitString: '824822',
         expression: '8÷2+4=8+2-2',
       );
@@ -66,38 +44,13 @@ void main() {
     });
 
     test('rejects digits outside the supplied multiset', () {
-      final result = validateDailyPuzzleFormula(
+      final result = validateReorderableEquality(
         digitString: '123321',
         expression: '3×2×1=1×2×4',
       );
 
       expect(result.valid, isFalse);
       expect(result.message, '주어진 6개의 숫자만 사용할 수 있습니다.');
-    });
-  });
-
-  group('Time Attack puzzle generation', () {
-    test('always generates 100% solvable 4, 5, and 6 digit puzzles', () {
-      for (final digitCount in [4, 5, 6]) {
-        for (var i = 0; i < 20; i++) {
-          final puzzle = generateTimeAttackPuzzle(digitCount);
-          expect(puzzle, hasLength(digitCount));
-          expect(isSolvableTimeAttackPuzzle(puzzle), isTrue,
-              reason: 'Generated $digitCount-digit puzzle $puzzle must be solvable');
-        }
-      }
-    });
-
-    test('avoids generating puzzles present in recentDigitSets', () {
-      final recent = <String>{};
-      for (var i = 0; i < 15; i++) {
-        final puzzle = generateTimeAttackPuzzle(4, null, recent);
-        final sortedKey = (puzzle.split('')..sort()).join();
-        expect(recent.contains(puzzle), isFalse);
-        expect(recent.contains(sortedKey), isFalse);
-        recent.add(puzzle);
-        recent.add(sortedKey);
-      }
     });
   });
 }

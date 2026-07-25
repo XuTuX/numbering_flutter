@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,6 +8,7 @@ import 'package:numbering/screens/game_screen.dart';
 import 'package:numbering/screens/ranking/ranking_screen.dart';
 import 'package:numbering/screens/settings/settings_screen.dart';
 import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/time_attack_score_service.dart';
 import 'package:numbering/widgets/dialogs/edit_nickname_dialog.dart';
 import 'package:numbering/widgets/home_screen/login_sheet.dart';
 
@@ -54,6 +57,9 @@ void showSettingsScreen(AuthService authService) {
 }
 
 void showRankingSheet() {
+  if (Get.isRegistered<TimeAttackScoreService>()) {
+    unawaited(Get.find<TimeAttackScoreService>().refreshLeaderboard());
+  }
   Get.to(
     () => const RankingScreen(),
     transition: Transition.zoom,

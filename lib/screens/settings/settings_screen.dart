@@ -46,7 +46,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isLandscape = constraints.maxWidth > constraints.maxHeight;
+                final isLandscape =
+                    constraints.maxWidth > constraints.maxHeight;
                 final isWide = constraints.maxWidth >= 600 ||
                     (isLandscape && constraints.maxWidth >= 520);
                 final isCompactLandscape =

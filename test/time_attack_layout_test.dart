@@ -23,7 +23,7 @@ void main() {
     final hintService = await HintService().init();
     Get.put<HintService>(hintService);
     Get.put<AuthService>(AuthService());
-    Get.put<TimeAttackScoreService>(TimeAttackScoreService());
+    Get.put<TimeAttackScoreService>(_FakeTimeAttackScoreService());
   });
 
   tearDown(Get.reset);
@@ -69,4 +69,21 @@ void main() {
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
   });
+}
+
+class _FakeTimeAttackScoreService extends TimeAttackScoreService {
+  @override
+  Future<void> refreshLeaderboard({int limit = 100}) async {}
+
+  @override
+  Future<TimeAttackSession> startSession() async {
+    return TimeAttackSession(
+      id: 'test-session',
+      digits: '1233',
+      puzzleIndex: 0,
+      highestNumber: 0,
+      totalScore: 0,
+      expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 3)),
+    );
+  }
 }

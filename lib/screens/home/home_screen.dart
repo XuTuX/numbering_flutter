@@ -8,6 +8,7 @@ import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/audio_service.dart';
 import 'package:numbering/services/hint_service.dart';
+import 'package:numbering/services/time_attack_score_service.dart';
 import 'package:numbering/utils/app_snackbar.dart';
 
 import 'home_screen_flows.dart';
@@ -53,6 +54,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             iconColor: const Color(0xFFFFB800),
           );
         }
+      }
+      if (Get.isRegistered<TimeAttackScoreService>()) {
+        unawaited(
+          Get.find<TimeAttackScoreService>().refreshLeaderboard(),
+        );
       }
     });
   }
