@@ -295,8 +295,27 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
       children: [
         const SizedBox(height: AppSpacing.md),
         _GameHeader(
-          title: 'Time Attack · ${_formatTimer(_secondsRemaining)}',
-          leading: Row(
+          title: 'BEST $_highestNumber  TOTAL $_totalScore',
+          titleWidget: Text(
+            'BEST $_highestNumber  TOTAL $_totalScore',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(
+              _formatTimer(_secondsRemaining),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
@@ -310,14 +329,6 @@ class _TimeAttackPlayViewState extends State<_TimeAttackPlayView> {
                 onPressed: _restartGame,
               ),
             ],
-          ),
-          trailing: Text(
-            'BEST $_highestNumber  TOTAL $_totalScore',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textSecondary,
-            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),

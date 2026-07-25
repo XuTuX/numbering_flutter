@@ -66,7 +66,7 @@ class RankingScreen extends StatelessWidget {
               child: Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: isLandscape ? (mediaSize.width * 0.82).clamp(540.0, 720.0) : 600.0,
+                    maxWidth: isLandscape ? (mediaSize.width * 0.82).clamp(500.0, 640.0) : 600.0,
                   ),
                   child: Obx(() {
                     final records = SimulationMode.isEnabled.value ? _getMockRecords() : scoreService.records;
@@ -102,56 +102,13 @@ class RankingScreen extends StatelessWidget {
                       records: records,
                       myRank: myRank,
                       myBestRecord: myBestRecord,
-                      nickname: nickname,
                     );
-
-                    if (isLandscape) {
-                      final half = (displayItems.length / 2).ceil();
-                      final leftItems = displayItems.sublist(0, half);
-                      final rightItems = displayItems.sublist(half);
-
-                      return SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                        child: Column(
-                          children: [
-                            _MyRankBar(
-                              rank: myRank,
-                              bestNumber: myBestRecord?.highestNumber,
-                              totalScore: myBestRecord?.totalScore,
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: _buildRankListColumn(leftItems),
-                                ),
-                                const SizedBox(width: 32),
-                                Expanded(
-                                  child: _buildRankListColumn(rightItems),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    }
 
                     return ListView.separated(
                       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                       itemCount: displayItems.length + 1,
                       separatorBuilder: (context, index) {
-                        if (index == 0) return const SizedBox(height: 12);
-                        final currentItem = displayItems[index - 1];
-                        final nextItem = index < displayItems.length ? displayItems[index] : null;
-                        if (currentItem.isEllipsis || (nextItem != null && nextItem.isEllipsis)) {
-                          return const SizedBox.shrink();
-                        }
-                        return const Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: AppColors.hairlineSoft,
-                        );
+                        return const SizedBox(height: 4);
                       },
                       itemBuilder: (context, index) {
                         if (index == 0) {
@@ -186,7 +143,6 @@ class RankingScreen extends StatelessWidget {
     required List<TimeAttackRecord> records,
     required int? myRank,
     required TimeAttackRecord? myBestRecord,
-    required String nickname,
   }) {
     final items = <_RankDisplayItem>[];
     bool meIncluded = false;
@@ -194,7 +150,7 @@ class RankingScreen extends StatelessWidget {
     for (int i = 0; i < records.length; i++) {
       final record = records[i];
       final rank = i + 1;
-      final isMe = (record.nickname == nickname) || (myRank == rank);
+      final isMe = (myRank != null && rank == myRank);
       if (isMe) meIncluded = true;
       items.add(_RankDisplayItem(rank: rank, record: record, isMe: isMe));
     }
@@ -209,39 +165,6 @@ class RankingScreen extends StatelessWidget {
     }
 
     return items;
-  }
-
-  Widget _buildRankListColumn(List<_RankDisplayItem> items) {
-    if (items.isEmpty) return const SizedBox.shrink();
-
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      separatorBuilder: (context, index) {
-        final currentItem = items[index];
-        final nextItem = index + 1 < items.length ? items[index + 1] : null;
-        if (currentItem.isEllipsis || (nextItem != null && nextItem.isEllipsis)) {
-          return const SizedBox.shrink();
-        }
-        return const Divider(
-          height: 1,
-          thickness: 1,
-          color: AppColors.hairlineSoft,
-        );
-      },
-      itemBuilder: (context, index) {
-        final item = items[index];
-        if (item.isEllipsis) {
-          return const _EllipsisDivider();
-        }
-        return _TimeAttackRankListItem(
-          rank: item.rank,
-          record: item.record!,
-          isMe: item.isMe,
-        );
-      },
-    );
   }
 }
 
@@ -295,37 +218,29 @@ class _MyRankBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.blockLilac,
+        color: AppColors.blockMint,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderLight, width: 1),
       ),
       child: Row(
         children: [
-          Text(
-            rank != null ? '내 순위  #$rank' : '내 기록',
-            style: const TextStyle(
+          const Text(
+            '내 기록',
+            style: TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 15,
               color: AppColors.ink,
             ),
           ),
           const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              rank == null ? '기록 없음' : '${totalScore ?? 0}',
-              style: const TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 15,
-                color: AppColors.onPrimary,
-              ),
+          Text(
+            rank == null ? '기록 없음' : '${totalScore ?? 0}',
+            style: const TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 16,
+              color: AppColors.ink,
             ),
           ),
         ],
@@ -348,18 +263,15 @@ class _TimeAttackRankListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: isMe ? AppColors.blockMint : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        border: isMe
-            ? Border.all(color: AppColors.ink.withValues(alpha: 0.15), width: 1)
-            : null,
+        color: isMe ? AppColors.blockLilac.withValues(alpha: 0.6) : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
           SizedBox(
-            width: 38,
+            width: 34,
             child: Text(
               '$rank.',
               style: TextStyle(
@@ -369,62 +281,25 @@ class _TimeAttackRankListItem extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           Expanded(
-            child: Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    record.nickname,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: isMe ? FontWeight.w900 : FontWeight.w700,
-                      fontSize: 15,
-                      color: AppColors.ink,
-                    ),
-                  ),
-                ),
-                if (isMe) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.ink,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'ME',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+            child: Text(
+              record.nickname,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: isMe ? FontWeight.w900 : FontWeight.w700,
+                fontSize: 15,
+                color: AppColors.ink,
+              ),
             ),
           ),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: isMe ? 10 : 0,
-              vertical: isMe ? 4 : 0,
-            ),
-            decoration: isMe
-                ? BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(8),
-                  )
-                : null,
-            child: Text(
-              '${record.totalScore}',
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 15,
-                color: isMe ? AppColors.onPrimary : AppColors.ink,
-              ),
+          Text(
+            '${record.totalScore}',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 15,
+              color: isMe ? AppColors.primary : AppColors.ink,
             ),
           ),
         ],

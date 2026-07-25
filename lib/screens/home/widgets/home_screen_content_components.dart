@@ -146,17 +146,13 @@ class _ArrowCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: const BoxDecoration(
-        color: Color(0xDFFFFFFF),
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(
+    return const SizedBox(
+      width: 24,
+      height: 24,
+      child: Icon(
         Icons.arrow_forward_rounded,
         color: _homeInk,
-        size: 16,
+        size: 18,
       ),
     );
   }

@@ -134,22 +134,15 @@ class _PackHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Material(
-          color: AppColors.canvas,
-          shape: const CircleBorder(
-            side: BorderSide(color: AppColors.hairline),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: IconButton(
-            key: const ValueKey('level-list-back-button'),
-            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: onBack,
-            icon: const Icon(Icons.arrow_back_rounded),
-            color: AppColors.ink,
-            iconSize: 22,
-            constraints: const BoxConstraints.tightFor(width: 44, height: 44),
-            padding: EdgeInsets.zero,
-          ),
+        IconButton(
+          key: const ValueKey('level-list-back-button'),
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          onPressed: onBack,
+          icon: const Icon(Icons.arrow_back_rounded),
+          color: AppColors.ink,
+          iconSize: 22,
+          constraints: const BoxConstraints.tightFor(width: 44, height: 44),
+          padding: EdgeInsets.zero,
         ),
         const SizedBox(width: 14),
         Expanded(

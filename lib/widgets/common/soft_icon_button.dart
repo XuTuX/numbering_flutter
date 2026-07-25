@@ -50,9 +50,8 @@ class _SoftIconButtonState extends State<SoftIconButton> {
               width: widget.size.clamp(44, 64),
               height: widget.size.clamp(44, 64),
               decoration: BoxDecoration(
-                color: _pressed ? AppColors.hairlineSoft : AppColors.surfaceSoft,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.hairline),
+                color: _pressed ? AppColors.hairlineSoft : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
               child: Icon(

@@ -187,6 +187,7 @@ class _GameHeader extends StatelessWidget {
     this.onBack,
     required this.trailing,
     this.leading,
+    this.titleWidget,
   });
 
   final String title;
@@ -194,33 +195,33 @@ class _GameHeader extends StatelessWidget {
   final VoidCallback? onBack;
   final Widget trailing;
   final Widget? leading;
+  final Widget? titleWidget;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         leading ??
-            SoftIconButton(
-              icon: Icons.arrow_back_rounded,
-              label: backLabel,
+            IconButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              tooltip: backLabel.isNotEmpty ? backLabel : '뒤로가기',
               onPressed: onBack ?? () {},
-              size: 44,
-              iconSize: 20,
             ),
         const SizedBox(width: 8),
         Expanded(
           child: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            child: titleWidget ??
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
           ),
         ),
         const SizedBox(width: 8),

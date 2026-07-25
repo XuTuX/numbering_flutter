@@ -115,10 +115,6 @@ class _StoreHeader extends StatelessWidget {
           tooltip: '뒤로',
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_rounded),
-          style: IconButton.styleFrom(
-            backgroundColor: AppColors.surface,
-            side: const BorderSide(color: AppColors.borderLight),
-          ),
         ),
         const SizedBox(width: 14),
         const Expanded(
