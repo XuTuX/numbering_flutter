@@ -103,7 +103,7 @@ void main() {
           ),
         )
         .style;
-    expect(heldDigitStyle.color, AppColors.red);
+    expect(heldDigitStyle.color, AppColors.wrongAnswer);
 
     await tester.pumpAndSettle();
     final settledDigitStyle = tester

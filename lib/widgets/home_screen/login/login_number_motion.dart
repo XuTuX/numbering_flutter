@@ -1,6 +1,6 @@
 part of 'package:numbering/widgets/home_screen/login_sheet.dart';
 
-/// A quiet, non-interactive loop of Numbering's core arithmetic gesture.
+/// A quiet, non-interactive stream of Numbering equations.
 class _LoginNumberMotion extends StatefulWidget {
   const _LoginNumberMotion();
 
@@ -12,18 +12,27 @@ class _LoginNumberMotionState extends State<_LoginNumberMotion>
     with SingleTickerProviderStateMixin {
   final math.Random _random = math.Random();
   late final AnimationController _controller;
-  late List<_MotionExpression> _expressions;
+  late _MotionScene _currentScene;
+  late _MotionScene _nextScene;
   bool? _reduceMotion;
+  int _expressionsUntilWordmark = 0;
+  String? _lastExpressionKey;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2800),
+      duration: const Duration(milliseconds: 1800),
     )..addStatusListener(_handleAnimationStatus);
-    _expressions = _createExpressionPair();
+
+    _expressionsUntilWordmark = _nextWordmarkGap();
+    _currentScene = _MotionScene.expression(_createExpression());
+    _expressionsUntilWordmark--;
+    _nextScene = _createNextScene();
   }
+
+  int _nextWordmarkGap() => _random.nextInt(4) + 3;
 
   void _handleAnimationStatus(AnimationStatus status) {
     if (status != AnimationStatus.completed ||
@@ -32,31 +41,95 @@ class _LoginNumberMotionState extends State<_LoginNumberMotion>
       return;
     }
 
-    setState(() => _expressions = _createExpressionPair());
+    setState(() {
+      _currentScene = _nextScene;
+      _nextScene = _createNextScene();
+    });
     _controller.forward(from: 0);
   }
 
-  List<_MotionExpression> _createExpressionPair() {
-    final first = _createExpression();
-    var second = _createExpression();
-    while (second.values.join() == first.values.join()) {
-      second = _createExpression();
+  _MotionScene _createNextScene() {
+    if (_expressionsUntilWordmark == 0) {
+      _expressionsUntilWordmark = _nextWordmarkGap();
+      return const _MotionScene.wordmark();
     }
-    return [first, second];
+
+    _expressionsUntilWordmark--;
+    return _MotionScene.expression(_createExpression());
   }
 
   _MotionExpression _createExpression() {
-    final addition = _random.nextBool();
-    if (addition) {
-      final left = _random.nextInt(9) + 1;
-      final right = _random.nextInt(9) + 1;
-      return _MotionExpression(
-          ['$left', '+', '$right', '=', '${left + right}']);
-    }
+    late List<String> values;
+    String key;
 
-    final left = _random.nextInt(15) + 4;
+    do {
+      values = switch (_random.nextInt(6)) {
+        0 => _addition(),
+        1 => _subtraction(),
+        2 => _multiplication(),
+        3 => _division(),
+        4 => _addSubtractChain(),
+        _ => _multiplyAddChain(),
+      };
+      key = values.join();
+    } while (key == _lastExpressionKey);
+
+    _lastExpressionKey = key;
+    return _MotionExpression(values);
+  }
+
+  List<String> _addition() {
+    final left = _random.nextInt(12) + 1;
+    final right = _random.nextInt(9) + 1;
+    return ['$left', '+', '$right', '=', '${left + right}'];
+  }
+
+  List<String> _subtraction() {
+    final left = _random.nextInt(20) + 5;
     final right = _random.nextInt(left - 1) + 1;
-    return _MotionExpression(['$left', '−', '$right', '=', '${left - right}']);
+    return ['$left', '−', '$right', '=', '${left - right}'];
+  }
+
+  List<String> _multiplication() {
+    final left = _random.nextInt(8) + 2;
+    final right = _random.nextInt(8) + 2;
+    return ['$left', '×', '$right', '=', '${left * right}'];
+  }
+
+  List<String> _division() {
+    final divisor = _random.nextInt(8) + 2;
+    final result = _random.nextInt(8) + 2;
+    return ['${divisor * result}', '÷', '$divisor', '=', '$result'];
+  }
+
+  List<String> _addSubtractChain() {
+    final first = _random.nextInt(9) + 1;
+    final second = _random.nextInt(9) + 1;
+    final third = _random.nextInt(first + second - 1) + 1;
+    return [
+      '$first',
+      '+',
+      '$second',
+      '−',
+      '$third',
+      '=',
+      '${first + second - third}',
+    ];
+  }
+
+  List<String> _multiplyAddChain() {
+    final first = _random.nextInt(5) + 2;
+    final second = _random.nextInt(5) + 2;
+    final third = _random.nextInt(9) + 1;
+    return [
+      '$first',
+      '×',
+      '$second',
+      '+',
+      '$third',
+      '=',
+      '${first * second + third}',
+    ];
   }
 
   @override
@@ -70,7 +143,7 @@ class _LoginNumberMotionState extends State<_LoginNumberMotion>
     if (reduceMotion) {
       _controller
         ..stop()
-        ..value = 0.7;
+        ..value = 0;
     } else if (!_controller.isAnimating) {
       _controller.forward(from: 0);
     }
@@ -92,21 +165,23 @@ class _LoginNumberMotionState extends State<_LoginNumberMotion>
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
-              final progress = Curves.easeInOut.transform(_controller.value);
+              final slide = Curves.easeInOutCubic.transform(
+                ((_controller.value - 0.48) / 0.52).clamp(0.0, 1.0),
+              );
+
               return Stack(
                 alignment: Alignment.center,
+                clipBehavior: Clip.hardEdge,
                 children: [
-                  _MotionEquation(
-                    progress: progress,
-                    start: 0,
-                    exitStart: 0.38,
-                    values: _expressions[0].values,
+                  _MotionSceneView(
+                    scene: _currentScene,
+                    reveal: 1,
+                    offset: Offset(0, 72 * slide),
                   ),
-                  _MotionEquation(
-                    progress: progress,
-                    start: 0.46,
-                    exitStart: 0.86,
-                    values: _expressions[1].values,
+                  _MotionSceneView(
+                    scene: _nextScene,
+                    reveal: 1,
+                    offset: Offset(0, -72 * (1 - slide)),
                   ),
                 ],
               );
@@ -118,6 +193,53 @@ class _LoginNumberMotionState extends State<_LoginNumberMotion>
   }
 }
 
+class _MotionScene {
+  const _MotionScene.expression(this.expression) : isWordmark = false;
+  const _MotionScene.wordmark()
+      : expression = null,
+        isWordmark = true;
+
+  final _MotionExpression? expression;
+  final bool isWordmark;
+}
+
+class _MotionSceneView extends StatelessWidget {
+  const _MotionSceneView({
+    required this.scene,
+    required this.reveal,
+    required this.offset,
+  });
+
+  final _MotionScene scene;
+  final double reveal;
+  final Offset offset;
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.translate(
+      offset: offset,
+      child: scene.isWordmark
+          ? FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                'NUMBERING',
+                style: GoogleFonts.spaceGrotesk(
+                  color: AppColors.textPrimary,
+                  fontSize: 38,
+                  height: 1,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2.2,
+                ),
+              ),
+            )
+          : _MotionEquation(
+              values: scene.expression!.values,
+              reveal: reveal,
+            ),
+    );
+  }
+}
+
 class _MotionExpression {
   const _MotionExpression(this.values);
 
@@ -125,48 +247,31 @@ class _MotionExpression {
 }
 
 class _MotionEquation extends StatelessWidget {
-  const _MotionEquation({
-    required this.progress,
-    required this.start,
-    required this.values,
-    this.exitStart,
-  });
+  const _MotionEquation({required this.values, required this.reveal});
 
-  final double progress;
-  final double start;
-  final double? exitStart;
   final List<String> values;
+  final double reveal;
 
   @override
   Widget build(BuildContext context) {
-    final local = ((progress - start) / 0.32).clamp(0.0, 1.0);
-    final exit = exitStart == null
-        ? 0.0
-        : ((progress - exitStart!) / 0.14).clamp(0.0, 1.0);
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(values.length, (index) {
-        final delay = index * 0.12;
-        final entrance = Curves.easeOutBack.transform(
-          ((local - delay) / (1 - delay)).clamp(0.0, 1.0),
+        final delay = index * 0.035;
+        final pieceReveal = Curves.easeOutCubic.transform(
+          ((reveal - delay) / (1 - delay)).clamp(0.0, 1.0),
         );
-        final opacity = (entrance * (1 - exit)).clamp(0.0, 1.0);
-        final value = values[index];
         final isDigit = index.isEven;
 
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: isDigit ? 4 : 2),
           child: Opacity(
-            opacity: opacity,
+            opacity: pieceReveal,
             child: Transform.translate(
-              offset: Offset(0, (1 - entrance) * 16 - exit * 12),
-              child: Transform.rotate(
-                angle: (1 - entrance) * (index.isEven ? -0.05 : 0.05),
-                child: _MotionTile(
-                  value: value,
-                  isOperator: !isDigit,
-                ),
+              offset: Offset(0, (1 - pieceReveal) * 5),
+              child: _MotionTile(
+                value: values[index],
+                isOperator: !isDigit,
               ),
             ),
           ),
@@ -188,17 +293,17 @@ class _MotionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: isOperator ? 28 : 48,
+      width: isOperator ? 24 : 42,
       height: isOperator ? 40 : 56,
       child: Center(
         child: Text(
           value,
-          style: TextStyle(
+          style: GoogleFonts.spaceGrotesk(
             color: AppColors.textPrimary,
-            fontSize: isOperator ? 22 : 27,
+            fontSize: isOperator ? 21 : 28,
             height: 1,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.8,
+            fontWeight: isOperator ? FontWeight.w500 : FontWeight.w700,
+            letterSpacing: isOperator ? 0 : -0.4,
           ),
         ),
       ),

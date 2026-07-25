@@ -66,18 +66,18 @@ class FormulaEditorState extends State<FormulaEditor>
     _operators = List.filled(widget.digits.length - 1, null);
     _wrongAnswerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 700),
     );
     _wrongAnswerProgress = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween(begin: 0.0, end: 1.0).chain(
           CurveTween(curve: Curves.easeOut),
         ),
-        weight: 50,
+        weight: 100,
       ),
       TweenSequenceItem(
         tween: ConstantTween(1.0),
-        weight: 350,
+        weight: 500,
       ),
       TweenSequenceItem(
         tween: Tween(begin: 1.0, end: 0.0).chain(

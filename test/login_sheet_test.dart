@@ -70,7 +70,6 @@ void main() {
       ),
     );
 
-    expect(find.text('NUMBERING'), findsOneWidget);
     expect(find.text('로그인하여 플레이해보세요'), findsNothing);
     expect(
       find.byKey(const ValueKey('login-number-motion')),
@@ -108,7 +107,10 @@ void main() {
       ),
     );
 
-    expect(find.text('NUMBERING'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('login-number-motion')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const ValueKey('google-sign-in-button')),
       findsOneWidget,

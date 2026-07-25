@@ -156,7 +156,7 @@ class _DragDropEditorState extends State<DragDropEditor> {
                           fontWeight: FontWeight.w800,
                           color: Color.lerp(
                             selected ? widget.accent : AppColors.ink,
-                            AppColors.red,
+                            AppColors.wrongAnswer,
                             widget.wrongAnswerProgress,
                           ),
                         ),

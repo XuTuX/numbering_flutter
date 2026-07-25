@@ -107,16 +107,8 @@ class _RequiredLoginScreenState extends State<RequiredLoginScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          'NUMBERING',
-                          style: AppTextStyles.hero.copyWith(fontSize: 44),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
                       const _LoginNumberMotion(),
-                      const SizedBox(height: AppSpacing.xl),
+                      const SizedBox(height: AppSpacing.section),
                       _SocialSignInButtons(
                         pendingProvider: _pendingProvider,
                         showAppleButton: GetPlatform.isIOS,

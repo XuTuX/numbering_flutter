@@ -39,6 +39,7 @@ abstract final class AppColors {
   static const timeBlue = Color(0xFF0066CC);
   static const green = Color(0xFF00D47C);
   static const red = Color(0xFFFF4D4D);
+  static const wrongAnswer = Color(0xFFF05650);
   static const danger = Color(0xFFFF4D4D);
   static const yellow = Color(0xFFFFB300);
   static const blue = Color(0xFF0066CC);
