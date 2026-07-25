@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:numbering/theme/app_colors.dart';
 
 final GlobalKey<ScaffoldMessengerState> appScaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
@@ -10,8 +11,8 @@ OverlayEntry? _currentOverlay;
 void showAppSnackBar({
   required String message,
   String? title,
-  Color backgroundColor = const Color(0xFF171716),
-  Color textColor = const Color(0xFFFFFFFF),
+  Color backgroundColor = AppColors.primary,
+  Color textColor = AppColors.onPrimary,
   Color borderColor = const Color(0x33FFFFFF),
   IconData icon = Icons.info_outline_rounded,
   Color? iconColor,
@@ -298,4 +299,3 @@ class _TopSnackBarWidgetState extends State<_TopSnackBarWidget>
     );
   }
 }
-

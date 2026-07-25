@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:numbering/constant.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_radius.dart';
 import 'package:numbering/theme/app_shadows.dart';
@@ -50,12 +49,10 @@ class _HomeProgressPanelState extends State<HomeProgressPanel> {
   Future<void> _load() async {
     if (!mounted) return;
     setState(() {
+      final periodKey = KstClock.currentChallengePeriodKey();
       _dailyChallenge = DailyChallengeInfo(
-        dateKey: KstClock.currentDateKey(),
-        seed: int.tryParse(
-              KstClock.currentDateKey().replaceAll('-', ''),
-            ) ??
-            0,
+        dateKey: periodKey,
+        seed: KstClock.seedForPeriodKey(periodKey),
         hasUsedEntry: false,
       );
       _dailyRank = null;
@@ -165,7 +162,7 @@ class _TodayPuzzleCard extends StatelessWidget {
             style: AppTypography.bodySmall.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: charcoalBlack.withValues(alpha: 0.45),
+              color: AppColors.ink.withValues(alpha: 0.45),
             ),
           ),
         ],
@@ -187,7 +184,7 @@ class _TodayPuzzleCard extends StatelessWidget {
             style: AppTypography.bodySmall.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: charcoalBlack.withValues(alpha: 0.5),
+              color: AppColors.ink.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -234,7 +231,7 @@ class _TodayPuzzleCard extends StatelessWidget {
           style: AppTypography.bodySmall.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: charcoalBlack.withValues(alpha: 0.5),
+            color: AppColors.ink.withValues(alpha: 0.5),
           ),
         ),
       ],
@@ -248,7 +245,7 @@ class _TodayPuzzleCard extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       style: GoogleFonts.blackHanSans(
         fontSize: 17,
-        color: charcoalBlack,
+        color: AppColors.ink,
         letterSpacing: 0,
       ),
     );
@@ -298,7 +295,7 @@ class _ActionPill extends StatelessWidget {
         height: 18,
         child: CircularProgressIndicator(
           strokeWidth: 2.4,
-          color: charcoalBlack,
+          color: AppColors.ink,
         ),
       );
     }

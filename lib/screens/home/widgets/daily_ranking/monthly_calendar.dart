@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/utils/kst_clock.dart';
 
-const charcoalBlack = Color(0xFF17191D);
-
 class MonthlyCalendar extends StatelessWidget {
   const MonthlyCalendar({
     super.key,
@@ -117,7 +115,7 @@ class _DateChip extends StatelessWidget {
     final backgroundColor =
         (rank != null) ? _rankBackgroundColor : const Color(0xFFF8FAFC);
     final foregroundColor =
-        isEnabled ? charcoalBlack : charcoalBlack.withValues(alpha: 0.2);
+        isEnabled ? AppColors.ink : AppColors.ink.withValues(alpha: 0.2);
 
     return GestureDetector(
       onTap: onTap,
@@ -132,7 +130,7 @@ class _DateChip extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? charcoalBlack : AppColors.borderLight,
+            color: isSelected ? AppColors.ink : AppColors.borderLight,
             width: 1,
           ),
         ),
@@ -153,7 +151,7 @@ class _DateChip extends StatelessWidget {
                 width: 4,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: charcoalBlack.withValues(alpha: 0.4),
+                  color: AppColors.ink.withValues(alpha: 0.4),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -163,7 +161,7 @@ class _DateChip extends StatelessWidget {
                 width: 3,
                 height: 3,
                 decoration: BoxDecoration(
-                  color: charcoalBlack.withValues(alpha: 0.16),
+                  color: AppColors.ink.withValues(alpha: 0.16),
                   shape: BoxShape.circle,
                 ),
               ),

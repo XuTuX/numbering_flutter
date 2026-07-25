@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:numbering/theme/app_colors.dart';
 
 class AnimatedGameDialog extends StatelessWidget {
   const AnimatedGameDialog({
@@ -53,7 +54,7 @@ class GameDialogButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.backgroundColor = const Color(0xFFF3F4F6),
-    this.iconColor = const Color(0xFF17191D),
+    this.iconColor = AppColors.ink,
   });
 
   final IconData icon;

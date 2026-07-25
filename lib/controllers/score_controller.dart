@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:numbering/services/auth_service.dart';
+
+import 'score/score_merge_service.dart';
 
 part 'score/score_auth.dart';
 part 'score/score_gameplay.dart';
@@ -20,12 +21,14 @@ class ScoreController extends GetxController {
 
   final combo = 0.obs;
 
+  final ScoreMergeService _mergeService = const ScoreMergeService();
+
   Completer<void>? _loginSyncCompleter;
   Worker? _authWorker;
   int _authSyncGeneration = 0;
 
   String? get _currentUserId => Get.find<AuthService>().user.value?.id;
-  String get _scoreKey => _scoreStorageKeyFor(this);
+  String get _scoreKey => _mergeService.storageKeyFor(_currentUserId);
 
   bool _isCurrentAuthSync(int generation, String? userId) {
     return !isClosed &&

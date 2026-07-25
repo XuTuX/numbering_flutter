@@ -7,7 +7,6 @@ import 'package:numbering/game/game_module.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/audio_service.dart';
-import 'package:numbering/services/time_attack_score_service.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/utils/app_snackbar.dart';
 
@@ -123,39 +122,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final authService = Get.find<AuthService>();
-    final levelProgress = Get.find<LevelProgressService>();
-    final timeAttackService = Get.isRegistered<TimeAttackScoreService>()
-        ? Get.find<TimeAttackScoreService>()
-        : null;
 
-    return Obx(() {
-      final currentLevel = levelProgress.highestUnlockedLevel;
-      final nickname = authService.user.value == null
-          ? null
-          : authService.userNickname.value;
-      final bestRecord = timeAttackService?.personalBest;
-      final myRank = nickname == null ? null : timeAttackService?.getMyRank(nickname);
-
-      return HomeScreenContent(
-        nickname: nickname,
-        onNicknameTap:
-            nickname == null ? null : () => showEditNicknameDialog(authService),
-        currentLevel: currentLevel,
-        onSettingsTap: () => showSettingsScreen(authService),
-        onStartGame: () => openGameScreen(
-          GameSessionConfig(
-            mode: GameMode.normal,
-            startLevelId: currentLevel,
-          ),
+    return HomeScreenContent(
+      onNicknameTap: () => showEditNicknameDialog(authService),
+      onSettingsTap: () => showSettingsScreen(authService),
+      onStartGame: () => openGameScreen(
+        GameSessionConfig(
+          mode: GameMode.normal,
+          startLevelId: Get.find<LevelProgressService>().highestUnlockedLevel,
         ),
-        onStartTimeAttack: () => openGameScreen(
-          const GameSessionConfig.timeAttack(),
-        ),
-        onRankingTap: showRankingSheet,
-        rank: myRank,
-        bestNumber: bestRecord?.highestNumber,
-        topScore: bestRecord?.totalScore,
-      );
-    });
+      ),
+      onStartTimeAttack: () => openGameScreen(
+        const GameSessionConfig.timeAttack(),
+      ),
+      onRankingTap: showRankingSheet,
+    );
   }
 }

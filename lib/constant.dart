@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 const String appName = 'NUMBERING';
 const String gameId = 'numbering';
 
-const Color charcoalBlack = Color(0xFF1A1A1A);
-final Color charcoalBlack87 = charcoalBlack.withValues(alpha: 0.87);
-
 const List<Color> regionColors = [
   Color(0xFFFF7F7F),
   Color(0xFFFFB27A),

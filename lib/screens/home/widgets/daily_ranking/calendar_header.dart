@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/utils/kst_clock.dart';
-
-const charcoalBlack = Color(0xFF17191D);
 
 class CalendarHeader extends StatelessWidget {
   const CalendarHeader({super.key});
@@ -33,7 +32,7 @@ class CalendarHeader extends StatelessWidget {
           '오늘의 퍼즐'.tr,
           style: GoogleFonts.blackHanSans(
             fontSize: headerFs,
-            color: charcoalBlack,
+            color: AppColors.ink,
             letterSpacing: -0.5,
           ),
         ),
@@ -43,7 +42,7 @@ class CalendarHeader extends StatelessWidget {
           style: GoogleFonts.notoSans(
             fontSize: subFs,
             fontWeight: FontWeight.w800,
-            color: charcoalBlack.withValues(alpha: 0.2),
+            color: AppColors.ink.withValues(alpha: 0.2),
           ),
         ),
       ],

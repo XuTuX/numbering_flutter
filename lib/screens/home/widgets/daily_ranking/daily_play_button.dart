@@ -4,8 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_shadows.dart';
 
-const charcoalBlack = Color(0xFF17191D);
-
 class DailyPlayButton extends StatefulWidget {
   const DailyPlayButton({
     super.key,
@@ -137,13 +135,13 @@ class DailyTestButton extends StatelessWidget {
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: charcoalBlack,
+                color: AppColors.ink,
               ),
             )
           : const Icon(Icons.science_rounded),
       label: Text(isLoading ? '테스트 준비 중'.tr : '테스트 플레이'.tr),
       style: OutlinedButton.styleFrom(
-        foregroundColor: charcoalBlack,
+        foregroundColor: AppColors.ink,
         side: const BorderSide(color: AppColors.borderLight),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

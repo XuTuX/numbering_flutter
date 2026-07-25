@@ -18,6 +18,7 @@ class HintService extends GetxService {
 
   final RxInt hints = initialHints.obs;
   final RxBool justReceivedAttendanceBonus = false.obs;
+  final RxBool _isConsumingHint = false.obs;
 
   Future<HintService> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -54,17 +55,23 @@ class HintService extends GetxService {
           'p_local_last_attendance_date': localDate,
         },
       );
-      if (client.auth.currentUser?.id != user.id) return;
+      if (isClosed || client.auth.currentUser?.id != user.id) return;
 
       final state = _asMap(response);
-      hints.value = _asInt(state['hint_count']) ?? initialHints;
+      final syncedCount = _asInt(state['hint_count']);
+      if (syncedCount == null) {
+        throw const FormatException('RPC response missing hint_count');
+      }
+      hints.value = syncedCount;
       await _cacheCloudCount(user.id, hints.value);
+      if (isClosed) return;
       if (state['attendance_awarded'] == true) {
         justReceivedAttendanceBonus.value = true;
       }
     } catch (error, stackTrace) {
       debugPrint('Hint balance sync failed: $error');
       debugPrintStack(stackTrace: stackTrace);
+      if (isClosed) return;
       hints.value = _prefs.getInt(_cloudHintKey(user.id)) ?? hints.value;
     }
   }
@@ -106,26 +113,35 @@ class HintService extends GetxService {
   bool get hasHints => hints.value > 0;
 
   Future<bool> useHint() async {
-    final client = _supabase;
-    final user = client?.auth.currentUser;
-    if (client != null && user != null) {
-      try {
-        final response = await client.rpc('consume_my_numbering_hint');
-        final state = _asMap(response);
-        final used = state['used'] == true;
-        hints.value = _asInt(state['hint_count']) ?? hints.value;
-        await _cacheCloudCount(user.id, hints.value);
-        return used;
-      } catch (error) {
-        debugPrint('Hint consumption failed: $error');
-        return false;
+    // Guards against a double-tap (or any other overlapping caller) firing a
+    // second consumption before the first one's await chain resolves, which
+    // would otherwise deduct/consume two hints for a single user action.
+    if (_isConsumingHint.value) return false;
+    _isConsumingHint.value = true;
+    try {
+      final client = _supabase;
+      final user = client?.auth.currentUser;
+      if (client != null && user != null) {
+        try {
+          final response = await client.rpc('consume_my_numbering_hint');
+          final state = _asMap(response);
+          final used = state['used'] == true;
+          hints.value = _asInt(state['hint_count']) ?? hints.value;
+          await _cacheCloudCount(user.id, hints.value);
+          return used;
+        } catch (error) {
+          debugPrint('Hint consumption failed: $error');
+          return false;
+        }
       }
-    }
 
-    if (hints.value <= 0) return false;
-    hints.value -= 1;
-    await _prefs.setInt(_keyHints, hints.value);
-    return true;
+      if (hints.value <= 0) return false;
+      hints.value -= 1;
+      await _prefs.setInt(_keyHints, hints.value);
+      return true;
+    } finally {
+      _isConsumingHint.value = false;
+    }
   }
 
   Future<void> addHints(int amount) async {
@@ -172,7 +188,10 @@ Map<String, Object?> _asMap(Object? value) {
   if (value is Map) {
     return value.map((key, item) => MapEntry(key.toString(), item));
   }
-  return const {};
+  // An unexpected response shape is treated as a failed call rather than
+  // silently falling through with defaults — callers already fall back to
+  // their last known-good cached balance on error.
+  throw const FormatException('Unexpected RPC response shape');
 }
 
 int? _asInt(Object? value) {

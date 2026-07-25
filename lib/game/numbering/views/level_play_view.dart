@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:numbering/theme/app_colors.dart';
@@ -8,6 +10,7 @@ import 'package:numbering/game/numbering/level_catalog.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/hint_purchase_service.dart';
+import 'package:numbering/services/settings_service.dart';
 import 'package:numbering/utils/app_snackbar.dart';
 import 'package:numbering/screens/hints/hint_store_screen.dart';
 import 'package:numbering/widgets/dialogs/animated_game_dialog.dart';
@@ -24,6 +27,7 @@ class LevelPlayView extends StatefulWidget {
     required this.accent,
     required this.onShowLevels,
     required this.onNext,
+    this.isTutorial = false,
   });
 
   final LevelData level;
@@ -31,6 +35,7 @@ class LevelPlayView extends StatefulWidget {
   final Color accent;
   final VoidCallback onShowLevels;
   final ValueChanged<int> onNext;
+  final bool isTutorial;
 
   @override
   State<LevelPlayView> createState() => _LevelPlayViewState();
@@ -39,15 +44,8 @@ class LevelPlayView extends StatefulWidget {
 class _LevelPlayViewState extends State<LevelPlayView> {
   final _editorKey = GlobalKey<FormulaEditorState>();
   int _usedHints = 0;
-  _CompletedAttempt? _completed;
-  OverlayEntry? _resultOverlay;
+  LevelEvaluation? _completedEvaluation;
   bool _isCompleting = false;
-
-  @override
-  void dispose() {
-    _removeResultOverlay();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,137 +142,144 @@ class _LevelPlayViewState extends State<LevelPlayView> {
       evaluation: evaluation,
       usedHints: _usedHints,
     );
+    if (widget.isTutorial) {
+      unawaited(Get.find<SettingsService>().completeTutorial());
+    }
     if (!mounted) return;
     setState(() {
-      _completed = _CompletedAttempt(
-        evaluation: evaluation,
-      );
+      _completedEvaluation = evaluation;
       _isCompleting = false;
     });
     _showResultOverlay();
   }
 
   void _showResultOverlay() {
-    final completed = _completed;
-    if (completed == null || _resultOverlay != null) return;
-
-    _resultOverlay = OverlayEntry(
-      builder: (context) => _LevelResultOverlay(
-        attempt: completed,
-        onReplay: _replay,
-        onShowLevels: () {
-          _removeResultOverlay();
-          widget.onShowLevels();
-        },
-        onNext: widget.level.id < LevelCatalog.all.length
-            ? () {
-                _removeResultOverlay();
-                widget.onNext(widget.level.id + 1);
-              }
-            : null,
-      ),
-    );
-    Overlay.of(context, rootOverlay: true).insert(_resultOverlay!);
-  }
-
-  void _removeResultOverlay() {
-    _resultOverlay?.remove();
-    _resultOverlay = null;
-  }
-
-  void _replay() {
-    _removeResultOverlay();
-    setState(() {
-      _usedHints = 0;
-      _completed = null;
-    });
-    _editorKey.currentState?.reset();
+    final evaluation = _completedEvaluation;
+    if (evaluation == null) return;
+    Navigator.of(context, rootNavigator: true).push<void>(_LevelResultRoute(
+      evaluation: evaluation,
+      onReplay: () {
+        setState(() {
+          _usedHints = 0;
+          _completedEvaluation = null;
+        });
+      },
+      onShowLevels: widget.onShowLevels,
+      hasNext: widget.level.id < LevelCatalog.all.length,
+      onNextIfAny: () => widget.onNext(widget.level.id + 1),
+    ));
   }
 }
 
+// ─── PopupRoute ────────────────────────────────────────────
 
-
-// ─── 완료 시도 데이터 ────────────────────────────────────────
-
-class _CompletedAttempt {
-  const _CompletedAttempt({
+class _LevelResultRoute extends PopupRoute<void> {
+  _LevelResultRoute({
     required this.evaluation,
+    required this.onReplay,
+    required this.onShowLevels,
+    required this.hasNext,
+    required this.onNextIfAny,
   });
 
   final LevelEvaluation evaluation;
+  final VoidCallback onReplay;
+  final VoidCallback onShowLevels;
+  final bool hasNext;
+  final VoidCallback onNextIfAny;
+
+  @override
+  Color? get barrierColor => AppColors.ink.withValues(alpha: 0.55);
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 200);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    return _LevelResultContent(
+      evaluation: evaluation,
+      onReplay: () {
+        Navigator.of(context).pop();
+        onReplay();
+      },
+      onShowLevels: () {
+        Navigator.of(context).pop();
+        onShowLevels();
+      },
+      onNext: hasNext
+          ? () {
+              Navigator.of(context).pop();
+              onNextIfAny();
+            }
+          : null,
+    );
+  }
 }
 
-// ─── 레벨 결과 오버레이 ──────────────────────────────────────
+// ─── 레벨 결과 내용 ─────────────────────────────────────────
 
-class _LevelResultOverlay extends StatelessWidget {
-  const _LevelResultOverlay({
-    required this.attempt,
+class _LevelResultContent extends StatelessWidget {
+  const _LevelResultContent({
+    required this.evaluation,
     required this.onReplay,
     required this.onShowLevels,
     required this.onNext,
   });
 
-  final _CompletedAttempt attempt;
+  final LevelEvaluation evaluation;
   final VoidCallback onReplay;
   final VoidCallback onShowLevels;
   final VoidCallback? onNext;
 
   @override
   Widget build(BuildContext context) {
-    final evaluation = attempt.evaluation;
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: ModalBarrier(
-            dismissible: false,
-            color: const Color(0xFF17191D).withValues(alpha: 0.55),
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: AnimatedGameDialog(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(3, (index) {
+              final isLit = index < evaluation.stars;
+              final size = index == 1 ? 48.0 : 36.0;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Icon(
+                  isLit ? Icons.star_rounded : Icons.star_border_rounded,
+                  size: size,
+                  color:
+                      isLit ? const Color(0xFFFFB800) : AppColors.borderLight,
+                ),
+              );
+            }),
           ),
-        ),
-        Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: AnimatedGameDialog(
-              content: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (index) {
-                  final isLit = index < evaluation.stars;
-                  final size = index == 1 ? 48.0 : 36.0;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: Icon(
-                      isLit
-                          ? Icons.star_rounded
-                          : Icons.star_border_rounded,
-                      size: size,
-                      color: isLit
-                          ? const Color(0xFFFFB800)
-                          : AppColors.borderLight,
-                    ),
-                  );
-                }),
-              ),
-              actions: [
-                GameDialogButton(
-                  onPressed: onReplay,
-                  icon: Icons.replay_rounded,
-                ),
-                GameDialogButton(
-                  onPressed: onShowLevels,
-                  icon: Icons.grid_view_rounded,
-                ),
-                GameDialogButton(
-                  onPressed: onNext,
-                  icon: onNext == null
-                      ? Icons.check_rounded
-                      : Icons.arrow_forward_rounded,
-                  backgroundColor: const Color(0xFF0095FF),
-                  iconColor: Colors.white,
-                ),
-              ],
+          actions: [
+            GameDialogButton(
+              onPressed: onReplay,
+              icon: Icons.replay_rounded,
             ),
-          ),
+            GameDialogButton(
+              onPressed: onShowLevels,
+              icon: Icons.grid_view_rounded,
+            ),
+            GameDialogButton(
+              onPressed: onNext,
+              icon: onNext == null
+                  ? Icons.check_rounded
+                  : Icons.arrow_forward_rounded,
+              backgroundColor: const Color(0xFF0095FF),
+              iconColor: Colors.white,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -6,8 +6,6 @@ import 'package:numbering/theme/app_shadows.dart';
 import 'package:numbering/theme/app_typography.dart';
 import 'package:numbering/widgets/home_screen/components/weekly_ranking_preview.dart';
 
-const charcoalBlack = Color(0xFF17191D);
-
 class InlineDailyRankingPanel extends StatelessWidget {
   const InlineDailyRankingPanel({
     super.key,
@@ -65,14 +63,14 @@ class InlineDailyRankingPanel extends StatelessWidget {
                 Icon(
                   Icons.emoji_events_rounded,
                   size: headerFs - 1,
-                  color: charcoalBlack.withValues(alpha: 0.35),
+                  color: AppColors.ink.withValues(alpha: 0.35),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '${_formatDate(dateKey)} ${'랭킹'.tr}',
                   style: GoogleFonts.blackHanSans(
                     fontSize: headerFs,
-                    color: charcoalBlack,
+                    color: AppColors.ink,
                     letterSpacing: 0,
                   ),
                 ),
@@ -82,13 +80,13 @@ class InlineDailyRankingPanel extends StatelessWidget {
                   style: GoogleFonts.notoSans(
                     fontSize: viewAllFs,
                     fontWeight: FontWeight.w700,
-                    color: charcoalBlack.withValues(alpha: 0.32),
+                    color: AppColors.ink.withValues(alpha: 0.32),
                   ),
                 ),
                 Icon(
                   Icons.chevron_right_rounded,
                   size: viewAllFs + 3,
-                  color: charcoalBlack.withValues(alpha: 0.28),
+                  color: AppColors.ink.withValues(alpha: 0.28),
                 ),
               ],
             ),
@@ -102,7 +100,7 @@ class InlineDailyRankingPanel extends StatelessWidget {
                   width: 22,
                   height: 22,
                   child: CircularProgressIndicator(
-                    color: charcoalBlack,
+                    color: AppColors.ink,
                     strokeWidth: 3,
                   ),
                 ),
@@ -147,7 +145,7 @@ class InlineDailyRankingPanel extends StatelessWidget {
                 style: AppTypography.bodySmall.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: charcoalBlack.withValues(alpha: 0.28),
+                  color: AppColors.ink.withValues(alpha: 0.28),
                 ),
               ),
             )

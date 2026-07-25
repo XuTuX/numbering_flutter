@@ -82,6 +82,7 @@ class _NumberingGamePageState extends State<NumberingGamePage> {
         level: LevelCatalog.byId(_selectedLevelId),
         progress: _progress,
         accent: widget.game.visuals.accent,
+        isTutorial: widget.session.isTutorialMode,
         onShowLevels: widget.callbacks.onExit,
         onNext: (id) {
           if (!_progress.isUnlocked(id)) return;

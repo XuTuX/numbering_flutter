@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:numbering/screens/home/widgets/home_screen_content.dart';
+import 'package:numbering/services/auth_service.dart';
+import 'package:numbering/services/time_attack_score_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -12,26 +17,43 @@ void main() {
     String? nickname,
     VoidCallback? onNicknameTap,
   }) async {
+    Get.testMode = true;
+    SharedPreferences.setMockInitialValues({});
     await tester.binding.setSurfaceSize(surfaceSize);
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+      Get.reset();
+    });
+
+    final authService = Get.put<AuthService>(AuthService());
+    Get.put<TimeAttackScoreService>(TimeAttackScoreService());
+    if (nickname != null) {
+      authService.user.value = User(
+        id: 'test-user',
+        appMetadata: const {},
+        userMetadata: const {},
+        aud: 'authenticated',
+        createdAt: DateTime.now().toIso8601String(),
+      );
+      authService.userNickname.value = nickname;
+    }
 
     await tester.pumpWidget(
-      MaterialApp(
+      GetMaterialApp(
         home: HomeScreenContent(
           onSettingsTap: () {},
           onStartGame: () {},
           onStartTimeAttack: () {},
           onRankingTap: () {},
-          nickname: nickname,
-          onNicknameTap: onNicknameTap,
-          currentLevel: 3,
+          onNicknameTap: onNicknameTap ?? () {},
         ),
       ),
     );
     await tester.pump();
   }
 
-  testWidgets('shows minimal Arcade and Time Attack home cards in landscape', (tester) async {
+  testWidgets('shows minimal Arcade and Time Attack home cards in landscape',
+      (tester) async {
     await pumpHome(tester, surfaceSize: const Size(844, 390));
 
     expect(find.text('NUMBERING'), findsOneWidget);
@@ -63,8 +85,7 @@ void main() {
     expect(nicknameTapped, isTrue);
   });
 
-  testWidgets('keeps the layout on a compact landscape screen',
-      (tester) async {
+  testWidgets('keeps the layout on a compact landscape screen', (tester) async {
     await pumpHome(tester, surfaceSize: const Size(667, 375));
 
     expect(find.text('Arcade'), findsOneWidget);

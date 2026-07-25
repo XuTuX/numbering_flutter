@@ -45,11 +45,9 @@ class _HomeMenuCard extends StatelessWidget {
 
 class _ArcadeCard extends StatelessWidget {
   const _ArcadeCard({
-    required this.roundLabel,
     required this.onTap,
   });
 
-  final String roundLabel;
   final VoidCallback onTap;
 
   @override
@@ -106,40 +104,45 @@ class _TimeAttackCard extends StatelessWidget {
 class _RankingCard extends StatelessWidget {
   const _RankingCard({
     required this.onTap,
-    required this.rank,
-    this.bestNumber,
-    this.topScore,
   });
 
   final VoidCallback onTap;
-  final int? rank;
-  final int? bestNumber;
-  final int? topScore;
 
   @override
   Widget build(BuildContext context) {
+    final authService = Get.find<AuthService>();
+    final timeAttackService = Get.isRegistered<TimeAttackScoreService>()
+        ? Get.find<TimeAttackScoreService>()
+        : null;
     return _HomeMenuCard(
       color: _rankingSurface,
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'YOUR RANK'.tr,
-            style: AppTextStyles.labelSmall,
-          ),
-          const SizedBox(height: 2),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              rank == null ? '#—' : '#$rank',
-              style: AppTextStyles.cardTitle,
+      child: Obx(() {
+        final nickname = authService.user.value == null
+            ? null
+            : authService.userNickname.value;
+        final rank =
+            nickname == null ? null : timeAttackService?.getMyRank(nickname);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'YOUR RANK'.tr,
+              style: AppTextStyles.labelSmall,
             ),
-          ),
-        ],
-      ),
+            const SizedBox(height: 2),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                rank == null ? '#—' : '#$rank',
+                style: AppTextStyles.cardTitle,
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 }
@@ -163,17 +166,16 @@ class _ArrowCircle extends StatelessWidget {
 
 class _HomeHeader extends StatelessWidget {
   const _HomeHeader({
-    required this.nickname,
     required this.onNicknameTap,
     required this.onSettingsTap,
   });
 
-  final String? nickname;
-  final VoidCallback? onNicknameTap;
+  final VoidCallback onNicknameTap;
   final VoidCallback onSettingsTap;
 
   @override
   Widget build(BuildContext context) {
+    final authService = Get.find<AuthService>();
     return SizedBox(
       height: 56,
       child: Row(
@@ -182,19 +184,26 @@ class _HomeHeader extends StatelessWidget {
           Expanded(
             child: Align(
               alignment: Alignment.centerLeft,
-              child: _HomeIdentity(
-                nickname: nickname,
-                onNicknameTap: onNicknameTap,
-              ),
+              child: Obx(() {
+                final nickname = authService.user.value == null
+                    ? null
+                    : authService.userNickname.value;
+                return _HomeIdentity(
+                  nickname: nickname,
+                  onNicknameTap: nickname == null ? null : onNicknameTap,
+                );
+              }),
             ),
           ),
           const _HomeHeaderHintBadge(),
           const SizedBox(width: 10),
           Obx(() => _HeaderIconButton(
-            tooltip: 'Simulation Mode'.tr,
-            icon: SimulationMode.isEnabled.value ? Icons.bug_report : Icons.bug_report_outlined,
-            onTap: SimulationMode.toggle,
-          )),
+                tooltip: 'Simulation Mode'.tr,
+                icon: SimulationMode.isEnabled.value
+                    ? Icons.bug_report
+                    : Icons.bug_report_outlined,
+                onTap: SimulationMode.toggle,
+              )),
           const SizedBox(width: 10),
           _HeaderIconButton(
             tooltip: 'Settings'.tr,

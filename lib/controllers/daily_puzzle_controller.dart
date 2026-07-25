@@ -46,7 +46,7 @@ class DailyPuzzleController extends GetxController {
     if (!dailyTopScores.containsKey(dateKey)) {
       dailyTopScores[dateKey] = [];
     }
-    
+
     final scores = List<int>.from(dailyTopScores[dateKey]!);
     if (!scores.contains(newScore)) {
       scores.add(newScore);
@@ -57,10 +57,5 @@ class DailyPuzzleController extends GetxController {
       dailyTopScores[dateKey] = scores;
       _saveScores();
     }
-  }
-
-  int getDailyTotalScore(String dateKey) {
-    final scores = dailyTopScores[dateKey] ?? [];
-    return scores.fold(0, (sum, score) => sum + score);
   }
 }

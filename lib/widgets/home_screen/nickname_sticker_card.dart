@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:numbering/constant.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_radius.dart';
 import 'package:numbering/theme/app_shadows.dart';
@@ -97,7 +96,7 @@ class NicknameStickerCard extends StatelessWidget {
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
-                        color: charcoalBlack,
+                        color: AppColors.ink,
                         strokeWidth: 2.5,
                       ),
                     ),
@@ -108,7 +107,7 @@ class NicknameStickerCard extends StatelessWidget {
                   key: const ValueKey('score'),
                   style: GoogleFonts.blackHanSans(
                     fontSize: scoreFontSize,
-                    color: charcoalBlack,
+                    color: AppColors.ink,
                     height: 1.0,
                   ),
                 ),
@@ -133,7 +132,7 @@ class NicknameStickerCard extends StatelessWidget {
                     style: GoogleFonts.notoSans(
                       fontSize: tierFs,
                       fontWeight: FontWeight.w800,
-                      color: charcoalBlack.withValues(alpha: 0.4),
+                      color: AppColors.ink.withValues(alpha: 0.4),
                     ),
                   ),
                 ],
@@ -175,7 +174,7 @@ class NicknameStickerCard extends StatelessWidget {
                               style: GoogleFonts.notoSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: charcoalBlack.withValues(alpha: 0.34),
+                                color: AppColors.ink.withValues(alpha: 0.34),
                               ),
                             ),
                             const SizedBox(height: 5),
@@ -203,7 +202,7 @@ class NicknameStickerCard extends StatelessWidget {
                           style: GoogleFonts.notoSans(
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
-                            color: charcoalBlack.withValues(alpha: 0.34),
+                            color: AppColors.ink.withValues(alpha: 0.34),
                           ),
                         ),
                         SizedBox(height: cardPadV * 0.65),
@@ -265,7 +264,7 @@ class _NicknameButton extends StatelessWidget {
           const Icon(
             Icons.person_rounded,
             size: 15,
-            color: charcoalBlack,
+            color: AppColors.ink,
           ),
           const SizedBox(width: 6),
           Flexible(
@@ -276,7 +275,7 @@ class _NicknameButton extends StatelessWidget {
               style: GoogleFonts.notoSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
-                color: charcoalBlack,
+                color: AppColors.ink,
               ),
             ),
           ),
@@ -285,7 +284,7 @@ class _NicknameButton extends StatelessWidget {
             Icon(
               Icons.edit_rounded,
               size: 13,
-              color: charcoalBlack.withValues(alpha: 0.45),
+              color: AppColors.ink.withValues(alpha: 0.45),
             ),
           ],
         ],

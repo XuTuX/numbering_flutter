@@ -5,8 +5,10 @@ import 'package:numbering/screens/home/arcade_screen.dart';
 import 'package:numbering/screens/hints/hint_store_screen.dart';
 import 'package:numbering/theme/app_colors.dart';
 import 'package:numbering/theme/app_text_styles.dart';
+import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/hint_purchase_service.dart';
+import 'package:numbering/services/time_attack_score_service.dart';
 import 'package:numbering/utils/app_snackbar.dart';
 import 'package:numbering/widgets/common/soft_card.dart';
 import 'package:numbering/simulation_mode.dart';
@@ -48,24 +50,14 @@ class HomeScreenContent extends StatelessWidget {
     required this.onStartGame,
     required this.onStartTimeAttack,
     required this.onRankingTap,
-    this.nickname,
-    this.onNicknameTap,
-    this.currentLevel = 1,
-    this.rank,
-    this.bestNumber,
-    this.topScore,
+    required this.onNicknameTap,
   });
 
   final VoidCallback onSettingsTap;
   final VoidCallback onStartGame;
   final VoidCallback onStartTimeAttack;
   final VoidCallback onRankingTap;
-  final String? nickname;
-  final VoidCallback? onNicknameTap;
-  final int currentLevel;
-  final int? rank;
-  final int? bestNumber;
-  final int? topScore;
+  final VoidCallback onNicknameTap;
 
   @override
   Widget build(BuildContext context) {
@@ -84,48 +76,38 @@ class HomeScreenContent extends StatelessWidget {
               child: Column(
                 children: [
                   _HomeHeader(
-                    nickname: nickname,
                     onNicknameTap: onNicknameTap,
                     onSettingsTap: onSettingsTap,
                   ),
                   const SizedBox(height: 14),
                   Expanded(
-                    child: Builder(
-                      builder: (context) {
-                        final currentPack = levelPackFor(currentLevel);
-                        final arcade = _ArcadeCard(
-                          roundLabel: currentPack.name.toUpperCase(),
-                          onTap: () => _openArcade(onStartGame),
-                        );
-                        final timeAttack = _TimeAttackCard(
-                          onTap: onStartTimeAttack,
-                        );
-                        final ranking = _RankingCard(
-                          onTap: onRankingTap,
-                          rank: rank,
-                          bestNumber: bestNumber,
-                          topScore: topScore,
-                        );
-
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(flex: 7, child: arcade),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Expanded(child: timeAttack),
-                                  const SizedBox(height: 14),
-                                  Expanded(child: ranking),
-                                ],
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          flex: 7,
+                          child: _ArcadeCard(
+                            onTap: () => _openArcade(onStartGame),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child:
+                                    _TimeAttackCard(onTap: onStartTimeAttack),
                               ),
-                            ),
-                          ],
-                        );
-                      },
+                              const SizedBox(height: 14),
+                              Expanded(
+                                child: _RankingCard(onTap: onRankingTap),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

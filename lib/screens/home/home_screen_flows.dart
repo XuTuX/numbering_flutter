@@ -65,7 +65,7 @@ Future<void> openDailyChallenge(AuthService authService) async {
 
 Future<void> openDailyChallengeTest() async {
   final dateKey = KstClock.currentChallengePeriodKey();
-  final seed = _localDailySeed(dateKey);
+  final seed = KstClock.seedForPeriodKey(dateKey);
   showAppSnackBar(
     title: '테스트 모드'.tr,
     message: '공식 기록 없이 오늘의 퍼즐을 테스트합니다.'.tr,
@@ -78,10 +78,6 @@ Future<void> openDailyChallengeTest() async {
       dateKey: dateKey,
     ),
   );
-}
-
-int _localDailySeed(String dateKey) {
-  return int.tryParse(dateKey.replaceAll('-', '')) ?? 0;
 }
 
 NumberingGame _dailyGame(int seed) {

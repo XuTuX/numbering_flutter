@@ -1,11 +1,15 @@
 import 'dart:math';
 
-/// Cross-platform deterministic PRNG used by official Numbering puzzles.
+/// Cross-platform deterministic PRNG used by all Numbering puzzle generation.
 ///
 /// Park-Miller values stay below JavaScript's exact-integer limit, so the same
-/// seed produces the same sequence on Flutter web and native platforms.
-class NumberingPrng {
-  NumberingPrng(int seed) : _state = _normalizeSeed(seed);
+/// seed produces the same sequence on Flutter web and native platforms. This
+/// is the only RNG used across this file (instead of mixing in `dart:math`'s
+/// `Random`, whose seeded sequences are not guaranteed to match across web
+/// and native), so any seeded puzzle generation stays reproducible everywhere.
+class NumberingPrng implements Random {
+  NumberingPrng([int? seed])
+      : _state = _normalizeSeed(seed ?? DateTime.now().microsecondsSinceEpoch);
 
   static const int _modulus = 2147483647;
   static const int _multiplier = 48271;
@@ -17,13 +21,20 @@ class NumberingPrng {
     return normalized <= 0 ? normalized + _modulus - 1 : normalized;
   }
 
-  int nextInt(int upperBound) {
-    if (upperBound <= 0) {
-      throw RangeError.range(upperBound, 1, null, 'upperBound');
+  @override
+  int nextInt(int max) {
+    if (max <= 0) {
+      throw RangeError.range(max, 1, null, 'max');
     }
     _state = (_state * _multiplier) % _modulus;
-    return _state % upperBound;
+    return _state % max;
   }
+
+  @override
+  double nextDouble() => nextInt(_modulus) / _modulus;
+
+  @override
+  bool nextBool() => nextInt(2) == 0;
 }
 
 /// Builds eight deterministic random digits for the official daily puzzle.
@@ -42,7 +53,7 @@ String generateTimeAttackPuzzle(
   int? seed,
   Set<String>? recentDigitSets,
 ]) {
-  final random = seed != null ? Random(seed) : Random();
+  final random = NumberingPrng(seed);
   const allowed = {'+', '-', '×', '÷', '='};
 
   for (var attempt = 0; attempt < 500; attempt++) {
@@ -100,37 +111,73 @@ String generateTimeAttackPuzzle(
     }
   }
 
-  // Fallback if recentDigitSets is too restrictive
-  while (true) {
+  // Final fallback with iteration limit
+  for (var attempt = 0; attempt < 500; attempt++) {
     final candidate =
         List.generate(digitCount, (_) => '${1 + random.nextInt(9)}').join();
     if (isSolvableTimeAttackPuzzle(candidate)) {
       return candidate;
     }
   }
+
+  // Absolute last resort (rare edge case, keeps main thread responsive)
+  return List.generate(digitCount, (_) => '${1 + random.nextInt(9)}').join();
 }
 
-/// Checks if a string of digits can form at least one valid equality equation using +, -, ×, ÷.
+/// Checks if a string of digits can form at least one valid equality equation
+/// using +, -, ×, ÷.
+///
+/// Uses DFS with backtracking to build permutations one position at a time,
+/// short-circuiting as soon as a solution is found. This avoids generating all
+/// O(n!) permutations upfront.
 bool isSolvableTimeAttackPuzzle(String digitString) {
   final digits = digitString.split('');
   final n = digits.length;
-  final perms = _getUniquePermutations(digits);
+  final used = List<bool>.filled(n, false);
+  final perm = List<String>.filled(n, '');
+  return _dfsFindSolution(digits, used, perm, 0, n);
+}
 
-  for (final perm in perms) {
-    for (var split = 1; split < n; split++) {
-      final leftDigits = perm.sublist(0, split);
-      final rightDigits = perm.sublist(split);
+bool _dfsFindSolution(
+  List<String> digits,
+  List<bool> used,
+  List<String> perm,
+  int depth,
+  int n,
+) {
+  if (depth == n) {
+    return _checkPermutationForSolution(perm, n);
+  }
 
-      final leftValues = _evaluateAllPossibleValues(leftDigits);
-      if (leftValues.isEmpty) continue;
+  final seenAtDepth = <String>{};
+  for (var i = 0; i < n; i++) {
+    if (used[i]) continue;
+    if (seenAtDepth.contains(digits[i])) continue;
+    seenAtDepth.add(digits[i]);
+    used[i] = true;
+    perm[depth] = digits[i];
+    if (_dfsFindSolution(digits, used, perm, depth + 1, n)) {
+      return true;
+    }
+    used[i] = false;
+  }
+  return false;
+}
 
-      final rightValues = _evaluateAllPossibleValues(rightDigits);
-      if (rightValues.isEmpty) continue;
+bool _checkPermutationForSolution(List<String> perm, int n) {
+  for (var split = 1; split < n; split++) {
+    final leftDigits = perm.sublist(0, split);
+    final rightDigits = perm.sublist(split);
 
-      for (final val in leftValues) {
-        if (rightValues.contains(val)) {
-          return true;
-        }
+    final leftValues = _evaluateAllPossibleValues(leftDigits);
+    if (leftValues.isEmpty) continue;
+
+    final rightValues = _evaluateAllPossibleValues(rightDigits);
+    if (rightValues.isEmpty) continue;
+
+    for (final val in leftValues) {
+      if (rightValues.contains(val)) {
+        return true;
       }
     }
   }
@@ -159,33 +206,6 @@ Set<int> _evaluateAllPossibleValues(List<String> digits) {
     }
   }
   return results;
-}
-
-Set<List<String>> _getUniquePermutations(List<String> list) {
-  final results = <List<String>>{};
-  _permuteHelper(list, 0, results);
-  return results;
-}
-
-void _permuteHelper(List<String> list, int index, Set<List<String>> results) {
-  if (index == list.length - 1) {
-    results.add(List.from(list));
-    return;
-  }
-  final seen = <String>{};
-  for (var i = index; i < list.length; i++) {
-    if (seen.contains(list[i])) continue;
-    seen.add(list[i]);
-    _swap(list, index, i);
-    _permuteHelper(list, index + 1, results);
-    _swap(list, index, i);
-  }
-}
-
-void _swap(List<String> list, int i, int j) {
-  final temp = list[i];
-  list[i] = list[j];
-  list[j] = temp;
 }
 
 String? _composeTimeAttackExpr({

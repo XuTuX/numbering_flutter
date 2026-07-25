@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:numbering/constant.dart';
+import 'package:numbering/theme/app_colors.dart';
 
 /// Unified typography system for NUMBERING and the shared app shell.
 ///
@@ -42,7 +42,7 @@ class AppTypography {
     fontWeight: FontWeight.w900,
     letterSpacing: -2.0,
     height: 1.0,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   static const headline = TextStyle(
@@ -50,7 +50,7 @@ class AppTypography {
     fontWeight: FontWeight.w900,
     letterSpacing: -1.0,
     height: 1.2,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   // ─── Titles ────────────────────────────────────────────
@@ -59,14 +59,14 @@ class AppTypography {
     fontWeight: FontWeight.w900,
     letterSpacing: -0.5,
     height: 1.2,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   static const subtitle = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.w900,
     letterSpacing: -0.3,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   // ─── Body ──────────────────────────────────────────────
@@ -74,14 +74,14 @@ class AppTypography {
     fontSize: 16,
     fontWeight: FontWeight.w600,
     height: 1.5,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   static const bodySmall = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 1.5,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   // ─── Labels (UPPERCASE) ────────────────────────────────
@@ -89,7 +89,7 @@ class AppTypography {
     fontSize: 12,
     fontWeight: FontWeight.w800,
     letterSpacing: 1.5,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   // ─── Buttons ───────────────────────────────────────────
@@ -97,7 +97,7 @@ class AppTypography {
     fontSize: 16,
     fontWeight: FontWeight.w800,
     letterSpacing: 0.3,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   // ─── Scores ────────────────────────────────────────────
@@ -105,26 +105,26 @@ class AppTypography {
     fontSize: 48,
     fontWeight: FontWeight.w900,
     height: 1.0,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   static const scoreMedium = TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.w900,
     height: 1.0,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   // ─── Small ─────────────────────────────────────────────
   static const caption = TextStyle(
     fontSize: 11,
     fontWeight: FontWeight.w700,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 
   static const tiny = TextStyle(
     fontSize: 9,
     fontWeight: FontWeight.w800,
-    color: charcoalBlack,
+    color: AppColors.ink,
   );
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:numbering/theme/app_colors.dart';
+
 enum GameColor { coral, amber, mint, azure, violet, rainbow }
 
 enum GameMessageTone { info, success, warning, error }
@@ -17,13 +19,12 @@ class GamePalette {
 
   static Color colorFor(GameColor color) {
     return switch (color) {
-      GameColor.coral => const Color(0xFFFF4D4D), // Bold Red
-      GameColor.amber => const Color(0xFFFFB300), // Vibrant Orange
-      GameColor.mint => const Color(0xFF00D47C), // Bright Green
+      GameColor.coral => AppColors.red,
+      GameColor.amber => AppColors.yellow,
+      GameColor.mint => AppColors.green,
       GameColor.azure => const Color(0xFF0095FF), // Clear Blue
-      GameColor.violet => const Color(0xFF8F00FF), // Strong Purple
-      GameColor.rainbow =>
-        const Color(0xFFFFFFFF), // White placeholder for rainbow
+      GameColor.violet => AppColors.purple,
+      GameColor.rainbow => AppColors.onPrimary, // White placeholder
     };
   }
 

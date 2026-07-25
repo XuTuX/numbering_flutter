@@ -28,6 +28,19 @@ void main() {
     expect(service.hints.value, equals(19));
   });
 
+  test('concurrent useHint calls only deduct a single hint', () async {
+    final service = await HintService().init();
+    expect(service.hints.value, equals(20));
+
+    final results = await Future.wait([
+      service.useHint(),
+      service.useHint(),
+    ]);
+
+    expect(results.where((used) => used).length, equals(1));
+    expect(service.hints.value, equals(19));
+  });
+
   test('cannot use hint when count is 0', () async {
     final service = await HintService().init();
     service.hints.value = 0;

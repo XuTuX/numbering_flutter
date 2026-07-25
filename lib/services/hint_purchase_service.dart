@@ -197,6 +197,7 @@ class HintPurchaseService extends GetxService {
   }
 
   Future<void> _handlePurchase(PurchaseDetails purchase) async {
+    if (isClosed) return;
     switch (purchase.status) {
       case PurchaseStatus.pending:
         buyingProductId.value = purchase.productID;
@@ -242,6 +243,7 @@ class HintPurchaseService extends GetxService {
           'verificationData': purchase.verificationData.serverVerificationData,
         },
       );
+      if (isClosed) return;
       final result = _asMap(response.data);
       if (result['ok'] != true) {
         throw StateError('Purchase was not verified');
@@ -254,6 +256,7 @@ class HintPurchaseService extends GetxService {
         final addition =
             _store.getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
         final consumed = await addition.consumePurchase(purchase);
+        if (isClosed) return;
         if (consumed.responseCode != BillingResponse.ok) {
           throw StateError('Google Play consumption failed');
         }
@@ -265,9 +268,11 @@ class HintPurchaseService extends GetxService {
       } else {
         await _hintService.refreshFromServer();
       }
+      if (isClosed) return;
 
       if (purchase.pendingCompletePurchase) {
         await _store.completePurchase(purchase);
+        if (isClosed) return;
       }
       buyingProductId.value = null;
       statusMessage.value = result['already_granted'] == true
@@ -276,6 +281,7 @@ class HintPurchaseService extends GetxService {
     } catch (error, stackTrace) {
       debugPrint('Purchase verification failed: $error');
       debugPrintStack(stackTrace: stackTrace);
+      if (isClosed) return;
       buyingProductId.value = null;
       errorMessage.value = '구매 확인에 실패했습니다. 결제 내역은 보존되며 자동으로 다시 확인됩니다.';
     }

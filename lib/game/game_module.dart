@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// Launch modes supplied by the unchanged home, daily, and settings flows.
-enum GameMode { normal, timeAttack, dailyPractice, dailyOfficial, replay, tutorial }
+enum GameMode {
+  normal,
+  timeAttack,
+  dailyPractice,
+  dailyOfficial,
+  replay,
+  tutorial
+}
 
 @immutable
 class GameSessionConfig {
@@ -94,4 +101,10 @@ abstract class GameModule {
     GameSessionConfig session,
     GameCallbacks callbacks,
   );
+
+  /// Where "back" should take the player after a session GameScreen doesn't
+  /// already handle generically (daily/time attack always return home).
+  /// Each module owns its own post-game navigation (e.g. a level list),
+  /// so adding a new game never requires editing GameScreen itself.
+  void exitToModuleHome(BuildContext context, GameSessionConfig session);
 }

@@ -1,13 +1,5 @@
 part of 'package:numbering/controllers/score_controller.dart';
 
-String _scoreStorageKeyFor(ScoreController controller) {
-  final userId = controller._currentUserId;
-  if (userId != null) {
-    return 'high_score_$userId';
-  }
-  return 'high_score_guest';
-}
-
 Future<void> _saveHighScore(ScoreController controller, int score) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setInt(controller._scoreKey, score);

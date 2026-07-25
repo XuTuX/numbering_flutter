@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:numbering/constant.dart';
 import 'package:numbering/services/database_models.dart';
+import 'package:numbering/theme/app_colors.dart';
 
 class WeeklyRankingPreview extends StatefulWidget {
   const WeeklyRankingPreview({
@@ -85,7 +85,7 @@ class _WeeklyRankingPreviewState extends State<WeeklyRankingPreview> {
                       widget.isAllTime ? '전체 랭킹'.tr : '주간 랭킹'.tr,
                       style: GoogleFonts.blackHanSans(
                         fontSize: headerFs,
-                        color: charcoalBlack,
+                        color: AppColors.ink,
                         letterSpacing: 0,
                       ),
                     ),
@@ -95,13 +95,13 @@ class _WeeklyRankingPreviewState extends State<WeeklyRankingPreview> {
                       style: GoogleFonts.notoSans(
                         fontSize: viewAllFs,
                         fontWeight: FontWeight.w700,
-                        color: charcoalBlack.withValues(alpha: 0.32),
+                        color: AppColors.ink.withValues(alpha: 0.32),
                       ),
                     ),
                     Icon(
                       Icons.chevron_right_rounded,
                       size: viewAllFs + 3,
-                      color: charcoalBlack.withValues(alpha: 0.28),
+                      color: AppColors.ink.withValues(alpha: 0.28),
                     ),
                   ],
                 ),
@@ -122,7 +122,7 @@ class _WeeklyRankingPreviewState extends State<WeeklyRankingPreview> {
           width: 20,
           height: 20,
           child: CircularProgressIndicator(
-            color: charcoalBlack.withValues(alpha: 0.2),
+            color: AppColors.ink.withValues(alpha: 0.2),
             strokeWidth: 2.5,
           ),
         ),
@@ -136,7 +136,7 @@ class _WeeklyRankingPreviewState extends State<WeeklyRankingPreview> {
           style: GoogleFonts.notoSans(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: charcoalBlack.withValues(alpha: 0.2),
+            color: AppColors.ink.withValues(alpha: 0.2),
           ),
         ),
       );
@@ -205,7 +205,7 @@ class CleanRankRow extends StatelessWidget {
       1 => const Color(0xFFFB7185), // Coral Red
       2 => const Color(0xFFFB923C), // Orange
       3 => const Color(0xFFFBBF24), // Amber Yellow
-      _ => charcoalBlack.withValues(alpha: 0.2),
+      _ => AppColors.ink.withValues(alpha: 0.2),
     };
 
     final rowContent = Container(
@@ -236,8 +236,8 @@ class CleanRankRow extends StatelessWidget {
                 fontSize: nameFs,
                 fontWeight: FontWeight.w700,
                 color: frameStyle != null
-                    ? charcoalBlack.withValues(alpha: 0.85)
-                    : charcoalBlack.withValues(alpha: 0.65),
+                    ? AppColors.ink.withValues(alpha: 0.85)
+                    : AppColors.ink.withValues(alpha: 0.65),
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -248,7 +248,7 @@ class CleanRankRow extends StatelessWidget {
             style: GoogleFonts.blackHanSans(
               fontSize: scoreFs,
               color: frameStyle?.scoreColor ??
-                  charcoalBlack.withValues(alpha: 0.4),
+                  AppColors.ink.withValues(alpha: 0.4),
             ),
           ),
         ],

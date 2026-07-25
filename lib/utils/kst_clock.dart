@@ -18,6 +18,13 @@ class KstClock {
 
   static String currentWeekKey() => isoWeekKeyFor(nowInKst());
 
+  /// Derives a stable numeric seed from a KST date or challenge-period key
+  /// (e.g. `2026-07-26` or `2026-07-26-00`). This is the single source of
+  /// truth for turning a period key into a seed, so every daily-challenge
+  /// call site stays in sync instead of re-deriving it ad hoc.
+  static int seedForPeriodKey(String periodKey) =>
+      int.tryParse(periodKey.replaceAll('-', '')) ?? 0;
+
   static List<String> recentDateKeys({int days = 30}) {
     final totalDays = days < 1 ? 1 : days;
     final today = nowInKst();

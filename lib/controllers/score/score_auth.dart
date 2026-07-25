@@ -52,9 +52,11 @@ Future<void> _onUserLogin(
     final legacyScore = prefs.getInt('high_score') ?? 0;
     final guestScore = prefs.getInt('high_score_guest') ?? 0;
 
-    int bestLocalScore = max(userLocalScore, legacyScore);
-
-    bestLocalScore = max(bestLocalScore, guestScore);
+    final bestLocalScore = controller._mergeService.mergeOnLogin(
+      userLocalScore: userLocalScore,
+      legacyScore: legacyScore,
+      guestScore: guestScore,
+    );
     await prefs.setInt('high_score_$userId', bestLocalScore);
     if (!controller._isCurrentAuthSync(generation, userId)) {
       return;

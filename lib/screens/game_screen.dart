@@ -5,12 +5,9 @@ import 'package:get/get.dart';
 
 import '../game/game_module.dart';
 import '../game/game_registry.dart';
-import '../game/numbering/level_progress_service.dart';
 import '../services/audio_service.dart';
 import '../theme/app_colors.dart';
 import 'home/home_screen.dart';
-import 'home/level_list_screen.dart';
-import 'home/widgets/home_screen_content.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({
@@ -106,12 +103,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
       return;
     }
 
-    final levelId = Get.find<LevelProgressService>().lastPlayedLevel.value;
-    Get.off(
-      () => LevelListScreen(pack: levelPackFor(levelId)),
-      transition: Transition.fadeIn,
-      duration: const Duration(milliseconds: 220),
-    );
+    final module = GameRegistry.byId(widget.sessionConfig.gameId);
+    module.exitToModuleHome(context, widget.sessionConfig);
   }
 
   void _goHome() => Get.off(() => const HomeScreen());
