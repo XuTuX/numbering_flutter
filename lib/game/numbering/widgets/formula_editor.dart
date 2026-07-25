@@ -5,6 +5,8 @@ import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/expression_engine.dart';
 import 'package:numbering/services/numbering_score_service.dart';
 import 'package:numbering/game/numbering/widgets/drag_drop_editor.dart';
+import 'package:numbering/services/app_haptics.dart';
+
 
 // ─── 수식 편집기 ────────────────────────────────────────────
 
@@ -139,6 +141,7 @@ class FormulaEditorState extends State<FormulaEditor> {
   }
 
   void _changeOperator(int index, InlineOperator? value) {
+    AppHaptics.selection();
     _saveSnapshot();
     setState(() {
       _operators[index] = value;
@@ -152,6 +155,7 @@ class FormulaEditorState extends State<FormulaEditor> {
 
   void _reorderDigit(int fromIndex, int toIndex) {
     if (!widget.allowDigitReordering || fromIndex == toIndex) return;
+    AppHaptics.selection();
     _saveSnapshot();
     setState(() {
       final movedDigit = _digits.removeAt(fromIndex);
@@ -236,6 +240,7 @@ class FormulaEditorState extends State<FormulaEditor> {
     if (!result.valid && mounted) {
       setState(() => _message = '정답이 아닙니다.');
     } else if (result.valid) {
+      AppHaptics.success();
       setState(() => _message = '정답입니다!');
       Future.delayed(const Duration(milliseconds: 400), () {
         if (mounted && _expression == expression) {
