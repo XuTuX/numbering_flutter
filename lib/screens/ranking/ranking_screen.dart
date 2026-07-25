@@ -113,6 +113,7 @@ class RankingScreen extends StatelessWidget {
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return _MyRankBar(
+                            nickname: nickname,
                             rank: myRank,
                             bestNumber: myBestRecord?.highestNumber,
                             totalScore: myBestRecord?.totalScore,
@@ -206,11 +207,13 @@ class _EllipsisDivider extends StatelessWidget {
 
 class _MyRankBar extends StatelessWidget {
   const _MyRankBar({
+    required this.nickname,
     required this.rank,
     required this.bestNumber,
     required this.totalScore,
   });
 
+  final String nickname;
   final int? rank;
   final int? bestNumber;
   final int? totalScore;
@@ -226,9 +229,9 @@ class _MyRankBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Text(
-            '내 기록',
-            style: TextStyle(
+          Text(
+            nickname,
+            style: const TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 15,
               color: AppColors.ink,

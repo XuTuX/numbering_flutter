@@ -49,6 +49,7 @@ class HintStoreScreen extends StatelessWidget {
                         for (final pack in hintPacks)
                           _HintPackCard(
                             pack: pack,
+                            isLandscape: isLandscape,
                             storePrice: purchaseService
                                 .productFor(pack.productId)
                                 ?.price,
@@ -181,6 +182,7 @@ class _StoreHeader extends StatelessWidget {
 class _HintPackCard extends StatelessWidget {
   const _HintPackCard({
     required this.pack,
+    required this.isLandscape,
     required this.storePrice,
     required this.isBuying,
     required this.isEnabled,
@@ -188,6 +190,7 @@ class _HintPackCard extends StatelessWidget {
   });
 
   final HintPack pack;
+  final bool isLandscape;
   final String? storePrice;
   final bool isBuying;
   final bool isEnabled;
@@ -248,7 +251,7 @@ class _HintPackCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          if (isLandscape) const Spacer() else const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             height: 44,
