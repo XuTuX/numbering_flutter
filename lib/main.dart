@@ -62,6 +62,7 @@ void main() async {
       }
     }
 
+    await levelProgressService.connect(authClient);
     await hintService.connect(authClient);
     final hintPurchaseService = await HintPurchaseService(
       hintService: hintService,

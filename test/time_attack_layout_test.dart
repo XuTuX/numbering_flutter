@@ -8,6 +8,7 @@ import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/game/numbering/numbering_game_page.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
 import 'package:numbering/game/numbering/views/time_attack_play_view.dart';
+import 'package:numbering/screens/game_screen.dart';
 import 'package:numbering/services/auth_service.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/services/time_attack_score_service.dart';
@@ -69,6 +70,63 @@ void main() {
     // Verify close (exit) and refresh (restart) buttons are displayed on the right
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+  });
+
+  testWidgets('scales the time attack header with iPad portrait width',
+      (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(744, 1133);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: AppTheme.light,
+        home: const GameScreen(
+          sessionConfig: GameSessionConfig(mode: GameMode.timeAttack),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final miniTimer = tester.widget<Text>(
+      find.byKey(const ValueKey('time-attack-timer')),
+    );
+    final miniScore = tester.widget<Text>(
+      find.byKey(const ValueKey('time-attack-score')),
+    );
+    final miniExit = tester.widget<IconButton>(
+      find.byKey(const ValueKey('time-attack-exit')),
+    );
+
+    tester.view.physicalSize = const Size(1032, 1376);
+    await tester.pump();
+
+    final largeTimer = tester.widget<Text>(
+      find.byKey(const ValueKey('time-attack-timer')),
+    );
+    final largeScore = tester.widget<Text>(
+      find.byKey(const ValueKey('time-attack-score')),
+    );
+    final largeExit = tester.widget<IconButton>(
+      find.byKey(const ValueKey('time-attack-exit')),
+    );
+    final largeRestart = tester.widget<IconButton>(
+      find.byKey(const ValueKey('time-attack-restart')),
+    );
+
+    expect(miniTimer.style!.fontSize!, greaterThan(16));
+    expect(
+      largeTimer.style!.fontSize!,
+      greaterThan(miniTimer.style!.fontSize!),
+    );
+    expect(
+      largeScore.style!.fontSize!,
+      greaterThan(miniScore.style!.fontSize!),
+    );
+    expect(largeExit.iconSize!, greaterThan(miniExit.iconSize!));
+    expect(largeRestart.iconSize, largeExit.iconSize);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('retries finish when the server still reports an active session',

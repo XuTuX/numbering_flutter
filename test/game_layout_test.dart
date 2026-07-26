@@ -184,7 +184,7 @@ void main() {
   testWidgets('lays out the game controls on an iPad portrait screen',
       (tester) async {
     tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(768, 1024);
+    tester.view.physicalSize = const Size(1032, 1376);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
@@ -207,7 +207,7 @@ void main() {
     expect(operator, findsOneWidget);
     expect(
       MediaQuery.sizeOf(tester.element(digit)),
-      const Size(768, 1024),
+      const Size(1032, 1376),
     );
     expect(
       find.byKey(const ValueKey('tablet-portrait-game-controls')),
@@ -216,10 +216,13 @@ void main() {
     expect(tester.getCenter(digit).dy, lessThan(tester.getCenter(operator).dy));
     expect(
       tester.getCenter(operator).dy - tester.getCenter(digit).dy,
-      lessThan(220),
+      lessThan(260),
     );
-    expect(tester.getCenter(digit).dy, greaterThan(350));
-    expect(tester.getCenter(operator).dy, lessThan(700));
+    final controls =
+        find.byKey(const ValueKey('tablet-portrait-game-controls'));
+    expect((tester.getCenter(controls).dy - 688).abs(), lessThan(80));
+    expect(tester.getSize(digit).height, greaterThanOrEqualTo(100));
+    expect(tester.getSize(operator).height, greaterThanOrEqualTo(60));
     expect(tester.takeException(), isNull);
   });
 }

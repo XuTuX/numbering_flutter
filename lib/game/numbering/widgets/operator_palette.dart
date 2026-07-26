@@ -8,6 +8,7 @@ class OperatorPalette extends StatefulWidget {
     super.key,
     required this.availableOperators,
     required this.compact,
+    required this.scaleFactor,
     required this.parenthesisMode,
     required this.onParenthesisModeToggled,
     required this.onDragUpdate,
@@ -16,6 +17,7 @@ class OperatorPalette extends StatefulWidget {
 
   final Set<String> availableOperators;
   final bool compact;
+  final double scaleFactor;
   final bool parenthesisMode;
   final VoidCallback onParenthesisModeToggled;
   final ValueChanged<Offset> onDragUpdate;
@@ -36,11 +38,14 @@ class _OperatorPaletteState extends State<OperatorPalette> {
         .toList();
     final isLandscape =
         MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
-    final size = widget.compact ? (isLandscape ? 52.0 : 44.0) : 58.0;
+    final baseSize = widget.compact ? (isLandscape ? 52.0 : 44.0) : 58.0;
+    final size = baseSize * widget.scaleFactor;
+    final baseHorizontalPadding = widget.compact ? 14.0 : 22.0;
+    final baseVerticalPadding = widget.compact ? 10.0 : 14.0;
     final palette = Container(
         padding: EdgeInsets.symmetric(
-          horizontal: widget.compact ? 14 : 22,
-          vertical: widget.compact ? 10 : 14,
+          horizontal: baseHorizontalPadding * widget.scaleFactor,
+          vertical: baseVerticalPadding * widget.scaleFactor,
         ),
         decoration: BoxDecoration(
           color: Colors.white,

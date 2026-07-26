@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:numbering/game/numbering/level_models.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,5 +53,31 @@ void main() {
     expect(secondLoad.progress[121]?.bestScore, 11);
     expect(secondLoad.progress[161], isNull);
     expect(secondLoad.lastPlayedLevel.value, 121);
+  });
+
+  test('merges local progress without replacing a better result', () {
+    const cached = LevelProgress(
+      levelId: 12,
+      cleared: true,
+      bestScore: 10,
+      stars: 2,
+      perfect: false,
+      usedHints: 2,
+    );
+    const legacy = LevelProgress(
+      levelId: 12,
+      cleared: true,
+      bestScore: 8,
+      stars: 1,
+      perfect: true,
+      usedHints: 3,
+    );
+
+    final merged = LevelProgressService.mergeProgress(cached, legacy);
+
+    expect(merged.bestScore, 10);
+    expect(merged.stars, 2);
+    expect(merged.perfect, isTrue);
+    expect(merged.usedHints, 2);
   });
 }

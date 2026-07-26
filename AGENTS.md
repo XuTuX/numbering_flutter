@@ -6,5 +6,5 @@
 - Prefer numbers, icons, progress indicators, and visual state over explanatory labels.
 - Add visible text only when it is essential to understand or operate the interface, and use the shortest clear wording.
 - Rankings must use server-verified Time Attack results only.
-- Arcade play stores level progress locally and must never submit scores to, or affect, any ranking.
+- Arcade play syncs level progress to the signed-in account, keeps a local cache, and must never submit scores to, or affect, any ranking.
 - Generated arcade levels must have distinct normalized equation shapes and must not repeat the same shape in adjacent levels.

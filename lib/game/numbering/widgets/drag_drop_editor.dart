@@ -75,15 +75,25 @@ class _DragDropEditorState extends State<DragDropEditor> {
       builder: (context, constraints) {
         final viewport = MediaQuery.sizeOf(context);
         final isLandscape = viewport.width > viewport.height;
-        final isTabletPortrait = !isLandscape && viewport.shortestSide >= 600;
+        final isTabletPortrait = constraints.maxHeight > constraints.maxWidth &&
+            constraints.maxWidth >= 500;
         final compact = constraints.maxWidth < 600 || viewport.height < 560;
-        final digitFontSize = compact
-            ? (constraints.maxWidth / (widget.digits.length * 1.12))
-                .clamp(isLandscape ? 56.0 : 34.0, isLandscape ? 78.0 : 58.0)
+        final portraitGrowth = isLandscape
+            ? 0.0
+            : ((constraints.maxWidth - 430) / (560 - 430)).clamp(0.0, 1.0);
+        final baseDigitFontSize = compact
+            ? (constraints.maxWidth / (widget.digits.length * 1.12)).clamp(
+                isLandscape ? 56.0 : 34.0,
+                isLandscape ? 78.0 : 58.0,
+              )
             : (constraints.maxWidth * 0.08).clamp(62.0, 96.0);
-        final digitPadding = compact
+        final digitFontSize =
+            baseDigitFontSize + (104.0 - baseDigitFontSize) * portraitGrowth;
+        final baseDigitPadding = compact
             ? (widget.digits.length >= 8 ? 4.0 : (isLandscape ? 14.0 : 7.0))
             : 13.0;
+        final digitPadding =
+            baseDigitPadding + (14.0 - baseDigitPadding) * portraitGrowth;
         final operatorFontSize = (digitFontSize * 0.55).clamp(24.0, 48.0);
 
         final items = List<Widget>.generate(widget.digits.length, (digitIndex) {
@@ -328,6 +338,7 @@ class _DragDropEditorState extends State<DragDropEditor> {
         final operatorPalette = OperatorPalette(
           availableOperators: widget.availableOperators,
           compact: compact,
+          scaleFactor: 1 + 0.37 * portraitGrowth,
           parenthesisMode: widget.parenthesisMode,
           onParenthesisModeToggled: widget.onParenthesisModeToggled,
           onDragUpdate: _updateOperatorHover,

@@ -314,8 +314,17 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
       );
     }
 
-    final isLandscape =
-        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+    final viewport = MediaQuery.sizeOf(context);
+    final isLandscape = viewport.width > viewport.height;
+    final headerGrowth = isLandscape
+        ? 0.0
+        : ((viewport.width - 390) / (1032 - 390)).clamp(0.0, 1.0);
+    double fluidSize(double phone, double largeTablet) =>
+        phone + (largeTablet - phone) * headerGrowth;
+    final timerFontSize = fluidSize(16, 28);
+    final scoreFontSize = fluidSize(13, 22);
+    final actionIconSize = fluidSize(24, 32);
+    final actionButtonSize = fluidSize(48, 60);
     return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
@@ -323,8 +332,9 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
           title: 'SCORE $_totalScore',
           titleWidget: Text(
             'SCORE $_totalScore',
-            style: const TextStyle(
-              fontSize: 13,
+            key: const ValueKey('time-attack-score'),
+            style: TextStyle(
+              fontSize: scoreFontSize,
               fontWeight: FontWeight.w800,
               color: AppColors.textSecondary,
             ),
@@ -333,8 +343,9 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
             padding: const EdgeInsets.only(left: 8),
             child: Text(
               _formatTimer(_secondsRemaining),
-              style: const TextStyle(
-                fontSize: 16,
+              key: const ValueKey('time-attack-timer'),
+              style: TextStyle(
+                fontSize: timerFontSize,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
@@ -344,12 +355,24 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
+                key: const ValueKey('time-attack-exit'),
                 icon: const Icon(Icons.close_rounded),
+                iconSize: actionIconSize,
+                constraints: BoxConstraints.tightFor(
+                  width: actionButtonSize,
+                  height: actionButtonSize,
+                ),
                 tooltip: '나가기',
                 onPressed: widget.onShowLevels,
               ),
               IconButton(
+                key: const ValueKey('time-attack-restart'),
                 icon: const Icon(Icons.refresh_rounded),
+                iconSize: actionIconSize,
+                constraints: BoxConstraints.tightFor(
+                  width: actionButtonSize,
+                  height: actionButtonSize,
+                ),
                 tooltip: '다시하기',
                 onPressed: () => unawaited(_startNewSession()),
               ),
