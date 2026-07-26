@@ -117,13 +117,14 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('keeps the wide card layout on an iPad portrait screen',
-      (tester) async {
+  testWidgets('stacks cards on an iPad portrait screen', (tester) async {
     await pumpHome(tester, surfaceSize: const Size(768, 1024));
 
     final arcade = tester.getCenter(find.text('Arcade'));
     final timeAttack = tester.getCenter(find.text('Time Attack'));
-    expect(arcade.dx, lessThan(timeAttack.dx));
+    final rank = tester.getCenter(find.text('YOUR RANK'));
+    expect(arcade.dy, lessThan(timeAttack.dy));
+    expect((timeAttack.dy - rank.dy).abs(), lessThan(120));
     expect(tester.takeException(), isNull);
   });
 }

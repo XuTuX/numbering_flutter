@@ -68,7 +68,8 @@ class HomeScreenContent extends StatelessWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final useWideLayout = constraints.maxWidth >= 620;
+            final useWideLayout = constraints.maxWidth >= 620 &&
+                constraints.maxWidth > constraints.maxHeight;
 
             final arcade = _ArcadeCard(
               onTap: () => _openArcade(onStartGame),

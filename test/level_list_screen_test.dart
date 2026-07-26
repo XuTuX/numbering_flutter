@@ -85,4 +85,31 @@ void main() {
         tester.getCenter(level4).dy, greaterThan(tester.getCenter(level1).dy));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('keeps level tiles compact on an iPad portrait screen',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(768, 1024));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: LevelGrid(
+            pack: levelPacks.first,
+            currentLevel: 1,
+            records: const {},
+            packColor: AppColors.blockLilac,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSize(find.byKey(const ValueKey('level-tile-1'))).height,
+      lessThanOrEqualTo(112),
+    );
+    expect(find.byKey(const ValueKey('level-tile-20')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

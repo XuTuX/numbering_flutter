@@ -53,6 +53,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final module = GameRegistry.byId(widget.sessionConfig.gameId);
+    final mediaSize = MediaQuery.sizeOf(context);
+    final isLandscape = mediaSize.width > mediaSize.height;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -66,15 +69,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             SafeArea(
               child: Center(
                 child: ConstrainedBox(
+                  key: const ValueKey('game-content-frame'),
                   constraints: BoxConstraints(
-                    maxWidth: MediaQuery.sizeOf(context).width >
-                            MediaQuery.sizeOf(context).height
-                        ? MediaQuery.sizeOf(context).width * 0.92
-                        : 600,
+                    maxWidth: isLandscape ? mediaSize.width * 0.92 : 600,
                   ),
                   child: Padding(
-                    padding: MediaQuery.sizeOf(context).width >
-                            MediaQuery.sizeOf(context).height
+                    padding: isLandscape
                         ? const EdgeInsets.fromLTRB(24, 8, 24, 16)
                         : const EdgeInsets.fromLTRB(20, 12, 20, 24),
                     child: module.build(

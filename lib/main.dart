@@ -26,8 +26,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _installGlobalErrorHandlers();
 
-  // 퍼즐과 레벨 선택 화면은 가로 플레이에 맞춰 설계되어 있습니다.
+  // iPad portrait support is controlled by the iPad-specific orientation mask.
+  // Phone and Android orientation restrictions remain in their platform files.
   await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);

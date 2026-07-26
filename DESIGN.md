@@ -2,7 +2,7 @@
 version: 1.0
 name: Numbering-quiet-minimal
 status: canonical
-description: "A quiet, premium puzzle UI built from off-white space, near-black type, low-saturation pastel cards, thin hairlines, and a fixed 7:3 landscape Bento layout. The puzzle and its primary action are always the visual focus."
+description: "A quiet, premium puzzle UI built from off-white space, near-black type, low-saturation pastel cards, thin hairlines, and an adaptive Bento layout. The puzzle and its primary action are always the visual focus."
 
 principles:
   - purpose-first
@@ -65,9 +65,9 @@ microcopy:
 
 layout:
   home:
-    orientation: landscape
+    orientation: "landscape on phones; landscape and portrait on iPad"
     scrolling: forbidden
-    composition: "7:3 Bento"
+    composition: "7:3 Bento in landscape; primary card above two secondary cards in portrait"
     primary-column: 70%
     secondary-column: 30%
     secondary-stack-count: 2

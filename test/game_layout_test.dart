@@ -9,6 +9,7 @@ import 'package:numbering/game/numbering/level_catalog.dart';
 import 'package:numbering/game/numbering/level_progress_service.dart';
 import 'package:numbering/game/numbering/numbering_game_page.dart';
 import 'package:numbering/game/numbering/numbering_models.dart';
+import 'package:numbering/screens/game_screen.dart';
 import 'package:numbering/services/hint_service.dart';
 import 'package:numbering/theme/app_theme.dart';
 
@@ -177,6 +178,48 @@ void main() {
 
     expect(find.byKey(const ValueKey('level-hint-button')), findsOneWidget);
     expect(find.byKey(const ValueKey('operator-drag-+')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('lays out the game controls on an iPad portrait screen',
+      (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(768, 1024);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: AppTheme.light,
+        home: const GameScreen(
+          sessionConfig: GameSessionConfig(
+            mode: GameMode.normal,
+            startLevelId: 1,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final digit = find.byKey(const ValueKey('formula-digit-0'));
+    final operator = find.byKey(const ValueKey('operator-drag-+'));
+    expect(digit, findsOneWidget);
+    expect(operator, findsOneWidget);
+    expect(
+      MediaQuery.sizeOf(tester.element(digit)),
+      const Size(768, 1024),
+    );
+    expect(
+      find.byKey(const ValueKey('tablet-portrait-game-controls')),
+      findsOneWidget,
+    );
+    expect(tester.getCenter(digit).dy, lessThan(tester.getCenter(operator).dy));
+    expect(
+      tester.getCenter(operator).dy - tester.getCenter(digit).dy,
+      lessThan(220),
+    );
+    expect(tester.getCenter(digit).dy, greaterThan(350));
+    expect(tester.getCenter(operator).dy, lessThan(700));
     expect(tester.takeException(), isNull);
   });
 }

@@ -33,12 +33,18 @@ class LevelGrid extends StatelessWidget {
         final rowCount = (pack.totalLevels / crossAxisCount).ceil();
         final availableRowHeight =
             (constraints.maxHeight - (rowCount - 1) * spacing) / rowCount;
-        final rowHeight = math.max(54.0, availableRowHeight);
+        final tileWidth =
+            (constraints.maxWidth - (crossAxisCount - 1) * spacing) /
+                crossAxisCount;
+        final maxRowHeight = (tileWidth * 0.78).clamp(72.0, 112.0);
+        final rowHeight =
+            math.max(54.0, math.min(availableRowHeight, maxRowHeight));
+        final contentHeight = rowCount * rowHeight + (rowCount - 1) * spacing;
 
         return GridView.builder(
           key: const ValueKey('level-grid'),
           padding: EdgeInsets.zero,
-          physics: availableRowHeight >= 54
+          physics: contentHeight <= constraints.maxHeight
               ? const NeverScrollableScrollPhysics()
               : const BouncingScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
