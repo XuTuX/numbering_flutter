@@ -112,7 +112,6 @@ class HintPurchaseService extends GetxService {
       );
       if (response.error != null) {
         products.clear();
-        errorMessage.value = '상품 정보를 불러오지 못했습니다.';
         debugPrint('Product query failed: ${response.error}');
         return;
       }

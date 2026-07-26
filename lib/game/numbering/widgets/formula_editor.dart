@@ -17,6 +17,7 @@ class FormulaEditor extends StatefulWidget {
     required this.visibleHints,
     required this.requiresEquals,
     this.allowDigitReordering = false,
+    this.digitScaleFactor = 1,
     required this.validateExpression,
     required this.onValidSubmission,
   });
@@ -28,6 +29,7 @@ class FormulaEditor extends StatefulWidget {
   final List<String> visibleHints;
   final bool requiresEquals;
   final bool allowDigitReordering;
+  final double digitScaleFactor;
   final ValidationResult Function(String expression) validateExpression;
   final void Function(String expression, int score) onValidSubmission;
 
@@ -121,6 +123,7 @@ class FormulaEditorState extends State<FormulaEditor>
                       isLandscape: widget.isLandscape,
                       visibleHints: widget.visibleHints,
                       allowDigitReordering: widget.allowDigitReordering,
+                      digitScaleFactor: widget.digitScaleFactor,
                       wrongAnswerProgress: wrongAnswerProgress,
                       onDigitTapped: _handleDigitTap,
                       onParenthesisModeToggled: _toggleParenthesisMode,

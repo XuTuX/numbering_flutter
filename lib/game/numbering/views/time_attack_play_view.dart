@@ -316,15 +316,15 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
 
     final viewport = MediaQuery.sizeOf(context);
     final isLandscape = viewport.width > viewport.height;
-    final headerGrowth = isLandscape
-        ? 0.0
-        : ((viewport.width - 390) / (1032 - 390)).clamp(0.0, 1.0);
+    final screenGrowth =
+        ((viewport.shortestSide - 390) / (1032 - 390)).clamp(0.0, 1.0);
     double fluidSize(double phone, double largeTablet) =>
-        phone + (largeTablet - phone) * headerGrowth;
-    final timerFontSize = fluidSize(16, 28);
-    final scoreFontSize = fluidSize(13, 22);
-    final actionIconSize = fluidSize(24, 32);
+        phone + (largeTablet - phone) * screenGrowth;
+    final timerFontSize = fluidSize(16, 40);
+    final scoreFontSize = fluidSize(13, 28);
+    final actionIconSize = fluidSize(24, 34);
     final actionButtonSize = fluidSize(48, 60);
+    final digitScaleFactor = fluidSize(1, 1.32);
     return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
@@ -392,6 +392,7 @@ class _TimeAttackPlayViewState extends State<TimeAttackPlayView> {
               visibleHints: const [],
               requiresEquals: true,
               allowDigitReordering: true,
+              digitScaleFactor: digitScaleFactor,
               validateExpression: (expression) => validateReorderableEquality(
                 digitString: _digits,
                 expression: expression,

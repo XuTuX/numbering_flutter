@@ -1,0 +1,67 @@
+{
+  "identifier" : "4E86BF6F-3E54-4B2A-9295-64E5CAD21B91",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "1100",
+      "familyShareable" : false,
+      "internalID" : "0CED8B79-6E37-4D3A-B24F-B26F7DC8D6C6",
+      "localizations" : [
+        {
+          "description" : "게임에서 사용할 수 있는 힌트 11개를 충전합니다.",
+          "displayName" : "힌트 11개",
+          "locale" : "ko_KR"
+        }
+      ],
+      "productID" : "numbering_hints_11",
+      "referenceName" : "Numbering Hints 11",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "3300",
+      "familyShareable" : false,
+      "internalID" : "32A32051-2424-457F-A4F1-5C681B945C68",
+      "localizations" : [
+        {
+          "description" : "게임에서 사용할 수 있는 힌트 50개를 충전합니다.",
+          "displayName" : "힌트 50개",
+          "locale" : "ko_KR"
+        }
+      ],
+      "productID" : "numbering_hints_50",
+      "referenceName" : "Numbering Hints 50",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "5500",
+      "familyShareable" : false,
+      "internalID" : "6A86C0DB-D426-4418-9B3D-9F59B08BCB37",
+      "localizations" : [
+        {
+          "description" : "게임에서 사용할 수 있는 힌트 100개를 충전합니다.",
+          "displayName" : "힌트 100개",
+          "locale" : "ko_KR"
+        }
+      ],
+      "productID" : "numbering_hints_100",
+      "referenceName" : "Numbering Hints 100",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_locale" : "ko_KR",
+    "_storefront" : "KOR",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

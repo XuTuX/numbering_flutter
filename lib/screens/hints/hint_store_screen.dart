@@ -63,29 +63,44 @@ class HintStoreScreen extends StatelessWidget {
                           ),
                       ];
 
+                      if (!isLandscape) {
+                        return Column(
+                          children: [
+                            Expanded(
+                              child: ListView.separated(
+                                itemCount: cards.length,
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: 12),
+                                itemBuilder: (_, index) => cards[index],
+                              ),
+                            ),
+                            _StoreStatus(purchaseService: purchaseService),
+                          ],
+                        );
+                      }
+
                       return Column(
                         children: [
                           Expanded(
-                            child: isLandscape
-                                ? Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      for (var index = 0;
-                                          index < cards.length;
-                                          index++) ...[
-                                        Expanded(child: cards[index]),
-                                        if (index != cards.length - 1)
-                                          const SizedBox(width: 12),
-                                      ],
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints:
+                                    const BoxConstraints(maxHeight: 560),
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    for (var index = 0;
+                                        index < cards.length;
+                                        index++) ...[
+                                      Expanded(child: cards[index]),
+                                      if (index != cards.length - 1)
+                                        const SizedBox(width: 12),
                                     ],
-                                  )
-                                : ListView.separated(
-                                    itemCount: cards.length,
-                                    separatorBuilder: (_, __) =>
-                                        const SizedBox(height: 12),
-                                    itemBuilder: (_, index) => cards[index],
-                                  ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                           _StoreStatus(purchaseService: purchaseService),
                         ],

@@ -98,6 +98,12 @@ void main() {
     final miniExit = tester.widget<IconButton>(
       find.byKey(const ValueKey('time-attack-exit')),
     );
+    final miniDigit = tester.widget<AnimatedDefaultTextStyle>(
+      find.descendant(
+        of: find.byKey(const ValueKey('formula-digit-0')),
+        matching: find.byType(AnimatedDefaultTextStyle),
+      ),
+    );
 
     tester.view.physicalSize = const Size(1032, 1376);
     await tester.pump();
@@ -114,6 +120,12 @@ void main() {
     final largeRestart = tester.widget<IconButton>(
       find.byKey(const ValueKey('time-attack-restart')),
     );
+    final largeDigit = tester.widget<AnimatedDefaultTextStyle>(
+      find.descendant(
+        of: find.byKey(const ValueKey('formula-digit-0')),
+        matching: find.byType(AnimatedDefaultTextStyle),
+      ),
+    );
 
     expect(miniTimer.style!.fontSize!, greaterThan(16));
     expect(
@@ -126,6 +138,11 @@ void main() {
     );
     expect(largeExit.iconSize!, greaterThan(miniExit.iconSize!));
     expect(largeRestart.iconSize, largeExit.iconSize);
+    expect(
+      largeDigit.style.fontSize!,
+      greaterThan(miniDigit.style.fontSize!),
+    );
+    expect(largeDigit.style.fontSize!, greaterThan(130));
     expect(tester.takeException(), isNull);
   });
 

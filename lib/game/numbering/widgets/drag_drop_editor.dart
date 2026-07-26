@@ -20,6 +20,7 @@ class DragDropEditor extends StatefulWidget {
     required this.isLandscape,
     required this.visibleHints,
     required this.allowDigitReordering,
+    required this.digitScaleFactor,
     required this.wrongAnswerProgress,
   });
 
@@ -37,6 +38,7 @@ class DragDropEditor extends StatefulWidget {
   final bool isLandscape;
   final List<String> visibleHints;
   final bool allowDigitReordering;
+  final double digitScaleFactor;
   final double wrongAnswerProgress;
 
   @override
@@ -88,7 +90,8 @@ class _DragDropEditorState extends State<DragDropEditor> {
               )
             : (constraints.maxWidth * 0.08).clamp(62.0, 96.0);
         final digitFontSize =
-            baseDigitFontSize + (104.0 - baseDigitFontSize) * portraitGrowth;
+            (baseDigitFontSize + (104.0 - baseDigitFontSize) * portraitGrowth) *
+                widget.digitScaleFactor;
         final baseDigitPadding = compact
             ? (widget.digits.length >= 8 ? 4.0 : (isLandscape ? 14.0 : 7.0))
             : 13.0;
