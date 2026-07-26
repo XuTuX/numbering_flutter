@@ -15,6 +15,10 @@ import 'package:numbering/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Match the shipping orientation policy: iPhone is landscape only, iPad also
+  // allows portrait. Info.plist already enforces this, so nothing is pinned
+  // here; `simctl io … screenshot` writes the native buffer, which means an
+  // iPhone capture has to be rotated 90° counter-clockwise afterwards.
 
   final hintService = await HintService().init();
   final purchaseService = HintPurchaseService(hintService: hintService);

@@ -40,9 +40,22 @@ App Store Connect와 Google Play Console에 위 상품 ID를 정확히 동일하
 지역에서 현지화된 가격을 받아온다. 심사에 제출하는 앱 버전에 상품 3개를 모두
 연결하지 않으면 상품이 거부 상태로 반환된다.
 
-**앱 심사 스크린샷**은 상품마다 필수이며 심사에만 사용된다. 힌트 상점 화면
-(`lib/screens/hints/hint_store_screen.dart`)에서 팩 3개가 모두 보이는 상태로
-캡처해 각 상품에 올린다.
+**앱 심사 스크린샷**은 상품마다 필수이며 심사에만 사용된다. 힌트 상점 화면에서
+팩 3개가 모두 보이는 이미지 하나를 세 상품에 각각 올리면 된다. 로그인이나 실제
+스토어 연결 없이 캡처할 수 있도록 `tool/screenshots/hint_store_shot.dart`
+진입점을 두었다.
+
+```bash
+flutter build ios --simulator --debug -t tool/screenshots/hint_store_shot.dart
+xcrun simctl install <udid> build/ios/iphonesimulator/Runner.app
+xcrun simctl launch <udid> com.neoreo.numbering
+xcrun simctl io <udid> screenshot hint_store.png
+```
+
+`simctl io screenshot`은 기기의 기본 방향 버퍼를 그대로 저장한다. iPhone은
+가로 전용이므로 저장된 이미지를 반시계 방향으로 90도 회전해야 한다
+(`sips -r -90 hint_store.png`). 결과 크기는 iPhone 6.9인치 2868×1320,
+iPad 13인치 2752×2064이며 둘 다 App Store 스크린샷 규격에 해당한다.
 
 **심사 메모**(4000자 이내)는 아래 내용에 테스트 계정을 채워 넣는다.
 
