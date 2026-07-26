@@ -165,23 +165,26 @@ class _LoginNumberMotionState extends State<_LoginNumberMotion>
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
-              final slide = Curves.easeInOutCubic.transform(
+              final transition = Curves.easeInOutCubic.transform(
                 ((_controller.value - 0.48) / 0.52).clamp(0.0, 1.0),
               );
+              final incoming = Curves.easeOutCubic.transform(transition);
+              final outgoing = Curves.easeInCubic.transform(transition);
 
               return Stack(
                 alignment: Alignment.center,
-                clipBehavior: Clip.hardEdge,
                 children: [
                   _MotionSceneView(
                     scene: _currentScene,
                     reveal: 1,
-                    offset: Offset(0, 72 * slide),
+                    opacity: 1 - outgoing,
+                    offset: Offset(-6 * outgoing, -5 * outgoing),
                   ),
                   _MotionSceneView(
                     scene: _nextScene,
-                    reveal: 1,
-                    offset: Offset(0, -72 * (1 - slide)),
+                    reveal: incoming,
+                    opacity: incoming,
+                    offset: Offset(8 * (1 - incoming), 7 * (1 - incoming)),
                   ),
                 ],
               );
@@ -207,35 +210,40 @@ class _MotionSceneView extends StatelessWidget {
   const _MotionSceneView({
     required this.scene,
     required this.reveal,
+    required this.opacity,
     required this.offset,
   });
 
   final _MotionScene scene;
   final double reveal;
+  final double opacity;
   final Offset offset;
 
   @override
   Widget build(BuildContext context) {
-    return Transform.translate(
-      offset: offset,
-      child: scene.isWordmark
-          ? FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                'NUMBERING',
-                style: GoogleFonts.spaceGrotesk(
-                  color: AppColors.textPrimary,
-                  fontSize: 38,
-                  height: 1,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 2.2,
+    return Opacity(
+      opacity: opacity.clamp(0.0, 1.0),
+      child: Transform.translate(
+        offset: offset,
+        child: scene.isWordmark
+            ? FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'NUMBERING',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: AppColors.textPrimary,
+                    fontSize: 38,
+                    height: 1,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2.2,
+                  ),
                 ),
+              )
+            : _MotionEquation(
+                values: scene.expression!.values,
+                reveal: reveal,
               ),
-            )
-          : _MotionEquation(
-              values: scene.expression!.values,
-              reveal: reveal,
-            ),
+      ),
     );
   }
 }
